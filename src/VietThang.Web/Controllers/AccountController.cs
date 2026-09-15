@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using VietThang.Web.Data;
 using VietThang.Web.Models.Entities;
+using VietThang.Web.Services;
 using VietThang.Web.ViewModels.Account;
 
 namespace VietThang.Web.Controllers;
@@ -12,11 +13,13 @@ public class AccountController : Controller
 {
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly ICartService _cart;
 
-    public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager)
+    public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, ICartService cart)
     {
         _signInManager = signInManager;
         _userManager = userManager;
+        _cart = cart;
     }
 
     [HttpGet("dang-nhap")]
@@ -43,6 +46,8 @@ public class AccountController : Controller
         var result = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, lockoutOnFailure: true);
         if (result.Succeeded)
         {
+            // Gộp giỏ hàng session của khách vãng lai vào giỏ CSDL
+            await _cart.MergeSessionCartToUserAsync(user.Id);
             if (!string.IsNullOrEmpty(returnUrl)) return RedirectToLocal(returnUrl);
             var roles = await _userManager.GetRolesAsync(user);
             if (roles.Contains(SeedData.RoleAdmin) || roles.Contains(SeedData.RoleEmployee))
@@ -85,6 +90,7 @@ public class AccountController : Controller
         }
         await _userManager.AddToRoleAsync(user, SeedData.RoleCustomer);
         await _signInManager.SignInAsync(user, isPersistent: false);
+        await _cart.MergeSessionCartToUserAsync(user.Id);
         TempData["Success"] = "Đăng ký thành công. Chào mừng bạn đến với Thời trang Việt Thắng!";
         return RedirectToAction("Index", "Home");
     }

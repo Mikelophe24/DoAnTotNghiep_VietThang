@@ -1,0 +1,50 @@
+@model ContactViewModel
+@{
+    ViewData["Title"] = "Liên hệ";
+}
+<div class="container mt-3">
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <h1 class="h4 mb-3">Liên hệ với cửa hàng</h1>
+            <form asp-controller="Pages" asp-action="Contact" method="post" class="bg-white border rounded p-4">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="FullName" class="form-label required"></label>
+                        <input asp-for="FullName" class="form-control" />
+                        <span asp-validation-for="FullName" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Phone" class="form-label"></label>
+                        <input asp-for="Phone" class="form-control" />
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Subject" class="form-label"></label>
+                    <input asp-for="Subject" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Message" class="form-label required"></label>
+                    <textarea asp-for="Message" class="form-control" rows="5"></textarea>
+                    <span asp-validation-for="Message" class="text-danger small"></span>
+                </div>
+                <button class="btn btn-brand"><i class="bi bi-send"></i> Gửi liên hệ</button>
+            </form>
+        </div>
+        <div class="col-lg-5">
+            <div class="bg-white border rounded p-4">
+                <h2 class="h6">Thông tin liên hệ</h2>
+                <p class="mb-1"><i class="bi bi-telephone"></i> Hotline: <a href="tel:1800646859">1800 6468 59</a> (miễn phí)</p>
+                <p class="mb-1"><i class="bi bi-envelope"></i> info@thoitrangvietthang.vn</p>
+                <p class="mb-0"><i class="bi bi-clock"></i> 8:30 – 21:30 hằng ngày</p>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

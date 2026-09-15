@@ -1,0 +1,212 @@
+@model ProductDetailViewModel
+@{
+    var p = Model.Product;
+    ViewData["Title"] = p.Name;
+    var mainImage = p.Images.FirstOrDefault(i => i.IsMain) ?? p.Images.FirstOrDefault();
+}
+<div class="container mt-3">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+            @if (p.Category.Parent is not null) { <li class="breadcrumb-item"><a asp-controller="Products" asp-action="Category" asp-route-slug="@p.Category.Parent.Slug">@p.Category.Parent.Name</a></li> }
+            <li class="breadcrumb-item"><a asp-controller="Products" asp-action="Category" asp-route-slug="@p.Category.Slug">@p.Category.Name</a></li>
+            <li class="breadcrumb-item active">@p.Name</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="gallery">
+                <div class="gallery-main"><img id="gallery-main" src="@(mainImage?.Url ?? "/images/products/placeholder.svg")" alt="@p.Name" /></div>
+                @if (p.Images.Count > 1)
+                {
+                    <div class="gallery-thumbs">
+                        @foreach (var img in p.Images)
+                        {
+                            <img src="@img.Url" alt="" class="@(img.Id == mainImage?.Id ? "active" : "")" data-color-id="@img.ColorId" onclick="selectImage(this)" />
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <h1 class="h3 product-title">@p.Name</h1>
+            <div class="d-flex flex-wrap gap-3 small text-muted mb-2">
+                <span>Mã: <code>@p.Code</code></span>
+                @if (!string.IsNullOrEmpty(p.Material)) { <span>Chất liệu: @p.Material</span> }
+                <span>Đã bán: @p.SoldCount</span>
+                @if (Model.Reviews.Any()) { <span><i class="bi bi-star-fill text-warning"></i> @Model.AverageRating (@Model.Reviews.Count đánh giá)</span> }
+            </div>
+
+            <div class="detail-price my-3">
+                <span class="price-sale fs-3" id="price-sale">@Model.Price.SalePrice.ToVnd()</span>
+                <span class="price-original fs-6 @(Model.Price.HasDiscount ? "" : "d-none")" id="price-original">@Model.Price.OriginalPrice.ToVnd()</span>
+                <span class="badge-sale ms-2 @(Model.Price.HasDiscount ? "" : "d-none")" id="price-badge">-@Model.Price.DiscountPercent%</span>
+            </div>
+
+            @if (!string.IsNullOrEmpty(p.ShortDescription)) { <p class="text-muted">@p.ShortDescription</p> }
+
+            @if (Model.Variants.Any())
+            {
+                <div class="mb-3">
+                    <div class="option-label">Màu sắc: <strong id="color-name"></strong></div>
+                    <div class="d-flex flex-wrap gap-2" id="color-options">
+                        @foreach (var c in Model.Colors)
+                        {
+                            <button type="button" class="swatch-btn" data-color-id="@c.Id" data-color-name="@c.Name" title="@c.Name" style="background:@(c.HexCode ?? "#fff")"></button>
+                        }
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="option-label">Kích cỡ: <strong id="size-name"></strong></div>
+                    <div class="d-flex flex-wrap gap-2" id="size-options">
+                        @foreach (var s in Model.Sizes)
+                        {
+                            <button type="button" class="size-btn" data-size-id="@s.Id" data-size-name="@s.Name">@s.Name</button>
+                        }
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="qty-input">
+                        <button type="button" onclick="changeQty(-1)">−</button>
+                        <input type="number" id="qty" value="1" min="1" />
+                        <button type="button" onclick="changeQty(1)">+</button>
+                    </div>
+                    <span class="small text-muted" id="stock-info">Chọn màu và kích cỡ</span>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-brand btn-lg flex-grow-1" id="btn-add" disabled onclick="addToCart()"><i class="bi bi-bag-plus"></i> Thêm vào giỏ</button>
+                    <button type="button" class="btn btn-outline-danger btn-lg" id="btn-buy" disabled onclick="addToCart(true)">Mua ngay</button>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-warning">Sản phẩm tạm hết hàng.</div>
+            }
+
+            <ul class="list-unstyled small text-muted mt-4 mb-0">
+                <li><i class="bi bi-truck"></i> Miễn phí vận chuyển cho đơn từ 500.000 đ</li>
+                <li><i class="bi bi-arrow-repeat"></i> Đổi size trong 7 ngày</li>
+                <li><i class="bi bi-shield-check"></i> Thanh toán khi nhận hàng (COD)</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-lg-8">
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-desc" type="button">Mô tả sản phẩm</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-reviews" type="button">Đánh giá (@Model.Reviews.Count)</button></li>
+            </ul>
+            <div class="tab-content border border-top-0 p-4 bg-white">
+                <div class="tab-pane fade show active" id="tab-desc">
+                    @if (!string.IsNullOrEmpty(p.Description)) { @Html.Raw(p.Description) } else { <p class="text-muted">Chưa có mô tả.</p> }
+                </div>
+                <div class="tab-pane fade" id="tab-reviews">
+                    @if (Model.Reviews.Any())
+                    {
+                        @foreach (var r in Model.Reviews)
+                        {
+                            <div class="review-item">
+                                <div class="d-flex justify-content-between">
+                                    <strong>@r.User.FullName</strong>
+                                    <span class="small text-muted">@r.CreatedAt.ToString("dd/MM/yyyy")</span>
+                                </div>
+                                <div class="text-warning small">@for (int i = 1; i <= 5; i++) { <i class="bi @(i <= r.Rating ? "bi-star-fill" : "bi-star")"></i> }</div>
+                                <p class="mb-0">@r.Comment</p>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">Chưa có đánh giá. Khách đã mua có thể đánh giá trong mục Đơn hàng của tôi.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Related.Any())
+    {
+        <section class="mt-5">
+            <h2 class="section-title">Sản phẩm cùng danh mục</h2>
+            <div class="row g-3 row-cols-2 row-cols-md-4">
+                @foreach (var rp in Model.Related) { <div class="col"><partial name="_ProductCard" model="rp" /></div> }
+            </div>
+        </section>
+    }
+</div>
+
+@section Scripts {
+<script>
+    const variants = @Html.Raw(Model.VariantsJson);
+    let selectedColor = null, selectedSize = null;
+    const fmt = n => n.toLocaleString('vi-VN') + ' đ';
+
+    function selectImage(el) {
+        document.getElementById('gallery-main').src = el.src;
+        document.querySelectorAll('.gallery-thumbs img').forEach(i => i.classList.remove('active'));
+        el.classList.add('active');
+    }
+    function changeQty(d) {
+        const q = document.getElementById('qty');
+        q.value = Math.max(1, (parseInt(q.value) || 1) + d);
+    }
+    function refresh() {
+        // Kích cỡ khả dụng theo màu đã chọn
+        document.querySelectorAll('.size-btn').forEach(b => {
+            const sid = +b.dataset.sizeId;
+            const v = variants.find(x => x.sizeId === sid && (selectedColor === null || x.colorId === selectedColor));
+            b.disabled = !v || v.stock <= 0;
+            b.classList.toggle('active', selectedSize === sid);
+        });
+        document.querySelectorAll('.swatch-btn').forEach(b => {
+            const cid = +b.dataset.colorId;
+            const v = variants.find(x => x.colorId === cid && x.stock > 0);
+            b.classList.toggle('disabled', !v);
+            b.classList.toggle('active', selectedColor === cid);
+        });
+        const v = variants.find(x => x.colorId === selectedColor && x.sizeId === selectedSize);
+        const info = document.getElementById('stock-info');
+        const canBuy = v && v.stock > 0;
+        document.getElementById('btn-add').disabled = !canBuy;
+        document.getElementById('btn-buy').disabled = !canBuy;
+        if (v) {
+            document.getElementById('price-sale').textContent = fmt(v.salePrice);
+            const hasDiscount = v.salePrice < v.originalPrice;
+            document.getElementById('price-original').textContent = fmt(v.originalPrice);
+            document.getElementById('price-original').classList.toggle('d-none', !hasDiscount);
+            const badge = document.getElementById('price-badge');
+            badge.textContent = '-' + Math.round((1 - v.salePrice / v.originalPrice) * 100) + '%';
+            badge.classList.toggle('d-none', !hasDiscount);
+            info.textContent = v.stock > 0 ? ('Còn ' + v.stock + ' sản phẩm · ' + v.sku) : 'Hết hàng';
+            document.getElementById('qty').max = v.stock;
+        } else {
+            info.textContent = selectedColor === null ? 'Chọn màu và kích cỡ' : (selectedSize === null ? 'Chọn kích cỡ' : 'Không có biến thể này');
+        }
+    }
+    document.querySelectorAll('.swatch-btn').forEach(b => b.addEventListener('click', () => {
+        selectedColor = +b.dataset.colorId;
+        document.getElementById('color-name').textContent = b.dataset.colorName;
+        const img = document.querySelector('.gallery-thumbs img[data-color-id="' + selectedColor + '"]');
+        if (img) selectImage(img);
+        refresh();
+    }));
+    document.querySelectorAll('.size-btn').forEach(b => b.addEventListener('click', () => {
+        selectedSize = +b.dataset.sizeId;
+        document.getElementById('size-name').textContent = b.dataset.sizeName;
+        refresh();
+    }));
+    async function addToCart(buyNow) {
+        const v = variants.find(x => x.colorId === selectedColor && x.sizeId === selectedSize);
+        if (!v) return;
+        const qty = parseInt(document.getElementById('qty').value) || 1;
+        const res = await VT.addToCart(v.id, qty);
+        if (res.success && buyNow) window.location.href = '/gio-hang';
+    }
+    // Chọn sẵn màu đầu tiên còn hàng
+    const firstColor = document.querySelector('.swatch-btn');
+    if (firstColor) firstColor.click(); else refresh();
+</script>
+}

@@ -1,15 +1,13 @@
 @using Microsoft.AspNetCore.Identity
-@using VietThang.Web.Models.Entities
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
-<ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
 {
     var user = await UserManager.GetUserAsync(User);
-    <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="bi bi-person-circle"></i> @(user?.FullName ?? User.Identity?.Name)
+    <div class="dropdown">
+        <a class="header-action dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-person-circle"></i><span class="d-none d-lg-inline"> @(user?.FullName ?? "Tài khoản")</span>
         </a>
         <ul class="dropdown-menu dropdown-menu-end">
             @if (User.IsInRole("Admin") || User.IsInRole("Employee"))
@@ -17,17 +15,20 @@
                 <li><a class="dropdown-item" asp-area="Admin" asp-controller="Dashboard" asp-action="Index"><i class="bi bi-speedometer2"></i> Trang quản trị</a></li>
                 <li><hr class="dropdown-divider" /></li>
             }
+            else
+            {
+                <li><span class="dropdown-item-text small text-muted">Tài khoản, đơn hàng của tôi: tuần 9</span></li>
+                <li><hr class="dropdown-divider" /></li>
+            }
             <li>
-                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post">
                     <button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-right"></i> Đăng xuất</button>
                 </form>
             </li>
         </ul>
-    </li>
+    </div>
 }
 else
 {
-    <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Account" asp-action="Login">Đăng nhập</a></li>
-    <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Account" asp-action="Register">Đăng ký</a></li>
+    <a class="header-action" asp-area="" asp-controller="Account" asp-action="Login"><i class="bi bi-person"></i><span class="d-none d-lg-inline"> Đăng nhập</span></a>
 }
-</ul>

@@ -1,0 +1,98 @@
+@model CartSummary
+@{
+    ViewData["Title"] = "Giỏ hàng";
+}
+<div class="container mt-3">
+    <h1 class="h4 mb-3">Giỏ hàng <span class="text-muted fs-6">(@Model.TotalQuantity sản phẩm)</span></h1>
+
+    @if (Model.IsEmpty)
+    {
+        <div class="text-center py-5 bg-white rounded border">
+            <i class="bi bi-bag-x fs-1 text-muted"></i>
+            <p class="mt-2 text-muted">Giỏ hàng của bạn đang trống.</p>
+            <a class="btn btn-brand" asp-controller="Home" asp-action="Index">Tiếp tục mua sắm</a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="bg-white border rounded">
+                    <table class="table cart-table mb-0 align-middle">
+                        <thead class="table-light">
+                            <tr><th colspan="2">Sản phẩm</th><th class="text-end">Đơn giá</th><th class="text-center" style="width:150px">Số lượng</th><th class="text-end">Thành tiền</th><th></th></tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var l in Model.Lines)
+                        {
+                            <tr class="@(l.IsAvailable ? "" : "table-warning")">
+                                <td style="width:80px"><a asp-controller="Products" asp-action="Details" asp-route-slug="@l.Slug"><img src="@(l.ImageUrl ?? "/images/products/placeholder.svg")" class="cart-thumb" alt="" /></a></td>
+                                <td>
+                                    <a class="fw-semibold text-decoration-none text-dark" asp-controller="Products" asp-action="Details" asp-route-slug="@l.Slug">@l.ProductName</a>
+                                    <div class="small text-muted">@l.ColorName / @l.SizeName · <code>@l.Sku</code></div>
+                                    @if (!l.IsActive) { <div class="small text-danger">Sản phẩm không còn kinh doanh</div> }
+                                    else if (l.Stock < l.Quantity) { <div class="small text-danger">Chỉ còn @l.Stock sản phẩm</div> }
+                                </td>
+                                <td class="text-end">
+                                    <div>@l.UnitPrice.ToVnd()</div>
+                                    @if (l.UnitPrice < l.OriginalPrice) { <div class="price-original small">@l.OriginalPrice.ToVnd()</div> }
+                                </td>
+                                <td>
+                                    <form asp-controller="Cart" asp-action="Update" method="post" class="qty-input qty-sm mx-auto">
+                                        <input type="hidden" name="variantId" value="@l.VariantId" />
+                                        <button type="submit" name="quantity" value="@(l.Quantity - 1)">−</button>
+                                        <input type="number" name="quantity" value="@l.Quantity" min="1" max="@l.Stock" onchange="this.form.submit()" />
+                                        <button type="submit" name="quantity" value="@(l.Quantity + 1)" @(l.Quantity >= l.Stock ? "disabled" : "")>+</button>
+                                    </form>
+                                </td>
+                                <td class="text-end fw-semibold">@l.LineTotal.ToVnd()</td>
+                                <td class="text-end">
+                                    <form asp-controller="Cart" asp-action="Remove" method="post">
+                                        <input type="hidden" name="variantId" value="@l.VariantId" />
+                                        <button class="btn btn-sm btn-link text-danger" title="Xóa"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+                <a class="btn btn-link mt-2" asp-controller="Home" asp-action="Index"><i class="bi bi-arrow-left"></i> Tiếp tục mua sắm</a>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="bg-white border rounded p-3 summary-box">
+                    <h2 class="h6 mb-3">Mã giảm giá</h2>
+                    @if (Model.Coupon is not null)
+                    {
+                        <div class="d-flex justify-content-between align-items-center alert alert-success py-2 mb-3">
+                            <span><i class="bi bi-ticket-perforated"></i> <strong>@Model.Coupon.Code</strong> · @Model.Coupon.Description</span>
+                            <form asp-controller="Cart" asp-action="RemoveCoupon" method="post"><button class="btn btn-sm btn-link text-danger p-0">Bỏ</button></form>
+                        </div>
+                    }
+                    else
+                    {
+                        <form asp-controller="Cart" asp-action="ApplyCoupon" method="post" class="input-group mb-3">
+                            <input name="code" class="form-control text-uppercase" placeholder="Nhập mã (VD: VT10)" value="@Model.CouponCode" />
+                            <button class="btn btn-outline-dark">Áp dụng</button>
+                        </form>
+                        @if (!string.IsNullOrEmpty(Model.CouponError)) { <div class="small text-danger mb-3">@Model.CouponError</div> }
+                    }
+
+                    <h2 class="h6 mb-3">Tóm tắt đơn hàng</h2>
+                    <dl class="summary-list">
+                        <dt>Tiền hàng</dt><dd>@Model.SubTotal.ToVnd()</dd>
+                        <dt>Phí vận chuyển</dt><dd>@(Model.ShippingFee == 0 ? "Miễn phí" : Model.ShippingFee.ToVnd())</dd>
+                        @if (Model.DiscountAmount > 0) { <dt>Giảm giá</dt><dd class="text-success">−@Model.DiscountAmount.ToVnd()</dd> }
+                        <dt class="total">Tổng cộng</dt><dd class="total">@Model.Total.ToVnd()</dd>
+                    </dl>
+                    @if (Model.ShippingFee > 0)
+                    {
+                        <div class="small text-muted mb-3"><i class="bi bi-info-circle"></i> Mua thêm @((Model.FreeShippingThreshold - Model.SubTotal).ToVnd()) để được miễn phí vận chuyển.</div>
+                    }
+                    <a class="btn btn-brand w-100 btn-lg @(Model.Lines.Any(l => !l.IsAvailable) ? "disabled" : "")" asp-controller="Checkout" asp-action="Index">Tiến hành đặt hàng</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>

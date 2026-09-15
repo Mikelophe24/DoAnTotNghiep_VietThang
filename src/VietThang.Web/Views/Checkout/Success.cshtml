@@ -1,0 +1,34 @@
+@model Order
+@{
+    ViewData["Title"] = "Đặt hàng thành công";
+    string? bank = ViewBag.BankAccount;
+}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="text-center mb-4">
+                <i class="bi bi-check-circle-fill text-success" style="font-size:4rem"></i>
+                <h1 class="h3 mt-2">Đặt hàng thành công!</h1>
+                <p class="text-muted">Cảm ơn @Model.CustomerName. Mã đơn hàng của bạn là <strong class="text-brand fs-5">@Model.OrderCode</strong>.<br />Cửa hàng sẽ gọi xác nhận qua số @Model.Phone trong thời gian sớm nhất.</p>
+            </div>
+
+            @if (bank is not null)
+            {
+                <div class="alert alert-info">
+                    <strong><i class="bi bi-bank"></i> Thông tin chuyển khoản</strong><br />
+                    @bank<br />
+                    Số tiền: <strong>@Model.TotalAmount.ToVnd()</strong> · Nội dung: <strong>@Model.OrderCode</strong>
+                </div>
+            }
+
+            <div class="bg-white border rounded p-4">
+                <partial name="~/Views/Orders/_OrderDetails.cshtml" model="Model" />
+            </div>
+
+            <div class="d-flex gap-2 justify-content-center mt-4">
+                <a class="btn btn-brand" asp-controller="Home" asp-action="Index">Tiếp tục mua sắm</a>
+                <a class="btn btn-outline-secondary" asp-controller="Orders" asp-action="Lookup" asp-route-code="@Model.OrderCode">Tra cứu đơn hàng</a>
+            </div>
+        </div>
+    </div>
+</div>

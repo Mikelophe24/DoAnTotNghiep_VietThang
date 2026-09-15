@@ -1,0 +1,38 @@
+@model VietThang.Web.ViewComponents.FooterViewModel
+<footer class="site-footer mt-5">
+    <div class="container py-5">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <h5 class="footer-title">@Model.StoreName</h5>
+                <p class="small mb-2">Đồ mặc nhà, đồ bộ chất liệu lanh và cotton cho cả gia đình: Nữ, Trung niên, Trẻ em, Nam.</p>
+                <p class="small mb-1"><i class="bi bi-telephone"></i> Hotline: <a href="tel:@Model.Hotline">@Model.Hotline</a></p>
+                <p class="small mb-0"><i class="bi bi-envelope"></i> <a href="mailto:@Model.Email">@Model.Email</a></p>
+            </div>
+            <div class="col-md-3">
+                <h5 class="footer-title">Hỗ trợ khách hàng</h5>
+                <ul class="list-unstyled small footer-links">
+                    <li><a asp-controller="Orders" asp-action="Lookup">Tra cứu đơn hàng</a></li>
+                    <li><a asp-controller="Pages" asp-action="Contact">Liên hệ</a></li>
+                    <li><a asp-controller="Posts" asp-action="Recruitment">Tuyển dụng</a></li>
+                    <li>Miễn phí vận chuyển cho đơn từ @Model.FreeShippingThreshold.ToString("N0") đ</li>
+                </ul>
+            </div>
+            <div class="col-md-5">
+                <h5 class="footer-title">Hệ thống cửa hàng</h5>
+                <ul class="list-unstyled small footer-links">
+                    @foreach (var s in Model.Stores)
+                    {
+                        <li><i class="bi bi-geo-alt"></i> <strong>@s.Name</strong>: @s.Address</li>
+                    }
+                    <li><a asp-controller="Pages" asp-action="Stores">Xem tất cả cửa hàng →</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom py-3">
+        <div class="container small d-flex flex-wrap justify-content-between">
+            <span>© 2026 @Model.StoreName</span>
+            <span>Đồ án tốt nghiệp · ASP.NET Core MVC</span>
+        </div>
+    </div>
+</footer>

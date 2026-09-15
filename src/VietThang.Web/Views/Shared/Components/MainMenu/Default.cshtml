@@ -1,0 +1,25 @@
+@model List<Category>
+<ul class="navbar-nav main-nav">
+    <li class="nav-item"><a class="nav-link" asp-controller="Products" asp-action="New"><i class="bi bi-stars text-warning"></i> Hàng mới về</a></li>
+    @foreach (var c in Model)
+    {
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" asp-controller="Products" asp-action="Category" asp-route-slug="@c.Slug" data-bs-toggle="dropdown" data-bs-auto-close="outside">@c.Name</a>
+            @if (c.Children.Any())
+            {
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item fw-semibold" asp-controller="Products" asp-action="Category" asp-route-slug="@c.Slug">Tất cả @c.Name.ToLower()</a></li>
+                    <li><hr class="dropdown-divider" /></li>
+                    @foreach (var ch in c.Children)
+                    {
+                        <li><a class="dropdown-item" asp-controller="Products" asp-action="Category" asp-route-slug="@ch.Slug">@ch.Name</a></li>
+                    }
+                </ul>
+            }
+        </li>
+    }
+    <li class="nav-item"><a class="nav-link text-danger fw-semibold" asp-controller="Products" asp-action="Sale">Sale</a></li>
+    <li class="nav-item"><a class="nav-link" asp-controller="Pages" asp-action="Stores">Cửa hàng</a></li>
+    <li class="nav-item"><a class="nav-link" asp-controller="Posts" asp-action="Index">Tin tức</a></li>
+    <li class="nav-item"><a class="nav-link" asp-controller="Posts" asp-action="Recruitment">Tuyển dụng</a></li>
+</ul>

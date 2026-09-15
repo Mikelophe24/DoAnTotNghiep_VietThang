@@ -40,7 +40,18 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/khong-co-quyen";
     options.ExpireTimeSpan = TimeSpan.FromDays(7);
     options.SlidingExpiration = true;
+    // Khu vực /Admin dùng trang đăng nhập riêng
+    options.Events.OnRedirectToLogin = ctx =>
+    {
+        var loginPath = ctx.Request.Path.StartsWithSegments("/Admin") ? "/Admin/dang-nhap" : "/dang-nhap";
+        var returnUrl = Uri.EscapeDataString(ctx.Request.Path + ctx.Request.QueryString);
+        ctx.Response.Redirect($"{loginPath}?ReturnUrl={returnUrl}");
+        return Task.CompletedTask;
+    };
 });
+
+builder.Services.AddAntiforgery(options => options.HeaderName = "RequestVerificationToken");
+builder.Services.AddMemoryCache();
 
 // ---------- Session (giỏ hàng khách vãng lai) ----------
 builder.Services.AddDistributedMemoryCache();
@@ -54,6 +65,13 @@ builder.Services.AddSession(options =>
 // ---------- Dịch vụ ứng dụng ----------
 builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
 builder.Services.AddTransient<IHtmlSanitizer, HtmlSanitizer>();
+builder.Services.AddScoped<ISettingService, SettingService>();
+builder.Services.AddScoped<IPricingService, PricingService>();
+builder.Services.AddScoped<IPromotionService, PromotionService>();
+builder.Services.AddScoped<ICatalogService, CatalogService>();
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IAppEmailSender, LogEmailSender>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddControllersWithViews(options =>

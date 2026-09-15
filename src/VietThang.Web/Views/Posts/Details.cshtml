@@ -1,0 +1,28 @@
+@model Post
+@{
+    ViewData["Title"] = Model.Title;
+    var recent = (List<Post>)ViewBag.Recent;
+}
+<div class="container mt-3">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Posts" asp-action="@(Model.Type == PostType.News ? "Index" : "Recruitment")">@Model.Type.ToDisplay()</a></li>
+            <li class="breadcrumb-item active">@Model.Title</li>
+        </ol>
+    </nav>
+    <div class="row g-4">
+        <article class="col-lg-8">
+            <h1 class="h3">@Model.Title</h1>
+            <div class="small text-muted mb-3">@Model.PublishedAt?.ToString("dd/MM/yyyy") @(Model.Author is null ? "" : "· " + Model.Author.FullName)</div>
+            @if (!string.IsNullOrEmpty(Model.ThumbnailUrl)) { <img src="@Model.ThumbnailUrl" class="img-fluid rounded mb-3" alt="" /> }
+            <div class="post-content bg-white border rounded p-4">@Html.Raw(Model.Content)</div>
+        </article>
+        <aside class="col-lg-4">
+            <h2 class="h6">Bài viết khác</h2>
+            <ul class="list-unstyled">
+                @foreach (var r in recent) { <li class="mb-2"><a asp-controller="Posts" asp-action="Details" asp-route-slug="@r.Slug">@r.Title</a></li> }
+            </ul>
+        </aside>
+    </div>
+</div>

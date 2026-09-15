@@ -1,0 +1,57 @@
+@model Order
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+    <div>
+        <div class="small text-muted">Mã đơn</div>
+        <div class="fw-bold fs-5">@Model.OrderCode</div>
+        <div class="small text-muted">Đặt lúc @Model.CreatedAt.ToString("HH:mm dd/MM/yyyy")</div>
+    </div>
+    <div class="text-end">
+        <span class="badge @Model.Status.ToBadgeClass() fs-6">@Model.Status.ToDisplay()</span>
+        <div class="small text-muted mt-1">@Model.PaymentMethod.ToDisplay() · @Model.PaymentStatus.ToDisplay()</div>
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-md-6">
+        <div class="small text-muted">Người nhận</div>
+        <div><strong>@Model.CustomerName</strong> · @Model.Phone</div>
+        @if (!string.IsNullOrEmpty(Model.Email)) { <div class="small">@Model.Email</div> }
+    </div>
+    <div class="col-md-6">
+        <div class="small text-muted">Địa chỉ giao hàng</div>
+        <div>@Model.ShippingAddress, @Model.Ward, @Model.District, @Model.Province</div>
+        @if (!string.IsNullOrEmpty(Model.Note)) { <div class="small text-muted">Ghi chú: @Model.Note</div> }
+    </div>
+</div>
+
+<table class="table table-sm align-middle">
+    <thead class="table-light"><tr><th>Sản phẩm</th><th class="text-center">SL</th><th class="text-end">Đơn giá</th><th class="text-end">Thành tiền</th></tr></thead>
+    <tbody>
+    @foreach (var d in Model.Details)
+    {
+        <tr>
+            <td>@d.ProductName<div class="small text-muted">@d.ColorName / @d.SizeName · @d.Sku</div></td>
+            <td class="text-center">@d.Quantity</td>
+            <td class="text-end">@d.UnitPrice.ToVnd()</td>
+            <td class="text-end">@d.LineTotal.ToVnd()</td>
+        </tr>
+    }
+    </tbody>
+    <tfoot>
+        <tr><td colspan="3" class="text-end">Tiền hàng</td><td class="text-end">@Model.SubTotal.ToVnd()</td></tr>
+        <tr><td colspan="3" class="text-end">Phí vận chuyển</td><td class="text-end">@(Model.ShippingFee == 0 ? "Miễn phí" : Model.ShippingFee.ToVnd())</td></tr>
+        @if (Model.DiscountAmount > 0) { <tr><td colspan="3" class="text-end">Giảm giá</td><td class="text-end text-success">−@Model.DiscountAmount.ToVnd()</td></tr> }
+        <tr class="fw-bold"><td colspan="3" class="text-end">Tổng thanh toán</td><td class="text-end">@Model.TotalAmount.ToVnd()</td></tr>
+    </tfoot>
+</table>
+
+@if (Model.StatusHistories.Any())
+{
+    <div class="small text-muted">Lịch sử</div>
+    <ul class="timeline small">
+        @foreach (var h in Model.StatusHistories.OrderBy(h => h.ChangedAt))
+        {
+            <li><span class="text-muted">@h.ChangedAt.ToString("HH:mm dd/MM")</span> · <strong>@h.ToStatus.ToDisplay()</strong> @(string.IsNullOrEmpty(h.Note) ? "" : "– " + h.Note)</li>
+        }
+    </ul>
+}

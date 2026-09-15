@@ -29,11 +29,17 @@ Sơ đồ viết bằng Mermaid: xem trực tiếp trên GitHub/VS Code (extensi
 | 1–3 | Đề cương, phân tích, thiết kế CSDL | ✅ Xong (14/09/2026) |
 | 4 | Khởi tạo solution, EF Core, Identity, Migration, seed | ✅ Xong (14/09/2026) |
 | 5 | Đăng nhập/đăng ký, layout Admin, Danh mục, Màu, Size, Sản phẩm + ảnh + biến thể | ✅ Xong (14/09/2026) |
+| 7 | Storefront: trang chủ, menu danh mục, danh mục + lọc (giá, màu, size, chất liệu, sắp xếp), tìm kiếm, hàng mới, sale, chi tiết sản phẩm chọn màu/size, tin tức, tuyển dụng, cửa hàng, liên hệ | ✅ Xong (15/09/2026) |
+| 8 | Giỏ hàng (session cho khách vãng lai, CSDL cho khách đăng nhập, gộp khi đăng nhập), mã giảm giá, phí ship/freeship, đặt hàng COD/chuyển khoản trong transaction (trừ tồn, nhật ký kho, lượt dùng mã), trang cảm ơn, tra cứu đơn theo mã + SĐT | ✅ Xong (15/09/2026) |
+| – | Trang đăng nhập riêng cho quản trị `/Admin/dang-nhap` (từ chối tài khoản khách), tự chuyển hướng khi vào `/Admin/*` chưa đăng nhập | ✅ Xong (15/09/2026) |
 | 6 | Nhà cung cấp, phiếu nhập, tồn kho, lịch sử kho | ⏳ Tiếp theo |
-| 7–8 | Storefront: trang chủ, danh mục, chi tiết, giỏ hàng, đặt hàng | |
-| 9–12 | Đơn hàng, khuyến mãi, người dùng, báo cáo | |
+| 9 | Tài khoản khách: hồ sơ, sổ địa chỉ, lịch sử đơn, hủy đơn, đánh giá; Admin xử lý đơn hàng | |
+| 10–12 | Khuyến mãi, mã giảm giá, banner, tin tức, người dùng, báo cáo | |
 
-Đường dẫn chính: `/dang-nhap`, `/dang-ky`, `/Admin` (Dashboard), `/Admin/Products`, `/Admin/Products/Variants/{id}`, `/Admin/Categories`, `/Admin/Colors`, `/Admin/Sizes`.
+Đường dẫn storefront: `/`, `/danh-muc/{slug}`, `/tim-kiem?q=`, `/hang-moi-ve`, `/sale`, `/san-pham/{slug}`, `/gio-hang`, `/thanh-toan`, `/tra-cuu-don-hang`, `/tin-tuc`, `/tuyen-dung`, `/he-thong-cua-hang`, `/lien-he`, `/dang-nhap`, `/dang-ky`.
+Đường dẫn quản trị: `/Admin/dang-nhap`, `/Admin` (Dashboard), `/Admin/Products`, `/Admin/Products/Variants/{id}`, `/Admin/Categories`, `/Admin/Colors`, `/Admin/Sizes`.
+
+Dịch vụ nghiệp vụ (`Services/`): `PricingService` (giá khuyến mãi), `PromotionService` (mã giảm giá), `CartService`, `OrderService` (đặt hàng trong transaction), `CatalogService` (lọc/sắp xếp/thẻ sản phẩm), `SettingService` (cấu hình có cache), `FileStorageService`, `LogEmailSender` (email ghi log, thay bằng SMTP ở tuần 13).
 
 ## Quyết định đã chốt
 - ASP.NET Core MVC (.NET 8 LTS) + EF Core + Identity + SQL Server.

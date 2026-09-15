@@ -1,0 +1,40 @@
+@model OrderLookupViewModel
+@{
+    ViewData["Title"] = "Tra cứu đơn hàng";
+}
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="h4 mb-3">Tra cứu đơn hàng</h1>
+            <form asp-controller="Orders" asp-action="Lookup" method="post" class="bg-white border rounded p-4 mb-4">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-5">
+                        <label asp-for="OrderCode" class="form-label"></label>
+                        <input asp-for="OrderCode" class="form-control text-uppercase" placeholder="VT260915001" />
+                        <span asp-validation-for="OrderCode" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-5">
+                        <label asp-for="Phone" class="form-label"></label>
+                        <input asp-for="Phone" class="form-control" placeholder="Số điện thoại khi đặt hàng" />
+                        <span asp-validation-for="Phone" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-2"><button class="btn btn-brand w-100"><i class="bi bi-search"></i> Tra cứu</button></div>
+                </div>
+            </form>
+
+            @if (Model.Searched)
+            {
+                if (Model.Order is null)
+                {
+                    <div class="alert alert-warning">Không tìm thấy đơn hàng với mã và số điện thoại này. Vui lòng kiểm tra lại.</div>
+                }
+                else
+                {
+                    <div class="bg-white border rounded p-4">
+                        <partial name="_OrderDetails" model="Model.Order" />
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>

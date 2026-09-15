@@ -1,0 +1,153 @@
+@model ProductListViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    var f = Model.Filter;
+    var priceRanges = new (string Label, decimal? Min, decimal? Max)[]
+    {
+        ("Dưới 200.000 đ", null, 199999),
+        ("200.000 – 300.000 đ", 200000, 300000),
+        ("300.000 – 400.000 đ", 300000, 400000),
+        ("Trên 400.000 đ", 400001, null)
+    };
+}
+<div class="container mt-3">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+            @foreach (var (name, url) in Model.Breadcrumb) { <li class="breadcrumb-item"><a href="@url">@name</a></li> }
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <aside class="col-lg-3">
+            <form method="get" id="filter-form" class="filter-panel">
+                @if (!string.IsNullOrEmpty(f.Q)) { <input type="hidden" name="q" value="@f.Q" /> }
+                <input type="hidden" name="sort" value="@f.Sort" />
+
+                @if (Model.SubCategories.Any())
+                {
+                    <div class="filter-group">
+                        <h6 class="filter-title">Danh mục</h6>
+                        <ul class="list-unstyled small mb-0">
+                            @foreach (var c in Model.SubCategories)
+                            {
+                                <li><a class="@(Model.Category?.Id == c.Id ? "fw-bold text-brand" : "")" asp-controller="Products" asp-action="Category" asp-route-slug="@c.Slug">@c.Name</a></li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                <div class="filter-group">
+                    <h6 class="filter-title">Khoảng giá</h6>
+                    @foreach (var r in priceRanges)
+                    {
+                        var checkedRange = f.MinPrice == r.Min && f.MaxPrice == r.Max;
+                        <label class="form-check small">
+                            <input class="form-check-input price-range" type="radio" name="priceRange" data-min="@r.Min" data-max="@r.Max" checked="@checkedRange" /> @r.Label
+                        </label>
+                    }
+                    <input type="hidden" name="minPrice" id="minPrice" value="@f.MinPrice" />
+                    <input type="hidden" name="maxPrice" id="maxPrice" value="@f.MaxPrice" />
+                </div>
+
+                <div class="filter-group">
+                    <h6 class="filter-title">Màu sắc</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var c in Model.Colors)
+                        {
+                            <label class="swatch-check" title="@c.Name">
+                                <input type="checkbox" name="colorIds" value="@c.Id" checked="@f.ColorIds.Contains(c.Id)" />
+                                <span class="swatch" style="background:@(c.HexCode ?? "#fff")"></span>
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <h6 class="filter-title">Kích cỡ</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var s in Model.Sizes)
+                        {
+                            <label class="size-check">
+                                <input type="checkbox" name="sizeIds" value="@s.Id" checked="@f.SizeIds.Contains(s.Id)" />
+                                <span>@s.Name</span>
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                @if (Model.Materials.Any())
+                {
+                    <div class="filter-group">
+                        <h6 class="filter-title">Chất liệu</h6>
+                        <select name="material" class="form-select form-select-sm">
+                            <option value="">Tất cả</option>
+                            @foreach (var m in Model.Materials) { <option value="@m" selected="@(f.Material == m)">@m</option> }
+                        </select>
+                    </div>
+                }
+
+                <div class="d-grid gap-2">
+                    <button class="btn btn-brand btn-sm" type="submit"><i class="bi bi-funnel"></i> Áp dụng lọc</button>
+                    @if (f.HasAny) { <a class="btn btn-outline-secondary btn-sm" href="@Context.Request.Path@(string.IsNullOrEmpty(f.Q) ? "" : "?q=" + Uri.EscapeDataString(f.Q))">Xóa lọc</a> }
+                </div>
+            </form>
+        </aside>
+
+        <div class="col-lg-9">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                <div>
+                    <h1 class="h4 mb-0">@Model.Title</h1>
+                    <div class="small text-muted">@Model.Products.TotalCount sản phẩm</div>
+                </div>
+                <select class="form-select form-select-sm w-auto" id="sort-select">
+                    <option value="newest" selected="@(string.IsNullOrEmpty(f.Sort) || f.Sort == "newest")">Mới nhất</option>
+                    <option value="bestseller" selected="@(f.Sort == "bestseller")">Bán chạy</option>
+                    <option value="price-asc" selected="@(f.Sort == "price-asc")">Giá tăng dần</option>
+                    <option value="price-desc" selected="@(f.Sort == "price-desc")">Giá giảm dần</option>
+                </select>
+            </div>
+            @if (!string.IsNullOrEmpty(Model.Description)) { <p class="text-muted small">@Model.Description</p> }
+
+            @if (Model.Products.Items.Any())
+            {
+                <div class="row g-3 row-cols-2 row-cols-md-3">
+                    @foreach (var p in Model.Products.Items) { <div class="col"><partial name="_ProductCard" model="p" /></div> }
+                </div>
+                @if (Model.Products.TotalPages > 1)
+                {
+                    <nav class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item @(Model.Products.HasPrevious ? "" : "disabled")"><a class="page-link" href="@Context.Request.WithPage(Model.Products.PageIndex - 1)">‹</a></li>
+                            @for (int i = Math.Max(1, Model.Products.PageIndex - 2); i <= Math.Min(Model.Products.TotalPages, Model.Products.PageIndex + 2); i++)
+                            {
+                                <li class="page-item @(i == Model.Products.PageIndex ? "active" : "")"><a class="page-link" href="@Context.Request.WithPage(i)">@i</a></li>
+                            }
+                            <li class="page-item @(Model.Products.HasNext ? "" : "disabled")"><a class="page-link" href="@Context.Request.WithPage(Model.Products.PageIndex + 1)">›</a></li>
+                        </ul>
+                    </nav>
+                }
+            }
+            else
+            {
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-search fs-1"></i>
+                    <p class="mt-2">Không tìm thấy sản phẩm phù hợp. Hãy thử bỏ bớt bộ lọc.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+@section Scripts {
+<script>
+    document.querySelectorAll('.price-range').forEach(r => r.addEventListener('change', () => {
+        document.getElementById('minPrice').value = r.dataset.min || '';
+        document.getElementById('maxPrice').value = r.dataset.max || '';
+    }));
+    document.getElementById('sort-select').addEventListener('change', e => {
+        const form = document.getElementById('filter-form');
+        form.querySelector('[name="sort"]').value = e.target.value;
+        form.submit();
+    });
+</script>
+}

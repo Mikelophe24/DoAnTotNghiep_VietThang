@@ -1,0 +1,19 @@
+@model ProductCardVm
+<div class="product-card h-100">
+    <a class="product-thumb" asp-controller="Products" asp-action="Details" asp-route-slug="@Model.Slug">
+        <img src="@(Model.ImageUrl ?? "/images/products/placeholder.svg")" alt="@Model.Name" loading="lazy" />
+        <div class="product-badges">
+            @if (Model.HasDiscount) { <span class="badge-sale">-@Model.DiscountPercent%</span> }
+            @if (Model.IsNew) { <span class="badge-new">Mới</span> }
+            @if (!Model.InStock) { <span class="badge-out">Hết hàng</span> }
+        </div>
+    </a>
+    <div class="product-info">
+        @if (!string.IsNullOrEmpty(Model.CategoryName)) { <div class="product-cat">@Model.CategoryName</div> }
+        <a class="product-name" asp-controller="Products" asp-action="Details" asp-route-slug="@Model.Slug">@Model.Name</a>
+        <div class="product-price">
+            <span class="price-sale">@Model.SalePrice.ToVnd()</span>
+            @if (Model.HasDiscount) { <span class="price-original">@Model.OriginalPrice.ToVnd()</span> }
+        </div>
+    </div>
+</div>

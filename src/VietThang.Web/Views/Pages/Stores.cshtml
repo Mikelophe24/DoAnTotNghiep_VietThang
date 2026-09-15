@@ -1,0 +1,21 @@
+@model List<Store>
+@{
+    ViewData["Title"] = "Hệ thống cửa hàng";
+}
+<div class="container mt-3">
+    <h1 class="h4 mb-3">Hệ thống cửa hàng</h1>
+    <div class="row g-3">
+        @foreach (var s in Model)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="bg-white border rounded p-3 h-100">
+                    <h2 class="h6 text-brand"><i class="bi bi-geo-alt-fill"></i> @s.Name</h2>
+                    <p class="mb-1">@s.Address</p>
+                    @if (!string.IsNullOrEmpty(s.Phone)) { <p class="mb-1 small"><i class="bi bi-telephone"></i> <a href="tel:@s.Phone">@s.Phone</a></p> }
+                    @if (!string.IsNullOrEmpty(s.OpeningHours)) { <p class="mb-1 small"><i class="bi bi-clock"></i> @s.OpeningHours</p> }
+                    <a class="small" href="https://www.google.com/maps/search/?api=1&query=@Uri.EscapeDataString(s.Address)" target="_blank" rel="noopener">Chỉ đường trên Google Maps →</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>

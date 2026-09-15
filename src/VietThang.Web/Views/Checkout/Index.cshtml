@@ -1,0 +1,144 @@
+@model CheckoutViewModel
+@{
+    ViewData["Title"] = "Thanh toán";
+    var cart = Model.Cart!;
+}
+<div class="container mt-3">
+    <h1 class="h4 mb-3">Thanh toán</h1>
+    <form asp-controller="Checkout" asp-action="Index" method="post" id="checkout-form">
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="bg-white border rounded p-4 mb-4">
+                    <h2 class="h6 mb-3">Thông tin giao hàng</h2>
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
+
+                    @if (Model.SavedAddresses.Any())
+                    {
+                        <div class="mb-3">
+                            <label class="form-label small text-muted">Chọn địa chỉ đã lưu</label>
+                            <select class="form-select" id="saved-address">
+                                <option value="">— Nhập địa chỉ mới —</option>
+                                @foreach (var a in Model.SavedAddresses)
+                                {
+                                    <option value="@a.Id" data-name="@a.ReceiverName" data-phone="@a.Phone" data-province="@a.Province" data-district="@a.District" data-ward="@a.Ward" data-street="@a.Street" selected="@a.IsDefault">
+                                        @a.ReceiverName · @a.Phone · @a.Street, @a.Ward, @a.District, @a.Province @(a.IsDefault ? "(mặc định)" : "")
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                    }
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="CustomerName" class="form-label required"></label>
+                            <input asp-for="CustomerName" class="form-control" />
+                            <span asp-validation-for="CustomerName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Phone" class="form-label required"></label>
+                            <input asp-for="Phone" class="form-control" />
+                            <span asp-validation-for="Phone" class="text-danger small"></span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="Province" class="form-label required"></label>
+                            <input asp-for="Province" class="form-control" placeholder="Hà Nội" />
+                            <span asp-validation-for="Province" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="District" class="form-label required"></label>
+                            <input asp-for="District" class="form-control" placeholder="Cầu Giấy" />
+                            <span asp-validation-for="District" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="Ward" class="form-label required"></label>
+                            <input asp-for="Ward" class="form-control" placeholder="Dịch Vọng" />
+                            <span asp-validation-for="Ward" class="text-danger small"></span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Street" class="form-label required"></label>
+                        <input asp-for="Street" class="form-control" placeholder="Số 12, ngõ 34 Trần Thái Tông" />
+                        <span asp-validation-for="Street" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Note" class="form-label"></label>
+                        <textarea asp-for="Note" class="form-control" rows="2" placeholder="Ví dụ: giao giờ hành chính, gọi trước khi giao"></textarea>
+                    </div>
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <div class="form-check">
+                            <input asp-for="SaveAddress" class="form-check-input" />
+                            <label asp-for="SaveAddress" class="form-check-label"></label>
+                        </div>
+                    }
+                </div>
+
+                <div class="bg-white border rounded p-4">
+                    <h2 class="h6 mb-3">Phương thức thanh toán</h2>
+                    <div class="form-check payment-option">
+                        <input class="form-check-input" type="radio" asp-for="PaymentMethod" value="@((int)PaymentMethod.Cod)" id="pm-cod" />
+                        <label class="form-check-label" for="pm-cod"><i class="bi bi-cash-coin"></i> <strong>Thanh toán khi nhận hàng (COD)</strong><br /><small class="text-muted">Kiểm tra hàng rồi thanh toán cho nhân viên giao hàng.</small></label>
+                    </div>
+                    <div class="form-check payment-option">
+                        <input class="form-check-input" type="radio" asp-for="PaymentMethod" value="@((int)PaymentMethod.BankTransfer)" id="pm-bank" />
+                        <label class="form-check-label" for="pm-bank"><i class="bi bi-bank"></i> <strong>Chuyển khoản ngân hàng</strong><br /><small class="text-muted">@Model.BankAccount. Nội dung: mã đơn hàng. Đơn được xử lý sau khi nhận tiền.</small></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="bg-white border rounded p-3 summary-box">
+                    <h2 class="h6 mb-3">Đơn hàng (@cart.TotalQuantity sản phẩm)</h2>
+                    <ul class="list-unstyled checkout-items">
+                        @foreach (var l in cart.Lines)
+                        {
+                            <li class="d-flex gap-2 align-items-center">
+                                <img src="@(l.ImageUrl ?? "/images/products/placeholder.svg")" class="cart-thumb" alt="" />
+                                <div class="flex-grow-1">
+                                    <div class="small fw-semibold">@l.ProductName</div>
+                                    <div class="small text-muted">@l.ColorName / @l.SizeName × @l.Quantity</div>
+                                </div>
+                                <div class="small fw-semibold text-nowrap">@l.LineTotal.ToVnd()</div>
+                            </li>
+                        }
+                    </ul>
+                    <dl class="summary-list mt-3">
+                        <dt>Tiền hàng</dt><dd>@cart.SubTotal.ToVnd()</dd>
+                        <dt>Phí vận chuyển</dt><dd>@(cart.ShippingFee == 0 ? "Miễn phí" : cart.ShippingFee.ToVnd())</dd>
+                        @if (cart.DiscountAmount > 0) { <dt>Giảm giá (@cart.Coupon?.Code)</dt><dd class="text-success">−@cart.DiscountAmount.ToVnd()</dd> }
+                        <dt class="total">Tổng thanh toán</dt><dd class="total">@cart.Total.ToVnd()</dd>
+                    </dl>
+                    <button type="submit" class="btn btn-brand btn-lg w-100"><i class="bi bi-check2-circle"></i> Đặt hàng</button>
+                    <div class="small text-muted mt-2 text-center">Bằng việc đặt hàng, bạn đồng ý với chính sách đổi trả của cửa hàng.</div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const sel = document.getElementById('saved-address');
+        if (sel) {
+            const fill = () => {
+                const o = sel.options[sel.selectedIndex];
+                if (!o.value) return;
+                const f = document.getElementById('checkout-form');
+                f.querySelector('[name="CustomerName"]').value = o.dataset.name;
+                f.querySelector('[name="Phone"]').value = o.dataset.phone;
+                f.querySelector('[name="Province"]').value = o.dataset.province;
+                f.querySelector('[name="District"]').value = o.dataset.district;
+                f.querySelector('[name="Ward"]').value = o.dataset.ward;
+                f.querySelector('[name="Street"]').value = o.dataset.street;
+            };
+            sel.addEventListener('change', fill);
+        }
+    </script>
+}

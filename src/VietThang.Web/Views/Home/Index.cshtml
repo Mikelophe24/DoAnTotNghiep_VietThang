@@ -1,8 +1,117 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model HomeViewModel
+@{
+    ViewData["Title"] = "Trang chủ";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+@if (Model.Banners.Any())
+{
+    <section class="container mt-3">
+        <div id="heroCarousel" class="carousel slide hero-carousel" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+                @for (int i = 0; i < Model.Banners.Count; i++)
+                {
+                    <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-label="Slide @(i + 1)"></button>
+                }
+            </div>
+            <div class="carousel-inner rounded-3">
+                @for (int i = 0; i < Model.Banners.Count; i++)
+                {
+                    var b = Model.Banners[i];
+                    <div class="carousel-item @(i == 0 ? "active" : "")">
+                        <a href="@(b.LinkUrl ?? "#")"><img src="@b.ImageUrl" class="d-block w-100" alt="@b.Title" /></a>
+                    </div>
+                }
+            </div>
+            @if (Model.Banners.Count > 1)
+            {
+                <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
+                <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
+            }
+        </div>
+    </section>
+}
+
+<section class="container mt-4">
+    <div class="row g-3 usp-row">
+        <div class="col-6 col-md-3"><div class="usp"><i class="bi bi-truck"></i><div><strong>Freeship</strong><br /><small>Đơn từ @Model.FreeShippingThreshold.ToString("N0") đ</small></div></div></div>
+        <div class="col-6 col-md-3"><div class="usp"><i class="bi bi-arrow-repeat"></i><div><strong>Đổi size 7 ngày</strong><br /><small>Tại cửa hàng hoặc qua ship</small></div></div></div>
+        <div class="col-6 col-md-3"><div class="usp"><i class="bi bi-patch-check"></i><div><strong>Chất liệu lanh, cotton</strong><br /><small>Sản xuất tại xưởng Việt Thắng</small></div></div></div>
+        <div class="col-6 col-md-3"><div class="usp"><i class="bi bi-headset"></i><div><strong>Hotline 1800 6468 59</strong><br /><small>8:30 – 21:30 hằng ngày</small></div></div></div>
+    </div>
+</section>
+
+<section class="container mt-5">
+    <h2 class="section-title">Mua sắm theo nhóm</h2>
+    <div class="row g-3">
+        @foreach (var c in Model.RootCategories)
+        {
+            <div class="col-6 col-md-3">
+                <a class="cat-tile" asp-controller="Products" asp-action="Category" asp-route-slug="@c.Slug">
+                    <img src="@(c.ImageUrl ?? "/images/products/placeholder.svg")" alt="@c.Name" loading="lazy" />
+                    <span class="cat-tile-name">@c.Name</span>
+                </a>
+            </div>
+        }
+    </div>
+</section>
+
+@if (Model.NewProducts.Any())
+{
+    <section class="container mt-5">
+        <div class="d-flex justify-content-between align-items-end mb-3">
+            <h2 class="section-title mb-0">Hàng mới về</h2>
+            <a class="link-more" asp-controller="Products" asp-action="New">Xem tất cả →</a>
+        </div>
+        <div class="row g-3 row-cols-2 row-cols-md-4">
+            @foreach (var p in Model.NewProducts) { <div class="col"><partial name="_ProductCard" model="p" /></div> }
+        </div>
+    </section>
+}
+
+@if (Model.SaleProducts.Any())
+{
+    <section class="container mt-5">
+        <div class="d-flex justify-content-between align-items-end mb-3">
+            <h2 class="section-title mb-0 text-danger">Đang khuyến mãi</h2>
+            <a class="link-more" asp-controller="Products" asp-action="Sale">Xem tất cả →</a>
+        </div>
+        <div class="row g-3 row-cols-2 row-cols-md-4">
+            @foreach (var p in Model.SaleProducts) { <div class="col"><partial name="_ProductCard" model="p" /></div> }
+        </div>
+    </section>
+}
+
+@if (Model.BestSellers.Any())
+{
+    <section class="container mt-5">
+        <h2 class="section-title">Bán chạy nhất</h2>
+        <div class="row g-3 row-cols-2 row-cols-md-4">
+            @foreach (var p in Model.BestSellers) { <div class="col"><partial name="_ProductCard" model="p" /></div> }
+        </div>
+    </section>
+}
+
+@if (Model.Posts.Any())
+{
+    <section class="container mt-5">
+        <div class="d-flex justify-content-between align-items-end mb-3">
+            <h2 class="section-title mb-0">Tin tức</h2>
+            <a class="link-more" asp-controller="Posts" asp-action="Index">Xem tất cả →</a>
+        </div>
+        <div class="row g-3">
+            @foreach (var post in Model.Posts)
+            {
+                <div class="col-md-4">
+                    <a class="post-card" asp-controller="Posts" asp-action="Details" asp-route-slug="@post.Slug">
+                        <img src="@(post.ThumbnailUrl ?? "/images/banners/banner-1.svg")" alt="@post.Title" loading="lazy" />
+                        <div class="post-card-body">
+                            <div class="small text-muted">@post.PublishedAt?.ToString("dd/MM/yyyy")</div>
+                            <h3 class="h6 mb-1">@post.Title</h3>
+                            <p class="small text-muted mb-0">@post.Summary</p>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    </section>
+}
