@@ -1,0 +1,66 @@
+@model ApplicationUser
+@{
+    ViewData["Title"] = "Khách hàng " + Model.FullName;
+    var orders = (List<Order>)ViewBag.Orders;
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">@Model.FullName <span class="badge @(Model.IsActive ? "bg-success" : "bg-danger")">@(Model.IsActive ? "Hoạt động" : "Bị khóa")</span></h1>
+    <div class="d-flex gap-2">
+        @if (User.IsInRole("Admin"))
+        {
+            <form asp-action="ToggleActive" asp-route-id="@Model.Id" method="post" data-confirm="@(Model.IsActive ? "Khóa tài khoản này?" : "Mở khóa tài khoản này?")">
+                <button class="btn @(Model.IsActive ? "btn-outline-danger" : "btn-outline-success")"><i class="bi @(Model.IsActive ? "bi-lock" : "bi-unlock")"></i> @(Model.IsActive ? "Khóa tài khoản" : "Mở khóa")</button>
+            </form>
+        }
+        <a class="btn btn-outline-secondary" asp-action="Index"><i class="bi bi-arrow-left"></i> Danh sách</a>
+    </div>
+</div>
+<div class="row g-3">
+    <div class="col-lg-4">
+        <div class="card mb-3">
+            <div class="card-header fw-semibold">Thông tin</div>
+            <div class="card-body small">
+                <dl class="row mb-0">
+                    <dt class="col-5">Email</dt><dd class="col-7">@Model.Email</dd>
+                    <dt class="col-5">Điện thoại</dt><dd class="col-7">@Model.PhoneNumber</dd>
+                    <dt class="col-5">Giới tính</dt><dd class="col-7">@(Model.Gender switch { Gender.Male => "Nam", Gender.Female => "Nữ", Gender.Other => "Khác", _ => "—" })</dd>
+                    <dt class="col-5">Ngày sinh</dt><dd class="col-7">@(Model.DateOfBirth?.ToString("dd/MM/yyyy") ?? "—")</dd>
+                    <dt class="col-5">Đăng ký</dt><dd class="col-7">@Model.CreatedAt.ToString("dd/MM/yyyy")</dd>
+                    <dt class="col-5">Đã chi tiêu</dt><dd class="col-7 fw-semibold">@(((decimal)ViewBag.TotalSpent).ToString("N0")) đ</dd>
+                    <dt class="col-5">Đánh giá</dt><dd class="col-7">@ViewBag.ReviewCount</dd>
+                </dl>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header fw-semibold">Sổ địa chỉ (@Model.Addresses.Count)</div>
+            <ul class="list-group list-group-flush small">
+                @foreach (var a in Model.Addresses)
+                {
+                    <li class="list-group-item"><strong>@a.ReceiverName</strong> · @a.Phone @(a.IsDefault ? "(mặc định)" : "")<br />@a.FullAddress</li>
+                }
+                @if (!Model.Addresses.Any()) { <li class="list-group-item text-muted">Chưa có địa chỉ.</li> }
+            </ul>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header fw-semibold">Lịch sử đơn hàng (@orders.Count)</div>
+            <table class="table table-sm mb-0 align-middle">
+                <thead class="table-light"><tr><th>Mã đơn</th><th>Ngày</th><th class="text-center">SP</th><th class="text-end">Tổng tiền</th><th class="text-center">Trạng thái</th></tr></thead>
+                <tbody>
+                @foreach (var o in orders)
+                {
+                    <tr>
+                        <td><a asp-controller="Orders" asp-action="Details" asp-route-id="@o.Id">@o.OrderCode</a></td>
+                        <td class="small">@o.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td class="text-center">@o.Details.Sum(d => d.Quantity)</td>
+                        <td class="text-end">@o.TotalAmount.ToString("N0")</td>
+                        <td class="text-center"><span class="badge @o.Status.ToBadgeClass()">@o.Status.ToDisplay()</span></td>
+                    </tr>
+                }
+                @if (!orders.Any()) { <tr><td colspan="5" class="text-center text-muted py-3">Chưa có đơn hàng.</td></tr> }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

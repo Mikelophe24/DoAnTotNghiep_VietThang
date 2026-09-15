@@ -46,14 +46,28 @@
             <li><a class="nav-link @(Active("Inventory") + (currentAction == "History" ? "" : ""))" asp-area="Admin" asp-controller="Inventory" asp-action="Index"><i class="bi bi-boxes"></i> Tồn kho</a></li>
 
             <li class="nav-header">Marketing & nội dung</li>
-            <li><a class="nav-link disabled" href="#"><i class="bi bi-percent"></i> Khuyến mãi <small>(tuần 10)</small></a></li>
-            <li><a class="nav-link disabled" href="#"><i class="bi bi-ticket-perforated"></i> Mã giảm giá <small>(tuần 10)</small></a></li>
-            <li><a class="nav-link disabled" href="#"><i class="bi bi-star"></i> Đánh giá <small>(tuần 10)</small></a></li>
-            <li><a class="nav-link disabled" href="#"><i class="bi bi-newspaper"></i> Tin tức / Banner <small>(tuần 10)</small></a></li>
+            @if (isAdmin)
+            {
+                <li><a class="nav-link @Active("Promotions")" asp-area="Admin" asp-controller="Promotions" asp-action="Index"><i class="bi bi-percent"></i> Khuyến mãi</a></li>
+                <li><a class="nav-link @Active("Coupons")" asp-area="Admin" asp-controller="Coupons" asp-action="Index"><i class="bi bi-ticket-perforated"></i> Mã giảm giá</a></li>
+            }
+            <li><a class="nav-link @Active("Reviews")" asp-area="Admin" asp-controller="Reviews" asp-action="Index"><i class="bi bi-star"></i> Đánh giá</a></li>
+            <li><a class="nav-link @Active("Contacts")" asp-area="Admin" asp-controller="Contacts" asp-action="Index"><i class="bi bi-envelope"></i> Liên hệ</a></li>
+            @if (isAdmin)
+            {
+                <li><a class="nav-link @Active("Posts")" asp-area="Admin" asp-controller="Posts" asp-action="Index"><i class="bi bi-newspaper"></i> Tin tức / Tuyển dụng</a></li>
+                <li><a class="nav-link @Active("Banners")" asp-area="Admin" asp-controller="Banners" asp-action="Index"><i class="bi bi-image"></i> Banner</a></li>
+                <li><a class="nav-link @Active("Stores")" asp-area="Admin" asp-controller="Stores" asp-action="Index"><i class="bi bi-shop"></i> Cửa hàng</a></li>
+            }
 
             <li class="nav-header">Hệ thống</li>
-            <li><a class="nav-link disabled" href="#"><i class="bi bi-people"></i> Khách hàng / Nhân viên <small>(tuần 11)</small></a></li>
-            <li><a class="nav-link disabled" href="#"><i class="bi bi-bar-chart"></i> Báo cáo <small>(tuần 12)</small></a></li>
+            <li><a class="nav-link @Active("Customers")" asp-area="Admin" asp-controller="Customers" asp-action="Index"><i class="bi bi-people"></i> Khách hàng</a></li>
+            @if (isAdmin)
+            {
+                <li><a class="nav-link @Active("Employees")" asp-area="Admin" asp-controller="Employees" asp-action="Index"><i class="bi bi-person-badge"></i> Nhân viên</a></li>
+                <li><a class="nav-link @Active("Reports")" asp-area="Admin" asp-controller="Reports" asp-action="Index"><i class="bi bi-bar-chart"></i> Báo cáo</a></li>
+                <li><a class="nav-link @Active("Settings")" asp-area="Admin" asp-controller="Settings" asp-action="Index"><i class="bi bi-gear"></i> Cấu hình</a></li>
+            }
         </ul>
         <div class="mt-auto p-3 small text-white-50">
             <a class="text-white-50 text-decoration-none" asp-area="" asp-controller="Home" asp-action="Index"><i class="bi bi-shop"></i> Xem website</a>

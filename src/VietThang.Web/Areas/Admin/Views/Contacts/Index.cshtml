@@ -1,0 +1,35 @@
+@model PagedList<Contact>
+@{
+    ViewData["Title"] = "Liên hệ";
+    bool? handled = ViewBag.Handled;
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Liên hệ từ khách hàng</h1>
+    <ul class="nav nav-pills gap-1">
+        <li class="nav-item"><a class="nav-link @(handled is null ? "active" : "")" asp-action="Index">Tất cả</a></li>
+        <li class="nav-item"><a class="nav-link @(handled == false ? "active" : "")" asp-action="Index" asp-route-handled="false">Chưa xử lý <span class="badge bg-danger">@ViewBag.NewCount</span></a></li>
+        <li class="nav-item"><a class="nav-link @(handled == true ? "active" : "")" asp-action="Index" asp-route-handled="true">Đã xử lý</a></li>
+    </ul>
+</div>
+<div class="card">
+    <table class="table table-hover mb-0 align-middle">
+        <thead class="table-light"><tr><th>Thời gian</th><th>Khách</th><th>Chủ đề / Nội dung</th><th class="text-center">Trạng thái</th><th class="text-end" style="width:130px"></th></tr></thead>
+        <tbody>
+        @foreach (var c in Model.Items)
+        {
+            <tr class="@(c.IsHandled ? "text-muted" : "")">
+                <td class="small text-nowrap">@c.CreatedAt.ToString("HH:mm dd/MM/yyyy")</td>
+                <td>@c.FullName<div class="small">@c.Phone @(string.IsNullOrEmpty(c.Email) ? "" : "· " + c.Email)</div></td>
+                <td>@if (!string.IsNullOrEmpty(c.Subject)) { <strong>@c.Subject</strong><br /> }<span class="small">@c.Message</span></td>
+                <td class="text-center"><span class="badge @(c.IsHandled ? "bg-success" : "bg-danger")">@(c.IsHandled ? "Đã xử lý" : "Mới")</span>@if (c.HandledBy is not null) { <div class="small">@c.HandledBy.FullName</div> }</td>
+                <td class="text-end">
+                    <form asp-action="MarkHandled" asp-route-id="@c.Id" asp-route-returnUrl="@returnUrl" method="post" class="d-inline"><button class="btn btn-sm @(c.IsHandled ? "btn-outline-secondary" : "btn-success")" title="@(c.IsHandled ? "Đánh dấu chưa xử lý" : "Đã xử lý")"><i class="bi @(c.IsHandled ? "bi-arrow-counterclockwise" : "bi-check-lg")"></i></button></form>
+                    <form asp-action="Delete" asp-route-id="@c.Id" method="post" class="d-inline" data-confirm="Xóa liên hệ này?"><button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button></form>
+                </td>
+            </tr>
+        }
+        @if (!Model.Items.Any()) { <tr><td colspan="5" class="text-center text-muted py-4">Không có liên hệ.</td></tr> }
+        </tbody>
+    </table>
+</div>

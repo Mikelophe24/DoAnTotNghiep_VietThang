@@ -1,0 +1,79 @@
+@model PromotionFormViewModel
+@{
+    var isEdit = Model.Id > 0;
+    ViewData["Title"] = isEdit ? "Sửa khuyến mãi" : "Tạo khuyến mãi";
+    IEnumerable<dynamic> products = ViewBag.Products;
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">@ViewData["Title"]</h1>
+    <a class="btn btn-outline-secondary" asp-action="Index"><i class="bi bi-arrow-left"></i> Quay lại</a>
+</div>
+<form asp-action="@(isEdit ? "Edit" : "Create")" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div class="row g-3">
+        <div class="col-lg-5">
+            <div class="card">
+                <div class="card-body">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
+                    <div class="mb-3"><label asp-for="Name" class="form-label required"></label><input asp-for="Name" class="form-control" placeholder="VD: Sale hè - Giảm 30% đồ lanh" /><span asp-validation-for="Name" class="text-danger small"></span></div>
+                    <div class="row">
+                        <div class="col-6 mb-3"><label asp-for="DiscountType" class="form-label"></label>
+                            <select asp-for="DiscountType" class="form-select"><option value="1">Giảm theo %</option><option value="2">Giảm số tiền (đ)</option></select></div>
+                        <div class="col-6 mb-3"><label asp-for="DiscountValue" class="form-label required"></label><input asp-for="DiscountValue" type="number" min="1" class="form-control" /><span asp-validation-for="DiscountValue" class="text-danger small"></span></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3"><label asp-for="StartDate" class="form-label"></label><input asp-for="StartDate" type="date" class="form-control" /></div>
+                        <div class="col-6 mb-3"><label asp-for="EndDate" class="form-label"></label><input asp-for="EndDate" type="date" class="form-control" /><span asp-validation-for="EndDate" class="text-danger small"></span></div>
+                    </div>
+                    <div class="form-check"><input asp-for="IsActive" class="form-check-input" /><label asp-for="IsActive" class="form-check-label"></label></div>
+                </div>
+                <div class="card-footer"><button class="btn btn-primary"><i class="bi bi-check-lg"></i> Lưu chương trình</button></div>
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span class="fw-semibold">Sản phẩm áp dụng <span class="badge bg-secondary" id="sel-count">@Model.ProductIds.Count</span></span>
+                    <div class="d-flex gap-2 align-items-center">
+                        <input class="form-control form-control-sm" id="prod-search" placeholder="Lọc theo tên / mã / danh mục" style="width:240px" />
+                        <label class="small"><input type="checkbox" class="form-check-input" id="check-visible" /> chọn hết đang hiện</label>
+                    </div>
+                </div>
+                <span asp-validation-for="ProductIds" class="text-danger small px-3"></span>
+                <div class="table-responsive" style="max-height:520px">
+                    <table class="table table-sm table-hover mb-0 align-middle" id="prod-table">
+                        <thead class="table-light"><tr><th style="width:40px"></th><th>Sản phẩm</th><th>Danh mục</th><th class="text-end">Giá</th></tr></thead>
+                        <tbody>
+                        @foreach (var p in products)
+                        {
+                            int pid = p.Id; string name = p.Name; string code = p.Code; string cat = p.CategoryName; decimal price = p.Price;
+                            <tr data-text="@((name + " " + code + " " + cat).ToLower())">
+                                <td><input type="checkbox" name="ProductIds" value="@pid" class="form-check-input prod-check" checked="@Model.ProductIds.Contains(pid)" /></td>
+                                <td>@name<div class="small text-muted"><code>@code</code></div></td>
+                                <td class="small">@cat</td>
+                                <td class="text-end">@price.ToString("N0")</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@section Scripts {
+    <partial name="/Views/Shared/_ValidationScriptsPartial.cshtml" />
+    <script>
+        const rows = [...document.querySelectorAll('#prod-table tbody tr')];
+        const count = () => document.getElementById('sel-count').textContent = document.querySelectorAll('.prod-check:checked').length;
+        document.getElementById('prod-search').addEventListener('input', e => {
+            const q = e.target.value.toLowerCase();
+            rows.forEach(r => r.hidden = q && !r.dataset.text.includes(q));
+        });
+        document.getElementById('check-visible').addEventListener('change', e => {
+            rows.filter(r => !r.hidden).forEach(r => r.querySelector('.prod-check').checked = e.target.checked);
+            count();
+        });
+        document.querySelectorAll('.prod-check').forEach(c => c.addEventListener('change', count));
+    </script>
+}

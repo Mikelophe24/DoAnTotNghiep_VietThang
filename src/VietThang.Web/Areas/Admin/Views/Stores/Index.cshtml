@@ -1,0 +1,29 @@
+@model List<Store>
+@{
+    ViewData["Title"] = "Hệ thống cửa hàng";
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Hệ thống cửa hàng</h1>
+    <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg"></i> Thêm cửa hàng</a>
+</div>
+<div class="card">
+    <table class="table table-hover mb-0 align-middle">
+        <thead class="table-light"><tr><th>Cửa hàng</th><th>Địa chỉ</th><th>Điện thoại</th><th>Giờ mở cửa</th><th class="text-center">Trạng thái</th><th class="text-end" style="width:130px"></th></tr></thead>
+        <tbody>
+        @foreach (var s in Model)
+        {
+            <tr>
+                <td class="fw-semibold">@s.Name</td>
+                <td class="small">@s.Address</td>
+                <td class="small">@s.Phone</td>
+                <td class="small">@s.OpeningHours</td>
+                <td class="text-center"><span class="badge @(s.IsActive ? "bg-success" : "bg-secondary")">@(s.IsActive ? "Hoạt động" : "Đóng")</span></td>
+                <td class="text-end">
+                    <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@s.Id"><i class="bi bi-pencil"></i></a>
+                    <form asp-action="Delete" asp-route-id="@s.Id" method="post" class="d-inline" data-confirm="Xóa cửa hàng '@s.Name'?"><button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button></form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

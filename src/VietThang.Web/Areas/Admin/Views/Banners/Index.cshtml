@@ -1,0 +1,32 @@
+@model List<Banner>
+@{
+    ViewData["Title"] = "Banner";
+    string Pos(BannerPosition p) => p switch { BannerPosition.HomeSlider => "Slider trang chủ", BannerPosition.HomeMiddle => "Giữa trang chủ", _ => "Đầu trang danh mục" };
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Banner</h1>
+    <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg"></i> Thêm banner</a>
+</div>
+<div class="card">
+    <table class="table table-hover mb-0 align-middle">
+        <thead class="table-light"><tr><th style="width:200px">Ảnh</th><th>Tiêu đề</th><th>Vị trí</th><th class="text-center">Thứ tự</th><th>Liên kết</th><th class="text-center">Hiển thị</th><th class="text-end" style="width:130px"></th></tr></thead>
+        <tbody>
+        @foreach (var b in Model)
+        {
+            <tr>
+                <td><img src="@b.ImageUrl" alt="" style="width:180px;aspect-ratio:8/3;object-fit:cover;border-radius:4px" /></td>
+                <td>@b.Title</td>
+                <td class="small">@Pos(b.Position)</td>
+                <td class="text-center">@b.DisplayOrder</td>
+                <td class="small"><code>@b.LinkUrl</code></td>
+                <td class="text-center"><form asp-action="ToggleActive" asp-route-id="@b.Id" method="post"><button class="btn btn-sm @(b.IsActive ? "btn-success" : "btn-outline-secondary")">@(b.IsActive ? "Đang hiện" : "Đang ẩn")</button></form></td>
+                <td class="text-end">
+                    <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@b.Id"><i class="bi bi-pencil"></i></a>
+                    <form asp-action="Delete" asp-route-id="@b.Id" method="post" class="d-inline" data-confirm="Xóa banner này?"><button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button></form>
+                </td>
+            </tr>
+        }
+        @if (!Model.Any()) { <tr><td colspan="7" class="text-center text-muted py-4">Chưa có banner.</td></tr> }
+        </tbody>
+    </table>
+</div>

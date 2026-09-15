@@ -1,0 +1,25 @@
+@model StoreFormViewModel
+@{
+    var isEdit = Model.Id > 0;
+    ViewData["Title"] = isEdit ? "Sửa cửa hàng" : "Thêm cửa hàng";
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">@ViewData["Title"]</h1>
+    <a class="btn btn-outline-secondary" asp-action="Index"><i class="bi bi-arrow-left"></i> Quay lại</a>
+</div>
+<form asp-action="@(isEdit ? "Edit" : "Create")" method="post" class="card" style="max-width:720px">
+    <div class="card-body">
+        <input type="hidden" asp-for="Id" />
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
+        <div class="mb-3"><label asp-for="Name" class="form-label required"></label><input asp-for="Name" class="form-control" /><span asp-validation-for="Name" class="text-danger small"></span></div>
+        <div class="mb-3"><label asp-for="Address" class="form-label required"></label><input asp-for="Address" class="form-control" /><span asp-validation-for="Address" class="text-danger small"></span></div>
+        <div class="row">
+            <div class="col-md-6 mb-3"><label asp-for="Phone" class="form-label"></label><input asp-for="Phone" class="form-control" /></div>
+            <div class="col-md-6 mb-3"><label asp-for="OpeningHours" class="form-label"></label><input asp-for="OpeningHours" class="form-control" placeholder="8:30 - 21:30" /></div>
+        </div>
+        <div class="mb-3"><label asp-for="MapEmbedUrl" class="form-label"></label><input asp-for="MapEmbedUrl" class="form-control" /></div>
+        <div class="form-check"><input asp-for="IsActive" class="form-check-input" /><label asp-for="IsActive" class="form-check-label"></label></div>
+    </div>
+    <div class="card-footer"><button class="btn btn-primary"><i class="bi bi-check-lg"></i> Lưu</button></div>
+</form>
+@section Scripts { <partial name="/Views/Shared/_ValidationScriptsPartial.cshtml" /> }

@@ -34,13 +34,19 @@ Sơ đồ viết bằng Mermaid: xem trực tiếp trên GitHub/VS Code (extensi
 | – | Trang đăng nhập riêng cho quản trị `/Admin/dang-nhap` (từ chối tài khoản khách), tự chuyển hướng khi vào `/Admin/*` chưa đăng nhập | ✅ Xong (15/09/2026) |
 | 6 | Nhà cung cấp (CRUD), phiếu nhập (nháp → thêm dòng theo biến thể → duyệt cộng tồn + cập nhật giá vốn), tồn kho theo biến thể (lọc, cảnh báo sắp hết, giá trị tồn), điều chỉnh kiểm kê, lịch sử xuất nhập | ✅ Xong (15/09/2026) |
 | 9 | Admin xử lý đơn: danh sách theo trạng thái, chi tiết, chuyển trạng thái theo máy trạng thái (hủy → hoàn tồn, hoàn thành → đã thanh toán), xác nhận chuyển khoản, in phiếu giao; Dashboard có đơn gần đây + sắp hết hàng. Khách: hồ sơ, đổi mật khẩu, sổ địa chỉ, lịch sử đơn, hủy đơn chờ xác nhận, đánh giá sản phẩm đã mua (chờ duyệt), yêu thích | ✅ Xong (15/09/2026) |
-| 10 | Admin: khuyến mãi, mã giảm giá, duyệt đánh giá, tin tức, banner, liên hệ, cửa hàng | ⏳ Tiếp theo |
-| 11 | Admin: khách hàng, nhân viên, phân quyền, cấu hình | |
-| 12 | Báo cáo thống kê biểu đồ, xuất Excel | |
+| 10 | Admin: khuyến mãi theo sản phẩm (chọn nhiều SP có lọc), mã giảm giá, duyệt/ẩn đánh giá, tin tức & tuyển dụng (TinyMCE, ảnh), banner, liên hệ (đánh dấu đã xử lý), hệ thống cửa hàng | ✅ Xong (15/09/2026) |
+| 11 | Admin: khách hàng (tìm, chi tiết, số đơn, chi tiêu, khóa/mở), nhân viên & phân quyền (tạo tài khoản Admin/Employee, đổi vai trò, đặt lại mật khẩu, khóa; chống tự khóa), cấu hình hệ thống (tên, hotline, phí ship, freeship, ngưỡng tồn, tài khoản ngân hàng) | ✅ Xong (15/09/2026) |
+| 12 | Báo cáo (Chart.js): doanh thu theo ngày/tháng, đơn theo trạng thái, top 10 bán chạy, doanh thu theo nhóm hàng, lợi nhuận gộp theo tháng, khách mới; thẻ tổng hợp; xuất Excel đơn hàng + chi tiết (ClosedXML) | ✅ Xong (15/09/2026) |
+| 13 | Kiểm thử, sửa lỗi, responsive, email SMTP, test case | ⏳ Tiếp theo |
+| 14–15 | Viết báo cáo, slide, bảo vệ | |
 
 Đường dẫn storefront: `/`, `/danh-muc/{slug}`, `/tim-kiem?q=`, `/hang-moi-ve`, `/sale`, `/san-pham/{slug}`, `/gio-hang`, `/thanh-toan`, `/tra-cuu-don-hang`, `/tin-tuc`, `/tuyen-dung`, `/he-thong-cua-hang`, `/lien-he`, `/dang-nhap`, `/dang-ky`.
 Đường dẫn tài khoản khách: `/tai-khoan`, `/tai-khoan/doi-mat-khau`, `/tai-khoan/dia-chi`, `/tai-khoan/don-hang`, `/tai-khoan/don-hang/{code}`, `/tai-khoan/yeu-thich`.
-Đường dẫn quản trị: `/Admin/dang-nhap`, `/Admin` (Dashboard), `/Admin/Products`, `/Admin/Products/Variants/{id}`, `/Admin/Categories`, `/Admin/Colors`, `/Admin/Sizes`, `/Admin/Orders`, `/Admin/Orders/Details/{id}`, `/Admin/Orders/Print/{id}`, `/Admin/Suppliers`, `/Admin/GoodsReceipts`, `/Admin/GoodsReceipts/Edit/{id}`, `/Admin/Inventory`, `/Admin/Inventory/History`.
+Đường dẫn quản trị: `/Admin/dang-nhap`, `/Admin` (Dashboard), `/Admin/Products`, `/Admin/Products/Variants/{id}`, `/Admin/Categories`, `/Admin/Colors`, `/Admin/Sizes`, `/Admin/Orders`, `/Admin/Orders/Details/{id}`, `/Admin/Orders/Print/{id}`, `/Admin/Suppliers`, `/Admin/GoodsReceipts`, `/Admin/GoodsReceipts/Edit/{id}`, `/Admin/Inventory`, `/Admin/Inventory/History`, `/Admin/Promotions`, `/Admin/Coupons`, `/Admin/Reviews`, `/Admin/Posts`, `/Admin/Banners`, `/Admin/Contacts`, `/Admin/Stores`, `/Admin/Customers`, `/Admin/Employees`, `/Admin/Settings`, `/Admin/Reports`, `/Admin/Reports/Export?from=&to=`.
+
+Phân quyền Admin: Employee dùng được Sản phẩm, Đơn hàng, Kho, Đánh giá, Liên hệ, xem Khách hàng. Chỉ Admin: Danh mục, Màu/Size, Khuyến mãi, Mã giảm giá, Tin tức, Banner, Cửa hàng, Nhân viên, Báo cáo, Cấu hình, khóa khách hàng.
+
+Ghi chú báo cáo: doanh thu tính theo đơn **Hoàn thành** tại mốc `CompletedAt`; lợi nhuận gộp = Σ(UnitPrice − CostPrice hiện tại của biến thể) × SL (giá vốn không lưu snapshot theo đơn, nêu trong phần hạn chế của báo cáo).
 
 Dịch vụ nghiệp vụ (`Services/`): `PricingService` (giá khuyến mãi), `PromotionService` (mã giảm giá), `CartService`, `OrderService` (đặt hàng trong transaction), `CatalogService` (lọc/sắp xếp/thẻ sản phẩm), `SettingService` (cấu hình có cache), `FileStorageService`, `LogEmailSender` (email ghi log, thay bằng SMTP ở tuần 13).
 

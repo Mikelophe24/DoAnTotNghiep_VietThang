@@ -1,0 +1,28 @@
+@model SettingsFormViewModel
+@{
+    ViewData["Title"] = "Cấu hình hệ thống";
+}
+<h1 class="h4 mb-3">Cấu hình hệ thống</h1>
+<form asp-action="Index" method="post" class="card" style="max-width:720px">
+    <div class="card-body">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
+        <h2 class="h6 text-muted">Thông tin cửa hàng</h2>
+        <div class="mb-3"><label asp-for="StoreName" class="form-label required"></label><input asp-for="StoreName" class="form-control" /><span asp-validation-for="StoreName" class="text-danger small"></span></div>
+        <div class="row">
+            <div class="col-md-6 mb-3"><label asp-for="Hotline" class="form-label required"></label><input asp-for="Hotline" class="form-control" /><span asp-validation-for="Hotline" class="text-danger small"></span></div>
+            <div class="col-md-6 mb-3"><label asp-for="Email" class="form-label"></label><input asp-for="Email" class="form-control" /><span asp-validation-for="Email" class="text-danger small"></span></div>
+        </div>
+        <hr />
+        <h2 class="h6 text-muted">Vận chuyển & kho</h2>
+        <div class="row">
+            <div class="col-md-4 mb-3"><label asp-for="DefaultShippingFee" class="form-label"></label><input asp-for="DefaultShippingFee" type="number" min="0" step="1000" class="form-control" /></div>
+            <div class="col-md-4 mb-3"><label asp-for="FreeShippingThreshold" class="form-label"></label><input asp-for="FreeShippingThreshold" type="number" min="0" step="10000" class="form-control" /></div>
+            <div class="col-md-4 mb-3"><label asp-for="LowStockThreshold" class="form-label"></label><input asp-for="LowStockThreshold" type="number" min="0" class="form-control" /></div>
+        </div>
+        <hr />
+        <h2 class="h6 text-muted">Thanh toán</h2>
+        <div class="mb-0"><label asp-for="BankAccount" class="form-label"></label><textarea asp-for="BankAccount" class="form-control" rows="2"></textarea><div class="form-text">Hiển thị cho khách chọn chuyển khoản.</div></div>
+    </div>
+    <div class="card-footer"><button class="btn btn-primary"><i class="bi bi-check-lg"></i> Lưu cấu hình</button></div>
+</form>
+@section Scripts { <partial name="/Views/Shared/_ValidationScriptsPartial.cshtml" /> }

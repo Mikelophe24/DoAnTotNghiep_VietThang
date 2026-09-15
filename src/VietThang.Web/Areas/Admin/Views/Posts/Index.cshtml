@@ -1,0 +1,41 @@
+@model PagedList<Post>
+@{
+    ViewData["Title"] = "Tin tức & tuyển dụng";
+    PostType? type = ViewBag.Type;
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Tin tức & tuyển dụng</h1>
+    <div class="d-flex gap-2">
+        <a class="btn btn-primary" asp-action="Create" asp-route-type="1"><i class="bi bi-plus-lg"></i> Viết tin tức</a>
+        <a class="btn btn-outline-primary" asp-action="Create" asp-route-type="2"><i class="bi bi-plus-lg"></i> Đăng tuyển dụng</a>
+    </div>
+</div>
+<ul class="nav nav-pills mb-3 gap-1">
+    <li class="nav-item"><a class="nav-link @(type is null ? "active" : "")" asp-action="Index">Tất cả</a></li>
+    <li class="nav-item"><a class="nav-link @(type == PostType.News ? "active" : "")" asp-action="Index" asp-route-type="1">Tin tức</a></li>
+    <li class="nav-item"><a class="nav-link @(type == PostType.Recruitment ? "active" : "")" asp-action="Index" asp-route-type="2">Tuyển dụng</a></li>
+</ul>
+<div class="card">
+    <table class="table table-hover mb-0 align-middle">
+        <thead class="table-light"><tr><th style="width:70px"></th><th>Tiêu đề</th><th>Loại</th><th>Tác giả</th><th>Ngày</th><th class="text-center">Trạng thái</th><th class="text-end" style="width:130px"></th></tr></thead>
+        <tbody>
+        @foreach (var p in Model.Items)
+        {
+            <tr>
+                <td><img src="@(p.ThumbnailUrl ?? "/images/banners/banner-1.svg")" class="thumb-sm" style="height:44px" alt="" /></td>
+                <td><a asp-action="Edit" asp-route-id="@p.Id" class="fw-semibold">@p.Title</a><div class="small text-muted"><code>@p.Slug</code></div></td>
+                <td><span class="badge @(p.Type == PostType.News ? "bg-info text-dark" : "bg-primary")">@p.Type.ToDisplay()</span></td>
+                <td class="small">@p.Author?.FullName</td>
+                <td class="small">@((p.PublishedAt ?? p.CreatedAt).ToString("dd/MM/yyyy"))</td>
+                <td class="text-center"><span class="badge @(p.IsPublished ? "bg-success" : "bg-secondary")">@(p.IsPublished ? "Đã đăng" : "Nháp")</span></td>
+                <td class="text-end">
+                    @if (p.IsPublished) { <a class="btn btn-sm btn-outline-secondary" asp-area="" asp-controller="Posts" asp-action="Details" asp-route-slug="@p.Slug" target="_blank" title="Xem"><i class="bi bi-eye"></i></a> }
+                    <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@p.Id"><i class="bi bi-pencil"></i></a>
+                    <form asp-action="Delete" asp-route-id="@p.Id" method="post" class="d-inline" data-confirm="Xóa bài '@p.Title'?"><button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button></form>
+                </td>
+            </tr>
+        }
+        @if (!Model.Items.Any()) { <tr><td colspan="7" class="text-center text-muted py-4">Chưa có bài viết.</td></tr> }
+        </tbody>
+    </table>
+</div>

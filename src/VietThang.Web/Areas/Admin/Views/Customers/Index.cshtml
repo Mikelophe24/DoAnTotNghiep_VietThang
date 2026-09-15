@@ -1,0 +1,38 @@
+@model PagedList<CustomerListItem>
+@{
+    ViewData["Title"] = "Khách hàng";
+}
+<h1 class="h4 mb-3">Khách hàng <span class="badge bg-secondary">@Model.TotalCount</span></h1>
+<form method="get" class="card card-body mb-3">
+    <div class="input-group" style="max-width:460px">
+        <input name="q" value="@ViewBag.Q" class="form-control" placeholder="Tìm theo tên, email, điện thoại" />
+        <button class="btn btn-outline-primary"><i class="bi bi-search"></i></button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Xóa</a>
+    </div>
+</form>
+<div class="card">
+    <table class="table table-hover mb-0 align-middle">
+        <thead class="table-light"><tr><th>Khách hàng</th><th>Liên hệ</th><th>Ngày đăng ký</th><th class="text-center">Đơn</th><th class="text-end">Đã chi tiêu</th><th class="text-center">Trạng thái</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var c in Model.Items)
+        {
+            <tr>
+                <td><a asp-action="Details" asp-route-id="@c.Id" class="fw-semibold">@c.FullName</a></td>
+                <td class="small">@c.Email<br />@c.Phone</td>
+                <td class="small">@c.CreatedAt.ToString("dd/MM/yyyy")</td>
+                <td class="text-center">@c.OrderCount</td>
+                <td class="text-end">@c.TotalSpent.ToString("N0") đ</td>
+                <td class="text-center"><span class="badge @(c.IsActive ? "bg-success" : "bg-danger")">@(c.IsActive ? "Hoạt động" : "Bị khóa")</span></td>
+                <td class="text-end"><a class="btn btn-sm btn-outline-secondary" asp-action="Details" asp-route-id="@c.Id"><i class="bi bi-eye"></i></a></td>
+            </tr>
+        }
+        @if (!Model.Items.Any()) { <tr><td colspan="7" class="text-center text-muted py-4">Không có khách hàng.</td></tr> }
+        </tbody>
+    </table>
+    @if (Model.TotalPages > 1)
+    {
+        <div class="card-footer"><ul class="pagination pagination-sm mb-0 justify-content-end">
+            @for (int i = 1; i <= Model.TotalPages; i++) { <li class="page-item @(i == Model.PageIndex ? "active" : "")"><a class="page-link" href="@Context.Request.WithPage(i)">@i</a></li> }
+        </ul></div>
+    }
+</div>

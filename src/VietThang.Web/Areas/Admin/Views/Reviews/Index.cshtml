@@ -1,0 +1,42 @@
+@model PagedList<Review>
+@{
+    ViewData["Title"] = "Đánh giá sản phẩm";
+    bool? approved = ViewBag.Approved;
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Đánh giá sản phẩm</h1>
+    <ul class="nav nav-pills gap-1">
+        <li class="nav-item"><a class="nav-link @(approved is null ? "active" : "")" asp-action="Index">Tất cả</a></li>
+        <li class="nav-item"><a class="nav-link @(approved == false ? "active" : "")" asp-action="Index" asp-route-approved="false">Chờ duyệt <span class="badge bg-warning text-dark">@ViewBag.PendingCount</span></a></li>
+        <li class="nav-item"><a class="nav-link @(approved == true ? "active" : "")" asp-action="Index" asp-route-approved="true">Đã duyệt</a></li>
+    </ul>
+</div>
+<div class="card">
+    <table class="table table-hover mb-0 align-middle">
+        <thead class="table-light"><tr><th>Sản phẩm</th><th>Khách hàng</th><th>Đánh giá</th><th>Thời gian</th><th class="text-center">Trạng thái</th><th class="text-end" style="width:130px"></th></tr></thead>
+        <tbody>
+        @foreach (var r in Model.Items)
+        {
+            <tr>
+                <td><a asp-area="" asp-controller="Products" asp-action="Details" asp-route-slug="@r.Product.Slug" target="_blank">@r.Product.Name</a></td>
+                <td>@r.User.FullName<div class="small text-muted">@r.User.Email</div></td>
+                <td><div class="text-warning small">@for (int i = 1; i <= 5; i++) { <i class="bi @(i <= r.Rating ? "bi-star-fill" : "bi-star")"></i> }</div><div class="small">@r.Comment</div></td>
+                <td class="small text-nowrap">@r.CreatedAt.ToString("HH:mm dd/MM/yyyy")</td>
+                <td class="text-center"><span class="badge @(r.IsApproved ? "bg-success" : "bg-warning text-dark")">@(r.IsApproved ? "Đã duyệt" : "Chờ duyệt")</span></td>
+                <td class="text-end">
+                    <form asp-action="Toggle" asp-route-id="@r.Id" asp-route-returnUrl="@returnUrl" method="post" class="d-inline"><button class="btn btn-sm @(r.IsApproved ? "btn-outline-secondary" : "btn-success")" title="@(r.IsApproved ? "Ẩn" : "Duyệt")"><i class="bi @(r.IsApproved ? "bi-eye-slash" : "bi-check-lg")"></i></button></form>
+                    <form asp-action="Delete" asp-route-id="@r.Id" asp-route-returnUrl="@returnUrl" method="post" class="d-inline" data-confirm="Xóa đánh giá này?"><button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button></form>
+                </td>
+            </tr>
+        }
+        @if (!Model.Items.Any()) { <tr><td colspan="6" class="text-center text-muted py-4">Không có đánh giá.</td></tr> }
+        </tbody>
+    </table>
+    @if (Model.TotalPages > 1)
+    {
+        <div class="card-footer"><ul class="pagination pagination-sm mb-0 justify-content-end">
+            @for (int i = 1; i <= Model.TotalPages; i++) { <li class="page-item @(i == Model.PageIndex ? "active" : "")"><a class="page-link" href="@Context.Request.WithPage(i)">@i</a></li> }
+        </ul></div>
+    }
+</div>

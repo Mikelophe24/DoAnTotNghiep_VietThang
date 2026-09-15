@@ -1,0 +1,25 @@
+@model EmployeeFormViewModel
+@{
+    var isEdit = !string.IsNullOrEmpty(Model.Id);
+    ViewData["Title"] = isEdit ? "Sửa tài khoản nhân viên" : "Thêm tài khoản nhân viên";
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">@ViewData["Title"]</h1>
+    <a class="btn btn-outline-secondary" asp-action="Index"><i class="bi bi-arrow-left"></i> Quay lại</a>
+</div>
+<form asp-action="@(isEdit ? "Edit" : "Create")" method="post" class="card" style="max-width:640px" autocomplete="off">
+    <div class="card-body">
+        <input type="hidden" asp-for="Id" />
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
+        <div class="mb-3"><label asp-for="FullName" class="form-label required"></label><input asp-for="FullName" class="form-control" /><span asp-validation-for="FullName" class="text-danger small"></span></div>
+        <div class="mb-3"><label asp-for="Email" class="form-label required"></label><input asp-for="Email" class="form-control" autocomplete="off" /><span asp-validation-for="Email" class="text-danger small"></span></div>
+        <div class="mb-3"><label asp-for="PhoneNumber" class="form-label"></label><input asp-for="PhoneNumber" class="form-control" /><span asp-validation-for="PhoneNumber" class="text-danger small"></span></div>
+        <div class="mb-3"><label asp-for="Role" class="form-label"></label>
+            <select asp-for="Role" class="form-select"><option value="Employee">Nhân viên</option><option value="Admin">Quản trị viên</option></select></div>
+        <div class="mb-3"><label asp-for="Password" class="form-label @(isEdit ? "" : "required")"></label><input asp-for="Password" class="form-control" autocomplete="new-password" /><span asp-validation-for="Password" class="text-danger small"></span>
+            <div class="form-text">Tối thiểu 8 ký tự, có chữ hoa, chữ thường và số.</div></div>
+        <div class="form-check"><input asp-for="IsActive" class="form-check-input" /><label asp-for="IsActive" class="form-check-label"></label></div>
+    </div>
+    <div class="card-footer"><button class="btn btn-primary"><i class="bi bi-check-lg"></i> Lưu</button></div>
+</form>
+@section Scripts { <partial name="/Views/Shared/_ValidationScriptsPartial.cshtml" /> }
