@@ -9,6 +9,32 @@
 | `04b-migration-script.sql` | Script sinh tự động từ EF Core Migration (bản đang chạy thực tế, 34 bảng gồm 7 bảng Identity) | Phụ lục |
 | `05-kien-truc-he-thong.md` | Kiến trúc, cấu trúc solution, phân quyền, máy trạng thái đơn, sitemap, báo cáo, bảo mật | Chương 4 |
 
+## Giao diện khách hàng bằng Angular (từ 15/09/2026)
+
+Quyết định: **Angular 18 cho storefront (khách hàng), Admin giữ Razor**. Backend bổ sung **REST API + JWT** trong cùng project `VietThang.Web`:
+
+| Thành phần | Vị trí | Ghi chú |
+|---|---|---|
+| REST API | `src/VietThang.Web/Controllers/Api/*ApiController.cs` | `/api/catalog`, `/api/auth`, `/api/cart`, `/api/checkout`, `/api/account`, `/api/content`; `[ApiController]`, `[IgnoreAntiforgeryToken]`, JSON camelCase |
+| JWT | `Services/IJwtTokenService.cs`, cấu hình `Jwt` trong `appsettings.json` | Scheme `Bearer` chỉ dùng cho API; Admin Razor vẫn dùng cookie Identity |
+| CORS | `Cors:Origins` trong `appsettings.json` | Mặc định `http://localhost:4200` |
+| Angular app | `src/vietthang-web/` | Standalone components, signals, lazy routes, Reactive Forms, HttpClient + interceptor JWT, guard `/tai-khoan` |
+| Proxy dev | `src/vietthang-web/proxy.conf.json` | Chuyển `/api`, `/images`, `/uploads` sang `http://localhost:5292` |
+
+Giỏ hàng khách vãng lai lưu `localStorage`, tính giá qua `POST /api/cart/quote`; khi đăng nhập, giỏ được gộp lên CSDL qua `POST /api/cart/merge`. Đặt hàng: `POST /api/checkout` (khách vãng lai gửi `items`, khách đăng nhập dùng giỏ CSDL).
+
+Chạy song song hai server:
+
+```bash
+# Terminal 1 – backend (API + Admin Razor) tại http://localhost:5292
+cd src/VietThang.Web && dotnet run
+
+# Terminal 2 – Angular storefront tại http://localhost:4200
+cd src/vietthang-web && npm start
+```
+
+Storefront Razor cũ (`/`, `/danh-muc/...` trên cổng 5292) vẫn chạy và có thể dùng làm bản so sánh; Admin ở `http://localhost:5292/Admin`.
+
 ## Chạy dự án
 
 ```powershell

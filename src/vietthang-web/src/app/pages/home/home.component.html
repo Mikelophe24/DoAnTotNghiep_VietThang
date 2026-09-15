@@ -1,0 +1,110 @@
+@if (error()) {
+  <div class="container mt-4"><div class="alert alert-danger">{{ error() }}</div></div>
+} @else if (!data()) {
+  <div class="container mt-3">
+    <div class="skeleton" style="aspect-ratio:8/3"></div>
+    <div class="row g-3 mt-2">@for (i of [1,2,3,4]; track i) { <div class="col-6 col-md-3"><div class="skeleton" style="aspect-ratio:3/4"></div></div> }</div>
+  </div>
+} @else {
+  @if (data()!.banners.length) {
+    <section class="container mt-3">
+      <div id="heroCarousel" class="carousel slide hero-carousel" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+          @for (b of data()!.banners; track b.id; let i = $index) {
+            <button type="button" data-bs-target="#heroCarousel" [attr.data-bs-slide-to]="i" [class.active]="i === 0"></button>
+          }
+        </div>
+        <div class="carousel-inner rounded-3">
+          @for (b of data()!.banners; track b.id; let i = $index) {
+            <div class="carousel-item" [class.active]="i === 0">
+              <a [routerLink]="b.linkUrl || '/'"><img [src]="b.imageUrl" class="d-block w-100" [alt]="b.title" /></a>
+            </div>
+          }
+        </div>
+        @if (data()!.banners.length > 1) {
+          <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
+          <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
+        }
+      </div>
+    </section>
+  }
+
+  <section class="container mt-4">
+    <div class="row g-3">
+      <div class="col-6 col-md-3"><div class="usp"><i class="bi bi-truck"></i><div><strong>Freeship</strong><br /><small>Đơn từ {{ data()!.freeShippingThreshold | number:'1.0-0' }} đ</small></div></div></div>
+      <div class="col-6 col-md-3"><div class="usp"><i class="bi bi-arrow-repeat"></i><div><strong>Đổi size 7 ngày</strong><br /><small>Tại cửa hàng hoặc qua ship</small></div></div></div>
+      <div class="col-6 col-md-3"><div class="usp"><i class="bi bi-patch-check"></i><div><strong>Chất liệu lanh, cotton</strong><br /><small>Sản xuất tại xưởng Việt Thắng</small></div></div></div>
+      <div class="col-6 col-md-3"><div class="usp"><i class="bi bi-headset"></i><div><strong>Hotline 1800 6468 59</strong><br /><small>8:30 – 21:30 hằng ngày</small></div></div></div>
+    </div>
+  </section>
+
+  <section class="container mt-5">
+    <h2 class="section-title">Mua sắm theo nhóm</h2>
+    <div class="row g-3">
+      @for (c of data()!.categories; track c.id) {
+        <div class="col-6 col-md-3">
+          <a class="cat-tile" [routerLink]="['/danh-muc', c.slug]">
+            <img [src]="c.imageUrl || '/images/products/placeholder.svg'" [alt]="c.name" loading="lazy" />
+            <span class="cat-tile-name">{{ c.name }}</span>
+          </a>
+        </div>
+      }
+    </div>
+  </section>
+
+  @if (data()!.newProducts.length) {
+    <section class="container mt-5">
+      <div class="d-flex justify-content-between align-items-end mb-3">
+        <h2 class="section-title mb-0">Hàng mới về</h2>
+        <a class="link-more" routerLink="/hang-moi-ve">Xem tất cả →</a>
+      </div>
+      <div class="row g-3 row-cols-2 row-cols-md-4">
+        @for (p of data()!.newProducts; track p.id) { <div class="col"><app-product-card [p]="p" /></div> }
+      </div>
+    </section>
+  }
+
+  @if (data()!.saleProducts.length) {
+    <section class="container mt-5">
+      <div class="d-flex justify-content-between align-items-end mb-3">
+        <h2 class="section-title mb-0 text-danger">Đang khuyến mãi</h2>
+        <a class="link-more" routerLink="/sale">Xem tất cả →</a>
+      </div>
+      <div class="row g-3 row-cols-2 row-cols-md-4">
+        @for (p of data()!.saleProducts; track p.id) { <div class="col"><app-product-card [p]="p" /></div> }
+      </div>
+    </section>
+  }
+
+  @if (data()!.bestSellers.length) {
+    <section class="container mt-5">
+      <h2 class="section-title">Bán chạy nhất</h2>
+      <div class="row g-3 row-cols-2 row-cols-md-4">
+        @for (p of data()!.bestSellers; track p.id) { <div class="col"><app-product-card [p]="p" /></div> }
+      </div>
+    </section>
+  }
+
+  @if (data()!.posts.length) {
+    <section class="container mt-5">
+      <div class="d-flex justify-content-between align-items-end mb-3">
+        <h2 class="section-title mb-0">Tin tức</h2>
+        <a class="link-more" routerLink="/tin-tuc">Xem tất cả →</a>
+      </div>
+      <div class="row g-3">
+        @for (post of data()!.posts; track post.id) {
+          <div class="col-md-4">
+            <a class="post-card" [routerLink]="['/tin-tuc', post.slug]">
+              <img [src]="post.thumbnailUrl || '/images/banners/banner-1.svg'" [alt]="post.title" loading="lazy" />
+              <div class="post-card-body">
+                <div class="small text-muted">{{ post.publishedAt | date:'dd/MM/yyyy' }}</div>
+                <h3 class="h6 mb-1">{{ post.title }}</h3>
+                <p class="small text-muted mb-0">{{ post.summary }}</p>
+              </div>
+            </a>
+          </div>
+        }
+      </div>
+    </section>
+  }
+}

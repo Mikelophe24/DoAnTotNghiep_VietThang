@@ -12,7 +12,10 @@ public record PlaceOrderResult(bool Success, string? OrderCode, string? Error);
 /// <summary>Đặt hàng (UC-03): tạo đơn, trừ tồn, ghi nhật ký kho trong một transaction.</summary>
 public interface IOrderService
 {
+    /// <summary>Đặt hàng từ giỏ hiện tại (session/CSDL) – dùng cho Razor storefront.</summary>
     Task<PlaceOrderResult> PlaceOrderAsync(CheckoutViewModel model, string? userId);
+    /// <summary>Đặt hàng từ một CartSummary đã tính sẵn – dùng cho API (giỏ khách vãng lai gửi từ Angular).</summary>
+    Task<PlaceOrderResult> PlaceOrderFromSummaryAsync(CheckoutViewModel model, string? userId, CartSummary summary);
     Task<string> GenerateOrderCodeAsync();
     /// <summary>Chuyển trạng thái đơn theo máy trạng thái; hủy thì hoàn tồn, hoàn thành thì đánh dấu đã thanh toán.</summary>
     Task<(bool Success, string Message)> ChangeStatusAsync(int orderId, OrderStatus to, string? note, string? actorUserId);
@@ -82,6 +85,17 @@ public class OrderService : IOrderService
     public async Task<PlaceOrderResult> PlaceOrderAsync(CheckoutViewModel model, string? userId)
     {
         var summary = await _cart.GetSummaryAsync();
+        var result = await PlaceOrderFromSummaryAsync(model, userId, summary);
+        if (result.Success)
+        {
+            await _cart.ClearAsync();
+            _cart.SetCouponCode(null);
+        }
+        return result;
+    }
+
+    public async Task<PlaceOrderResult> PlaceOrderFromSummaryAsync(CheckoutViewModel model, string? userId, CartSummary summary)
+    {
         if (summary.IsEmpty) return new PlaceOrderResult(false, null, "Giỏ hàng của bạn đang trống.");
 
         var unavailable = summary.Lines.FirstOrDefault(l => !l.IsAvailable);
@@ -177,9 +191,6 @@ public class OrderService : IOrderService
             await _db.SaveChangesAsync();
 
             await tx.CommitAsync();
-
-            await _cart.ClearAsync();
-            _cart.SetCouponCode(null);
 
             try { await _email.SendAsync(order.Email, $"[Việt Thắng] Xác nhận đơn hàng {order.OrderCode}", BuildEmail(order)); }
             catch (Exception ex) { _logger.LogWarning(ex, "Không gửi được email xác nhận đơn {Code}", order.OrderCode); }

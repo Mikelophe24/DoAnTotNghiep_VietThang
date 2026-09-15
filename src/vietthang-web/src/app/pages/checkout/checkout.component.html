@@ -1,0 +1,99 @@
+<div class="container mt-3">
+  <h1 class="h4 mb-3">Thanh toán</h1>
+  @let s = cart.summary();
+  @if (s && !s.isEmpty) {
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <div class="bg-white border rounded p-4 mb-4">
+          <h2 class="h6 mb-3">Thông tin giao hàng</h2>
+
+          @if (addresses().length) {
+            <div class="mb-3">
+              <label class="form-label small text-muted">Chọn địa chỉ đã lưu</label>
+              <select class="form-select" (change)="onAddressSelect($event)">
+                <option value="">— Nhập địa chỉ mới —</option>
+                @for (a of addresses(); track a.id) {
+                  <option [value]="a.id" [selected]="a.isDefault">{{ a.receiverName }} · {{ a.phone }} · {{ a.street }}, {{ a.ward }}, {{ a.district }}, {{ a.province }}{{ a.isDefault ? ' (mặc định)' : '' }}</option>
+                }
+              </select>
+            </div>
+          }
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label required">Họ và tên người nhận</label>
+              <input class="form-control" formControlName="customerName" [class.is-invalid]="invalid('customerName')" />
+              <div class="invalid-feedback">Nhập họ tên người nhận</div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label required">Số điện thoại</label>
+              <input class="form-control" formControlName="phone" [class.is-invalid]="invalid('phone')" />
+              <div class="invalid-feedback">Số điện thoại không hợp lệ</div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email (nhận xác nhận đơn)</label>
+            <input class="form-control" formControlName="email" [class.is-invalid]="invalid('email')" />
+            <div class="invalid-feedback">Email không hợp lệ</div>
+          </div>
+          <div class="row">
+            <div class="col-md-4 mb-3"><label class="form-label required">Tỉnh / Thành phố</label><input class="form-control" formControlName="province" placeholder="Hà Nội" [class.is-invalid]="invalid('province')" /><div class="invalid-feedback">Nhập tỉnh / thành phố</div></div>
+            <div class="col-md-4 mb-3"><label class="form-label required">Quận / Huyện</label><input class="form-control" formControlName="district" placeholder="Cầu Giấy" [class.is-invalid]="invalid('district')" /><div class="invalid-feedback">Nhập quận / huyện</div></div>
+            <div class="col-md-4 mb-3"><label class="form-label required">Phường / Xã</label><input class="form-control" formControlName="ward" placeholder="Dịch Vọng" [class.is-invalid]="invalid('ward')" /><div class="invalid-feedback">Nhập phường / xã</div></div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label required">Số nhà, tên đường</label>
+            <input class="form-control" formControlName="street" placeholder="Số 12, ngõ 34 Trần Thái Tông" [class.is-invalid]="invalid('street')" />
+            <div class="invalid-feedback">Nhập số nhà, tên đường</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Ghi chú cho cửa hàng</label>
+            <textarea class="form-control" formControlName="note" rows="2" placeholder="Ví dụ: giao giờ hành chính, gọi trước khi giao"></textarea>
+          </div>
+          @if (auth.isLoggedIn()) {
+            <div class="form-check"><input class="form-check-input" type="checkbox" id="saveAddress" formControlName="saveAddress" /><label class="form-check-label" for="saveAddress">Lưu địa chỉ này cho lần sau</label></div>
+          }
+        </div>
+
+        <div class="bg-white border rounded p-4">
+          <h2 class="h6 mb-3">Phương thức thanh toán</h2>
+          <div class="payment-option" [class.selected]="form.value.paymentMethod == 1" (click)="setPayment(1)">
+            <i class="bi bi-cash-coin"></i> <strong>Thanh toán khi nhận hàng (COD)</strong><br /><small class="text-muted">Kiểm tra hàng rồi thanh toán cho nhân viên giao hàng.</small>
+          </div>
+          <div class="payment-option" [class.selected]="form.value.paymentMethod == 2" (click)="setPayment(2)">
+            <i class="bi bi-bank"></i> <strong>Chuyển khoản ngân hàng</strong><br /><small class="text-muted">{{ bankAccount() }}. Nội dung: mã đơn hàng. Đơn được xử lý sau khi nhận tiền.</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <div class="bg-white border rounded p-3 summary-box">
+          <h2 class="h6 mb-3">Đơn hàng ({{ s.totalQuantity }} sản phẩm)</h2>
+          <ul class="list-unstyled checkout-items">
+            @for (l of s.lines; track l.variantId) {
+              <li class="d-flex gap-2 align-items-center">
+                <img [src]="l.imageUrl || '/images/products/placeholder.svg'" class="cart-thumb" alt="" />
+                <div class="flex-grow-1"><div class="small fw-semibold">{{ l.productName }}</div><div class="small text-muted">{{ l.colorName }} / {{ l.sizeName }} × {{ l.quantity }}</div></div>
+                <div class="small fw-semibold text-nowrap">{{ l.lineTotal | vnd }}</div>
+              </li>
+            }
+          </ul>
+          <dl class="summary-list mt-3">
+            <dt>Tiền hàng</dt><dd>{{ s.subTotal | vnd }}</dd>
+            <dt>Phí vận chuyển</dt><dd>{{ s.shippingFee === 0 ? 'Miễn phí' : (s.shippingFee | vnd) }}</dd>
+            @if (s.discountAmount > 0) { <dt>Giảm giá ({{ s.coupon?.code }})</dt><dd class="text-success">−{{ s.discountAmount | vnd }}</dd> }
+            <dt class="total">Tổng thanh toán</dt><dd class="total">{{ s.total | vnd }}</dd>
+          </dl>
+          <button type="submit" class="btn btn-brand btn-lg w-100" [disabled]="submitting()">
+            @if (submitting()) { <span class="spinner-border spinner-border-sm"></span> Đang đặt hàng... } @else { <i class="bi bi-check2-circle"></i> Đặt hàng }
+          </button>
+          <div class="small text-muted mt-2 text-center">Bằng việc đặt hàng, bạn đồng ý với chính sách đổi trả của cửa hàng.</div>
+        </div>
+      </div>
+    </div>
+  </form>
+  } @else {
+    <div class="skeleton" style="height:200px"></div>
+  }
+</div>

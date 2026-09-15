@@ -1,0 +1,108 @@
+<div class="container mt-3">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb small">
+      <li class="breadcrumb-item"><a routerLink="/">Trang chủ</a></li>
+      @if (data()?.category?.parent; as parent) { <li class="breadcrumb-item"><a [routerLink]="['/danh-muc', parent.slug]">{{ parent.name }}</a></li> }
+      <li class="breadcrumb-item active">{{ title }}</li>
+    </ol>
+  </nav>
+
+  @if (notFound()) {
+    <div class="alert alert-warning">Không tìm thấy danh mục này.</div>
+  } @else {
+  <div class="row g-4">
+    <aside class="col-lg-3">
+      <div class="filter-panel">
+        @if (data()?.subCategories?.length) {
+          <div class="filter-group">
+            <h6 class="filter-title">Danh mục</h6>
+            <ul class="list-unstyled small mb-0">
+              @for (c of data()!.subCategories; track c.id) {
+                <li><a [routerLink]="['/danh-muc', c.slug]" [class.fw-bold]="data()?.category?.id === c.id" [class.text-brand]="data()?.category?.id === c.id">{{ c.name }}</a></li>
+              }
+            </ul>
+          </div>
+        }
+
+        <div class="filter-group">
+          <h6 class="filter-title">Khoảng giá</h6>
+          @for (r of priceRanges; track r.label) {
+            <label class="form-check small">
+              <input class="form-check-input" type="radio" name="priceRange" [checked]="isPriceRange(r)" (click)="setPriceRange(r)" /> {{ r.label }}
+            </label>
+          }
+        </div>
+
+        @if (filters(); as f) {
+          <div class="filter-group">
+            <h6 class="filter-title">Màu sắc</h6>
+            <div class="d-flex flex-wrap gap-2">
+              @for (c of f.colors; track c.id) {
+                <label class="swatch-check" [title]="c.name">
+                  <input type="checkbox" [checked]="filter.colorIds.includes(c.id)" (change)="toggleId(filter.colorIds, c.id)" />
+                  <span class="swatch" [style.background]="c.hexCode || '#fff'"></span>
+                </label>
+              }
+            </div>
+          </div>
+          <div class="filter-group">
+            <h6 class="filter-title">Kích cỡ</h6>
+            <div class="d-flex flex-wrap gap-2">
+              @for (s of f.sizes; track s.id) {
+                <label class="size-check">
+                  <input type="checkbox" [checked]="filter.sizeIds.includes(s.id)" (change)="toggleId(filter.sizeIds, s.id)" />
+                  <span>{{ s.name }}</span>
+                </label>
+              }
+            </div>
+          </div>
+          @if (f.materials.length) {
+            <div class="filter-group">
+              <h6 class="filter-title">Chất liệu</h6>
+              <select class="form-select form-select-sm" [(ngModel)]="filter.material">
+                <option [ngValue]="null">Tất cả</option>
+                @for (m of f.materials; track m) { <option [ngValue]="m">{{ m }}</option> }
+              </select>
+            </div>
+          }
+        }
+
+        <div class="d-grid gap-2">
+          <button class="btn btn-brand btn-sm" (click)="apply()"><i class="bi bi-funnel"></i> Áp dụng lọc</button>
+          @if (hasFilter) { <button class="btn btn-outline-secondary btn-sm" (click)="clear()">Xóa lọc</button> }
+        </div>
+      </div>
+    </aside>
+
+    <div class="col-lg-9">
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+        <div>
+          <h1 class="h4 mb-0">{{ title }}</h1>
+          @if (data()) { <div class="small text-muted">{{ data()!.products.totalCount }} sản phẩm</div> }
+        </div>
+        <select class="form-select form-select-sm w-auto" [(ngModel)]="filter.sort" (change)="apply()">
+          <option value="newest">Mới nhất</option>
+          <option value="bestseller">Bán chạy</option>
+          <option value="price-asc">Giá tăng dần</option>
+          <option value="price-desc">Giá giảm dần</option>
+        </select>
+      </div>
+      @if (data()?.category?.description; as desc) { <p class="text-muted small">{{ desc }}</p> }
+
+      @if (loading()) {
+        <div class="row g-3 row-cols-2 row-cols-md-3">@for (i of [1,2,3,4,5,6]; track i) { <div class="col"><div class="skeleton" style="aspect-ratio:3/4.6"></div></div> }</div>
+      } @else if (data()!.products.items.length) {
+        <div class="row g-3 row-cols-2 row-cols-md-3">
+          @for (p of data()!.products.items; track p.id) { <div class="col"><app-product-card [p]="p" /></div> }
+        </div>
+        <app-pagination [page]="data()!.products.pageIndex" [totalPages]="data()!.products.totalPages" (pageChange)="apply($event)" />
+      } @else {
+        <div class="text-center text-muted py-5">
+          <i class="bi bi-search fs-1"></i>
+          <p class="mt-2">Không tìm thấy sản phẩm phù hợp. Hãy thử bỏ bớt bộ lọc.</p>
+        </div>
+      }
+    </div>
+  </div>
+  }
+</div>

@@ -1,0 +1,86 @@
+<header class="site-header">
+  <div class="topbar small">
+    <div class="container d-flex justify-content-between">
+      @if (settings$ | async; as s) {
+        <span><i class="bi bi-truck"></i> Miễn phí vận chuyển cho đơn từ {{ s.freeShippingThreshold | number:'1.0-0' }} đ</span>
+        <span><i class="bi bi-telephone"></i> Hotline {{ s.hotline }}</span>
+      } @else {
+        <span><i class="bi bi-truck"></i> Miễn phí vận chuyển cho đơn từ 500.000 đ</span>
+      }
+    </div>
+  </div>
+
+  <div class="container header-main d-flex align-items-center gap-3 py-3">
+    <a class="brand" routerLink="/">
+      <span class="brand-mark">VT</span>
+      <span class="brand-text">Thời trang <strong>Việt Thắng</strong></span>
+    </a>
+    <form class="search-form flex-grow-1" (ngSubmit)="search()" role="search">
+      <div class="input-group">
+        <input type="search" name="q" class="form-control" [(ngModel)]="q" placeholder="Tìm bộ lanh, đồ bộ nữ, đồ trẻ em..." aria-label="Tìm sản phẩm" />
+        <button class="btn btn-brand" type="submit"><i class="bi bi-search"></i></button>
+      </div>
+    </form>
+    <div class="header-actions d-flex align-items-center gap-3">
+      <a class="header-action" routerLink="/tra-cuu-don-hang" title="Tra cứu đơn hàng"><i class="bi bi-box-seam"></i><span class="d-none d-lg-inline"> Tra cứu đơn</span></a>
+
+      @if (auth.user(); as u) {
+        <div class="dropdown">
+          <button class="header-action dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-person-circle"></i><span class="d-none d-lg-inline"> {{ u.fullName }}</span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" routerLink="/tai-khoan"><i class="bi bi-person"></i> Hồ sơ của tôi</a></li>
+            <li><a class="dropdown-item" routerLink="/tai-khoan/don-hang"><i class="bi bi-receipt"></i> Đơn hàng của tôi</a></li>
+            <li><a class="dropdown-item" routerLink="/tai-khoan/dia-chi"><i class="bi bi-geo-alt"></i> Sổ địa chỉ</a></li>
+            <li><a class="dropdown-item" routerLink="/tai-khoan/yeu-thich"><i class="bi bi-heart"></i> Yêu thích</a></li>
+            @if (isStaff()) {
+              <li><hr class="dropdown-divider" /></li>
+              <li><a class="dropdown-item" href="http://localhost:5292/Admin" target="_blank"><i class="bi bi-speedometer2"></i> Trang quản trị</a></li>
+            }
+            <li><hr class="dropdown-divider" /></li>
+            <li><button class="dropdown-item" (click)="logout()"><i class="bi bi-box-arrow-right"></i> Đăng xuất</button></li>
+          </ul>
+        </div>
+      } @else {
+        <a class="header-action" routerLink="/dang-nhap"><i class="bi bi-person"></i><span class="d-none d-lg-inline"> Đăng nhập</span></a>
+      }
+
+      <a class="header-action position-relative" routerLink="/gio-hang" title="Giỏ hàng">
+        <i class="bi bi-bag"></i><span class="d-none d-lg-inline"> Giỏ hàng</span>
+        @if (cart.count() > 0) { <span class="cart-badge">{{ cart.count() }}</span> }
+      </a>
+    </div>
+  </div>
+
+  <nav class="navbar navbar-expand-lg main-navbar">
+    <div class="container">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Mở menu">
+        <span class="navbar-toggler-icon"></span> <span class="small">Danh mục</span>
+      </button>
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav main-nav">
+          <li class="nav-item"><a class="nav-link" routerLink="/hang-moi-ve" routerLinkActive="active"><i class="bi bi-stars text-warning"></i> Hàng mới về</a></li>
+          @for (c of menu$ | async; track c.id) {
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" [routerLink]="['/danh-muc', c.slug]" data-bs-toggle="dropdown" data-bs-auto-close="outside">{{ c.name }}</a>
+              @if (c.children.length) {
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item fw-semibold" [routerLink]="['/danh-muc', c.slug]">Tất cả {{ c.name.toLowerCase() }}</a></li>
+                  <li><hr class="dropdown-divider" /></li>
+                  @for (ch of c.children; track ch.id) {
+                    <li><a class="dropdown-item" [routerLink]="['/danh-muc', ch.slug]">{{ ch.name }}</a></li>
+                  }
+                </ul>
+              }
+            </li>
+          }
+          <li class="nav-item"><a class="nav-link text-danger fw-semibold" routerLink="/sale" routerLinkActive="active">Sale</a></li>
+          <li class="nav-item"><a class="nav-link" routerLink="/he-thong-cua-hang" routerLinkActive="active">Cửa hàng</a></li>
+          <li class="nav-item"><a class="nav-link" routerLink="/tin-tuc" routerLinkActive="active">Tin tức</a></li>
+          <li class="nav-item"><a class="nav-link" routerLink="/tuyen-dung" routerLinkActive="active">Tuyển dụng</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>

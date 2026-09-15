@@ -1,8 +1,12 @@
 using System.Globalization;
+using System.Text;
+using System.Text.Json.Serialization;
 using Ganss.Xss;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using VietThang.Web.Data;
 using VietThang.Web.Models.Entities;
 using VietThang.Web.Services;
@@ -53,6 +57,28 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddAntiforgery(options => options.HeaderName = "RequestVerificationToken");
 builder.Services.AddMemoryCache();
 
+// ---------- JWT cho REST API (Angular storefront) – cookie Identity vẫn là scheme mặc định cho Razor ----------
+var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Thiếu cấu hình Jwt:Key trong appsettings.json");
+builder.Services.AddAuthentication().AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+        ClockSkew = TimeSpan.FromMinutes(1)
+    };
+});
+
+// ---------- CORS cho Angular dev server ----------
+builder.Services.AddCors(options => options.AddPolicy("Angular", policy => policy
+    .WithOrigins(builder.Configuration.GetSection("Cors:Origins").Get<string[]>() ?? new[] { "http://localhost:4200" })
+    .AllowAnyHeader().AllowAnyMethod()));
+
 // ---------- Session (giỏ hàng khách vãng lai) ----------
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
@@ -73,12 +99,18 @@ builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
 builder.Services.AddScoped<IAppEmailSender, LogEmailSender>();
+builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddControllersWithViews(options =>
 {
-    // Mọi POST/PUT/DELETE đều phải có anti-forgery token
+    // Mọi POST/PUT/DELETE của Razor đều phải có anti-forgery token (API dùng [IgnoreAntiforgeryToken] + JWT)
     options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+})
+.AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
 });
 
 var app = builder.Build();
@@ -118,6 +150,7 @@ app.UseRequestLocalization(new RequestLocalizationOptions
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseCors("Angular");
 app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();

@@ -1,6 +1,34 @@
 # CHƯƠNG 4 (phần 2). THIẾT KẾ KIẾN TRÚC HỆ THỐNG
 
-## 4.7. Kiến trúc tổng thể
+## 4.6b. Cập nhật kiến trúc (15/09/2026): storefront Angular + REST API
+
+Phần giao diện khách hàng được chuyển sang **Angular 18 (SPA)** gọi **REST API JSON** của backend; phần quản trị giữ **Razor Views**. Lý do: tách rõ front-end/back-end cho phần công khai (dễ mở rộng mobile app sau), trong khi Admin là công cụ nội bộ nên render phía server là đủ và đã hoàn thiện.
+
+```mermaid
+flowchart LR
+  subgraph Client
+    A[Angular 18 SPA<br/>vietthang-web :4200]
+    B[Trình duyệt nhân viên<br/>Admin Razor]
+  end
+  subgraph Server[ASP.NET Core 8 – VietThang.Web :5292]
+    API[REST API /api/*<br/>JWT Bearer]
+    MVC[Areas/Admin + Razor<br/>Cookie Identity]
+    S[Services dùng chung<br/>Pricing · Cart · Order · Inventory · Catalog]
+    EF[EF Core → SQL Server]
+  end
+  A -->|HTTPS JSON| API
+  B -->|HTTPS HTML| MVC
+  API --> S
+  MVC --> S
+  S --> EF
+```
+
+- **Xác thực:** hai scheme song song – cookie Identity cho Razor, JWT Bearer cho API (`[Authorize(AuthenticationSchemes = "Bearer")]`). Token phát hành tại `POST /api/auth/login`, chứa claim `NameIdentifier`, `Role`, hạn 7 ngày.
+- **Giỏ hàng:** khách vãng lai giữ `{variantId, quantity}` trong `localStorage`, server tính giá qua `POST /api/cart/quote`; khách đăng nhập dùng giỏ CSDL; gộp khi đăng nhập.
+- **Bảo mật API:** `[IgnoreAntiforgeryToken]` (CSRF không áp dụng cho Bearer), CORS whitelist `http://localhost:4200`, validation trả 400 `{ message }`.
+- **Angular:** standalone components, `signal`/`computed`, lazy `loadComponent`, `HttpInterceptorFn` gắn token và bắt 401, `CanActivateFn` guard cho `/tai-khoan`, Reactive Forms cho thanh toán/đăng ký/địa chỉ, Bootstrap 5 + Bootstrap Icons, proxy dev sang cổng 5292.
+
+## 4.7. Kiến trúc tổng thể (bản gốc – Razor toàn bộ)
 
 Ứng dụng web đơn khối (monolith) theo mô hình **ASP.NET Core MVC**, chia lớp theo trách nhiệm. Trang khách hàng và trang quản trị nằm trong cùng một ứng dụng, tách bằng **Areas** (`/Admin`).
 

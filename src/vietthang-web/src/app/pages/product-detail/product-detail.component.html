@@ -1,0 +1,125 @@
+<div class="container mt-3">
+  @if (notFound()) {
+    <div class="alert alert-warning">Không tìm thấy sản phẩm. <a routerLink="/">Về trang chủ</a></div>
+  } @else if (!product()) {
+    <div class="row g-4"><div class="col-md-6"><div class="skeleton" style="aspect-ratio:3/4"></div></div><div class="col-md-6"><div class="skeleton" style="height:32px"></div><div class="skeleton mt-3" style="height:24px;width:40%"></div><div class="skeleton mt-4" style="height:120px"></div></div></div>
+  } @else {
+    @let p = product()!;
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb small">
+        <li class="breadcrumb-item"><a routerLink="/">Trang chủ</a></li>
+        @if (p.category.parent) { <li class="breadcrumb-item"><a [routerLink]="['/danh-muc', p.category.parent.slug]">{{ p.category.parent.name }}</a></li> }
+        <li class="breadcrumb-item"><a [routerLink]="['/danh-muc', p.category.slug]">{{ p.category.name }}</a></li>
+        <li class="breadcrumb-item active">{{ p.name }}</li>
+      </ol>
+    </nav>
+
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="gallery-main"><img [src]="mainImage()?.url || '/images/products/placeholder.svg'" [alt]="p.name" /></div>
+        @if (p.images.length > 1) {
+          <div class="gallery-thumbs">
+            @for (img of p.images; track img.id) {
+              <img [src]="img.url" alt="" [class.active]="img.id === mainImage()?.id" (click)="mainImage.set(img)" />
+            }
+          </div>
+        }
+      </div>
+
+      <div class="col-md-6">
+        <h1 class="h3 fw-bold">{{ p.name }}</h1>
+        <div class="d-flex flex-wrap gap-3 small text-muted mb-2">
+          <span>Mã: <code>{{ p.code }}</code></span>
+          @if (p.material) { <span>Chất liệu: {{ p.material }}</span> }
+          <span>Đã bán: {{ p.soldCount }}</span>
+          @if (p.reviews.length) { <span><i class="bi bi-star-fill text-warning"></i> {{ p.averageRating }} ({{ p.reviews.length }} đánh giá)</span> }
+        </div>
+
+        @if (price(); as pr) {
+          <div class="my-3">
+            <span class="price-sale fs-3">{{ pr.sale | vnd }}</span>
+            @if (pr.hasDiscount) {
+              <span class="price-original fs-6">{{ pr.original | vnd }}</span>
+              <span class="badge-sale ms-2">-{{ pr.percent }}%</span>
+            }
+          </div>
+        }
+        @if (p.shortDescription) { <p class="text-muted">{{ p.shortDescription }}</p> }
+
+        @if (p.variants.length) {
+          <div class="mb-3">
+            <div class="option-label">Màu sắc: <strong>{{ colorName() }}</strong></div>
+            <div class="d-flex flex-wrap gap-2">
+              @for (c of p.colors; track c.id) {
+                <button type="button" class="swatch-btn" [class.active]="selectedColor() === c.id" [class.disabled]="!colorAvailable(c.id)" [title]="c.name" [style.background]="c.hexCode || '#fff'" (click)="selectColor(c.id)"></button>
+              }
+            </div>
+          </div>
+          <div class="mb-3">
+            <div class="option-label">Kích cỡ: <strong>{{ sizeName() }}</strong></div>
+            <div class="d-flex flex-wrap gap-2">
+              @for (s of p.sizes; track s.id) {
+                <button type="button" class="size-btn" [class.active]="selectedSize() === s.id" [disabled]="!sizeAvailable(s.id)" (click)="selectSize(s.id)">{{ s.name }}</button>
+              }
+            </div>
+          </div>
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="qty-input">
+              <button type="button" (click)="changeQty(-1)">−</button>
+              <input type="number" [value]="qty()" min="1" (change)="setQty($event)" />
+              <button type="button" (click)="changeQty(1)">+</button>
+            </div>
+            <span class="small text-muted">{{ stockInfo() }}</span>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-brand btn-lg flex-grow-1" [disabled]="!canBuy() || adding()" (click)="addToCart()"><i class="bi bi-bag-plus"></i> Thêm vào giỏ</button>
+            <button type="button" class="btn btn-outline-danger btn-lg" [disabled]="!canBuy() || adding()" (click)="addToCart(true)">Mua ngay</button>
+            <button type="button" class="btn btn-outline-secondary btn-lg" title="Yêu thích" (click)="toggleWishlist()"><i class="bi" [class.bi-heart-fill]="p.inWishlist" [class.text-danger]="p.inWishlist" [class.bi-heart]="!p.inWishlist"></i></button>
+          </div>
+        } @else {
+          <div class="alert alert-warning">Sản phẩm tạm hết hàng.</div>
+        }
+
+        <ul class="list-unstyled small text-muted mt-4 mb-0">
+          <li><i class="bi bi-truck"></i> Miễn phí vận chuyển cho đơn từ 500.000 đ</li>
+          <li><i class="bi bi-arrow-repeat"></i> Đổi size trong 7 ngày</li>
+          <li><i class="bi bi-shield-check"></i> Thanh toán khi nhận hàng (COD)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="row mt-5">
+      <div class="col-lg-8">
+        <ul class="nav nav-tabs" role="tablist">
+          <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-desc" type="button">Mô tả sản phẩm</button></li>
+          <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-reviews" type="button">Đánh giá ({{ p.reviews.length }})</button></li>
+        </ul>
+        <div class="tab-content border border-top-0 p-4 bg-white">
+          <div class="tab-pane fade show active" id="tab-desc">
+            @if (descriptionHtml) { <div class="post-content" [innerHTML]="descriptionHtml"></div> } @else { <p class="text-muted">Chưa có mô tả.</p> }
+          </div>
+          <div class="tab-pane fade" id="tab-reviews">
+            @for (r of p.reviews; track r.id) {
+              <div class="review-item">
+                <div class="d-flex justify-content-between"><strong>{{ r.userName }}</strong><span class="small text-muted">{{ r.createdAt | date:'dd/MM/yyyy' }}</span></div>
+                <div class="text-warning small">@for (on of stars(r.rating); track $index) { <i class="bi" [class.bi-star-fill]="on" [class.bi-star]="!on"></i> }</div>
+                <p class="mb-0">{{ r.comment }}</p>
+              </div>
+            } @empty {
+              <p class="text-muted mb-0">Chưa có đánh giá. Khách đã mua có thể đánh giá trong mục Đơn hàng của tôi.</p>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @if (p.related.length) {
+      <section class="mt-5">
+        <h2 class="section-title">Sản phẩm cùng danh mục</h2>
+        <div class="row g-3 row-cols-2 row-cols-md-4">
+          @for (rp of p.related; track rp.id) { <div class="col"><app-product-card [p]="rp" /></div> }
+        </div>
+      </section>
+    }
+  }
+</div>

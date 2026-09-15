@@ -16,7 +16,13 @@ appsettings.Development.local.json
 src/VietThang.Web/wwwroot/uploads/*
 !src/VietThang.Web/wwwroot/uploads/.gitkeep
 
-## Node / misc
+## Angular (src/vietthang-web)
 node_modules/
+src/vietthang-web/dist/
+src/vietthang-web/.angular/
+src/vietthang-web/.vscode/
+npm-debug.log*
+
+## misc
 .DS_Store
 Thumbs.db

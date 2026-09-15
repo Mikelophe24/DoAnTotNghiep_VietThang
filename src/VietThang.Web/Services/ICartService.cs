@@ -45,6 +45,10 @@ public interface ICartService
 {
     Task<List<CartLine>> GetLinesAsync();
     Task<CartSummary> GetSummaryAsync();
+    /// <summary>Dựng dòng giỏ từ danh sách biến thể bất kỳ (giỏ khách vãng lai gửi từ Angular).</summary>
+    Task<List<CartLine>> BuildLinesAsync(IEnumerable<(int VariantId, int Quantity)> items);
+    /// <summary>Tính tổng, phí ship, mã giảm giá cho các dòng đã dựng.</summary>
+    Task<CartSummary> BuildSummaryAsync(List<CartLine> lines, string? couponCode);
     Task<(bool Ok, string Message)> AddAsync(int variantId, int quantity);
     Task UpdateAsync(int variantId, int quantity);
     Task RemoveAsync(int variantId);
@@ -110,9 +114,12 @@ public class CartService : ICartService
         return ReadSession().Select(s => (s.VariantId, s.Quantity)).ToList();
     }
 
-    public async Task<List<CartLine>> GetLinesAsync()
+    public async Task<List<CartLine>> GetLinesAsync() => await BuildLinesAsync(await GetRawItemsAsync());
+
+    public async Task<List<CartLine>> BuildLinesAsync(IEnumerable<(int VariantId, int Quantity)> items)
     {
-        var raw = await GetRawItemsAsync();
+        var raw = items.Where(i => i.Quantity > 0).GroupBy(i => i.VariantId)
+            .Select(g => (VariantId: g.Key, Quantity: g.Sum(x => x.Quantity))).ToList();
         if (raw.Count == 0) return new List<CartLine>();
         var ids = raw.Select(r => r.VariantId).ToList();
 
@@ -148,12 +155,14 @@ public class CartService : ICartService
         return lines;
     }
 
-    public async Task<CartSummary> GetSummaryAsync()
+    public async Task<CartSummary> GetSummaryAsync() => await BuildSummaryAsync(await GetLinesAsync(), GetCouponCode());
+
+    public async Task<CartSummary> BuildSummaryAsync(List<CartLine> lines, string? couponCode)
     {
         var summary = new CartSummary
         {
-            Lines = await GetLinesAsync(),
-            CouponCode = GetCouponCode(),
+            Lines = lines,
+            CouponCode = string.IsNullOrWhiteSpace(couponCode) ? null : couponCode.Trim().ToUpperInvariant(),
             FreeShippingThreshold = await _settings.GetDecimalAsync(SettingKeys.FreeShippingThreshold, 500000)
         };
         if (summary.Lines.Count == 0) return summary;
