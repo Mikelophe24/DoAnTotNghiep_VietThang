@@ -1,0 +1,49 @@
+@using VietThang.Web.Helpers
+@model Order
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <title>Phiếu giao hàng @Model.OrderCode</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 13px; color: #000; max-width: 720px; margin: 24px auto; }
+        h1 { font-size: 18px; margin: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th, td { border: 1px solid #999; padding: 6px 8px; }
+        th { background: #eee; text-align: left; }
+        .r { text-align: right; } .c { text-align: center; }
+        .head { display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 8px; }
+        .sign { display: flex; justify-content: space-between; margin-top: 40px; text-align: center; }
+        @@media print { .noprint { display: none; } }
+    </style>
+</head>
+<body>
+    <div class="head">
+        <div><h1>@ViewBag.StoreName</h1><div>Hotline: @ViewBag.Hotline</div></div>
+        <div style="text-align:right"><h1>PHIẾU GIAO HÀNG</h1><div>Mã đơn: <b>@Model.OrderCode</b></div><div>Ngày: @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div></div>
+    </div>
+    <p><b>Người nhận:</b> @Model.CustomerName · @Model.Phone<br /><b>Địa chỉ:</b> @Model.ShippingAddress, @Model.Ward, @Model.District, @Model.Province<br />
+    @if (!string.IsNullOrEmpty(Model.Note)) { <b>Ghi chú:</b> @Model.Note }</p>
+    <table>
+        <thead><tr><th>#</th><th>Sản phẩm</th><th>SKU</th><th class="c">SL</th><th class="r">Đơn giá</th><th class="r">Thành tiền</th></tr></thead>
+        <tbody>
+        @{ int i = 1; }
+        @foreach (var d in Model.Details)
+        {
+            <tr><td class="c">@(i++)</td><td>@d.ProductName (@d.ColorName / @d.SizeName)</td><td>@d.Sku</td><td class="c">@d.Quantity</td><td class="r">@d.UnitPrice.ToString("N0")</td><td class="r">@d.LineTotal.ToString("N0")</td></tr>
+        }
+        </tbody>
+        <tfoot>
+            <tr><td colspan="5" class="r">Tiền hàng</td><td class="r">@Model.SubTotal.ToString("N0")</td></tr>
+            <tr><td colspan="5" class="r">Phí vận chuyển</td><td class="r">@Model.ShippingFee.ToString("N0")</td></tr>
+            @if (Model.DiscountAmount > 0) { <tr><td colspan="5" class="r">Giảm giá</td><td class="r">−@Model.DiscountAmount.ToString("N0")</td></tr> }
+            <tr><td colspan="5" class="r"><b>@(Model.PaymentStatus == PaymentStatus.Paid ? "Đã thanh toán" : "Thu hộ (COD)")</b></td><td class="r"><b>@(Model.PaymentStatus == PaymentStatus.Paid ? 0 : Model.TotalAmount).ToString("N0") đ</b></td></tr>
+        </tfoot>
+    </table>
+    <div class="sign"><div>Người lập phiếu<br /><br /><br />(ký, ghi rõ họ tên)</div><div>Người giao hàng<br /><br /><br />(ký, ghi rõ họ tên)</div><div>Người nhận hàng<br /><br /><br />(ký, ghi rõ họ tên)</div></div>
+    <p class="noprint" style="margin-top:30px;text-align:center"><button onclick="window.print()">In phiếu</button></p>
+</body>
+</html>

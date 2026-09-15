@@ -78,6 +78,7 @@
                 <div class="d-flex gap-2">
                     <button type="button" class="btn btn-brand btn-lg flex-grow-1" id="btn-add" disabled onclick="addToCart()"><i class="bi bi-bag-plus"></i> Thêm vào giỏ</button>
                     <button type="button" class="btn btn-outline-danger btn-lg" id="btn-buy" disabled onclick="addToCart(true)">Mua ngay</button>
+                    <button type="button" class="btn btn-outline-secondary btn-lg" title="Yêu thích" data-wishlist="@p.Id" onclick="VT.toggleWishlist(@p.Id)"><i class="bi @(ViewBag.InWishlist == true ? "bi-heart-fill text-danger" : "bi-heart")"></i></button>
                 </div>
             }
             else

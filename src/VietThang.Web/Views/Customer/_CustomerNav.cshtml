@@ -1,0 +1,11 @@
+@{
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    string Active(params string[] a) => a.Contains(action) ? "active" : "";
+}
+<div class="list-group customer-nav">
+    <a class="list-group-item list-group-item-action @Active("Profile", "ChangePassword")" asp-controller="Customer" asp-action="Profile"><i class="bi bi-person"></i> Hồ sơ của tôi</a>
+    <a class="list-group-item list-group-item-action @Active("Orders", "OrderDetails")" asp-controller="Customer" asp-action="Orders"><i class="bi bi-receipt"></i> Đơn hàng của tôi</a>
+    <a class="list-group-item list-group-item-action @Active("Addresses", "AddressForm", "EditAddress")" asp-controller="Customer" asp-action="Addresses"><i class="bi bi-geo-alt"></i> Sổ địa chỉ</a>
+    <a class="list-group-item list-group-item-action @Active("Wishlist")" asp-controller="Customer" asp-action="Wishlist"><i class="bi bi-heart"></i> Sản phẩm yêu thích</a>
+    <form asp-controller="Account" asp-action="Logout" method="post"><button class="list-group-item list-group-item-action text-danger w-100 text-start"><i class="bi bi-box-arrow-right"></i> Đăng xuất</button></form>
+</div>

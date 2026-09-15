@@ -38,12 +38,22 @@
             }
 
             <li class="nav-header">Bán hàng</li>
-            <li><a class="nav-link disabled" href="#"><i class="bi bi-receipt"></i> Đơn hàng <small class="text-muted">(tuần 9)</small></a></li>
+            <li><a class="nav-link @Active("Orders")" asp-area="Admin" asp-controller="Orders" asp-action="Index"><i class="bi bi-receipt"></i> Đơn hàng</a></li>
 
             <li class="nav-header">Kho</li>
-            <li><a class="nav-link disabled" href="#"><i class="bi bi-truck"></i> Nhà cung cấp <small class="text-muted">(tuần 6)</small></a></li>
-            <li><a class="nav-link disabled" href="#"><i class="bi bi-box-arrow-in-down"></i> Phiếu nhập <small class="text-muted">(tuần 6)</small></a></li>
-            <li><a class="nav-link disabled" href="#"><i class="bi bi-boxes"></i> Tồn kho <small class="text-muted">(tuần 6)</small></a></li>
+            <li><a class="nav-link @Active("Suppliers")" asp-area="Admin" asp-controller="Suppliers" asp-action="Index"><i class="bi bi-truck"></i> Nhà cung cấp</a></li>
+            <li><a class="nav-link @Active("GoodsReceipts")" asp-area="Admin" asp-controller="GoodsReceipts" asp-action="Index"><i class="bi bi-box-arrow-in-down"></i> Phiếu nhập</a></li>
+            <li><a class="nav-link @(Active("Inventory") + (currentAction == "History" ? "" : ""))" asp-area="Admin" asp-controller="Inventory" asp-action="Index"><i class="bi bi-boxes"></i> Tồn kho</a></li>
+
+            <li class="nav-header">Marketing & nội dung</li>
+            <li><a class="nav-link disabled" href="#"><i class="bi bi-percent"></i> Khuyến mãi <small>(tuần 10)</small></a></li>
+            <li><a class="nav-link disabled" href="#"><i class="bi bi-ticket-perforated"></i> Mã giảm giá <small>(tuần 10)</small></a></li>
+            <li><a class="nav-link disabled" href="#"><i class="bi bi-star"></i> Đánh giá <small>(tuần 10)</small></a></li>
+            <li><a class="nav-link disabled" href="#"><i class="bi bi-newspaper"></i> Tin tức / Banner <small>(tuần 10)</small></a></li>
+
+            <li class="nav-header">Hệ thống</li>
+            <li><a class="nav-link disabled" href="#"><i class="bi bi-people"></i> Khách hàng / Nhân viên <small>(tuần 11)</small></a></li>
+            <li><a class="nav-link disabled" href="#"><i class="bi bi-bar-chart"></i> Báo cáo <small>(tuần 12)</small></a></li>
         </ul>
         <div class="mt-auto p-3 small text-white-50">
             <a class="text-white-50 text-decoration-none" asp-area="" asp-controller="Home" asp-action="Index"><i class="bi bi-shop"></i> Xem website</a>

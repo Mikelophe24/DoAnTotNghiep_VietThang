@@ -1,0 +1,29 @@
+@model AddressFormViewModel
+@{
+    ViewData["Title"] = Model.Id > 0 ? "Sửa địa chỉ" : "Thêm địa chỉ";
+}
+<div class="container mt-3">
+    <div class="row g-4">
+        <div class="col-lg-3"><partial name="_CustomerNav" /></div>
+        <div class="col-lg-9">
+            <h1 class="h4 mb-3">@ViewData["Title"]</h1>
+            <form asp-action="SaveAddress" method="post" class="bg-white border rounded p-4" style="max-width:640px">
+                <input type="hidden" asp-for="Id" />
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
+                <div class="row">
+                    <div class="col-md-6 mb-3"><label asp-for="ReceiverName" class="form-label required"></label><input asp-for="ReceiverName" class="form-control" /><span asp-validation-for="ReceiverName" class="text-danger small"></span></div>
+                    <div class="col-md-6 mb-3"><label asp-for="Phone" class="form-label required"></label><input asp-for="Phone" class="form-control" /><span asp-validation-for="Phone" class="text-danger small"></span></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3"><label asp-for="Province" class="form-label required"></label><input asp-for="Province" class="form-control" /><span asp-validation-for="Province" class="text-danger small"></span></div>
+                    <div class="col-md-4 mb-3"><label asp-for="District" class="form-label required"></label><input asp-for="District" class="form-control" /><span asp-validation-for="District" class="text-danger small"></span></div>
+                    <div class="col-md-4 mb-3"><label asp-for="Ward" class="form-label required"></label><input asp-for="Ward" class="form-control" /><span asp-validation-for="Ward" class="text-danger small"></span></div>
+                </div>
+                <div class="mb-3"><label asp-for="Street" class="form-label required"></label><input asp-for="Street" class="form-control" /><span asp-validation-for="Street" class="text-danger small"></span></div>
+                <div class="form-check mb-3"><input asp-for="IsDefault" class="form-check-input" /><label asp-for="IsDefault" class="form-check-label"></label></div>
+                <div class="d-flex gap-2"><button class="btn btn-brand"><i class="bi bi-check-lg"></i> Lưu địa chỉ</button><a class="btn btn-outline-secondary" asp-action="Addresses">Hủy</a></div>
+            </form>
+        </div>
+    </div>
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

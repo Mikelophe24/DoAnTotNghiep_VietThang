@@ -1,0 +1,98 @@
+@using VietThang.Web.Helpers
+@model Order
+@{
+    ViewData["Title"] = "Đơn " + Model.OrderCode;
+    var next = OrderStateMachine.NextStatuses(Model.Status);
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="h4 mb-0">Đơn hàng <code>@Model.OrderCode</code> <span class="badge @Model.Status.ToBadgeClass()">@Model.Status.ToDisplay()</span></h1>
+        <div class="small text-muted">Đặt lúc @Model.CreatedAt.ToString("HH:mm dd/MM/yyyy") @(Model.User is null ? "· Khách vãng lai" : "· Tài khoản " + Model.User.Email)</div>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-secondary" asp-action="Print" asp-route-id="@Model.Id" target="_blank"><i class="bi bi-printer"></i> In đơn</a>
+        <a class="btn btn-outline-secondary" asp-action="Index"><i class="bi bi-arrow-left"></i> Danh sách</a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="card mb-3">
+            <div class="card-header fw-semibold">Sản phẩm</div>
+            <table class="table mb-0 align-middle">
+                <thead class="table-light"><tr><th>Sản phẩm</th><th>SKU</th><th class="text-center">SL</th><th class="text-end">Đơn giá</th><th class="text-end">Thành tiền</th></tr></thead>
+                <tbody>
+                @foreach (var d in Model.Details)
+                {
+                    <tr><td>@d.ProductName<div class="small text-muted">@d.ColorName / @d.SizeName</div></td><td><code>@d.Sku</code></td><td class="text-center">@d.Quantity</td><td class="text-end">@d.UnitPrice.ToString("N0")</td><td class="text-end fw-semibold">@d.LineTotal.ToString("N0")</td></tr>
+                }
+                </tbody>
+                <tfoot>
+                    <tr><td colspan="4" class="text-end">Tiền hàng</td><td class="text-end">@Model.SubTotal.ToString("N0")</td></tr>
+                    <tr><td colspan="4" class="text-end">Phí vận chuyển</td><td class="text-end">@Model.ShippingFee.ToString("N0")</td></tr>
+                    @if (Model.DiscountAmount > 0) { <tr><td colspan="4" class="text-end">Giảm giá @(Model.Coupon is null ? "" : "(" + Model.Coupon.Code + ")")</td><td class="text-end text-success">−@Model.DiscountAmount.ToString("N0")</td></tr> }
+                    <tr class="table-light fw-bold"><td colspan="4" class="text-end">Tổng thanh toán</td><td class="text-end">@Model.TotalAmount.ToString("N0") đ</td></tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="card">
+            <div class="card-header fw-semibold">Lịch sử xử lý</div>
+            <ul class="list-group list-group-flush">
+                @foreach (var h in Model.StatusHistories)
+                {
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span><span class="badge @h.ToStatus.ToBadgeClass()">@h.ToStatus.ToDisplay()</span> @h.Note</span>
+                        <span class="small text-muted">@h.ChangedAt.ToString("HH:mm dd/MM/yyyy") · @(h.ChangedBy?.FullName ?? "Khách hàng")</span>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card mb-3">
+            <div class="card-header fw-semibold">Xử lý đơn</div>
+            <div class="card-body">
+                @if (next.Count == 0)
+                {
+                    <p class="text-muted mb-0">Đơn đã ở trạng thái cuối.</p>
+                }
+                else
+                {
+                    <form asp-action="ChangeStatus" method="post" id="status-form">
+                        <input type="hidden" name="Id" value="@Model.Id" />
+                        <input type="hidden" name="Status" id="status-input" />
+                        <div class="mb-3"><label class="form-label small">Ghi chú / lý do (bắt buộc khi hủy)</label><textarea name="Note" class="form-control" rows="2" maxlength="255"></textarea></div>
+                        <div class="d-grid gap-2">
+                            @foreach (var s in next)
+                            {
+                                <button type="submit" class="btn @(s == OrderStatus.Cancelled ? "btn-outline-danger" : "btn-primary")" onclick="document.getElementById('status-input').value='@((int)s)'; @(s == OrderStatus.Cancelled ? "return confirm('Hủy đơn này? Tồn kho sẽ được hoàn lại.');" : "")">@OrderStateMachine.ActionLabel(s)</button>
+                            }
+                        </div>
+                    </form>
+                }
+                <hr />
+                <div class="small">Thanh toán: <strong>@Model.PaymentMethod.ToDisplay()</strong><br />Trạng thái: <span class="@(Model.PaymentStatus == PaymentStatus.Paid ? "text-success fw-semibold" : "text-muted")">@Model.PaymentStatus.ToDisplay()</span></div>
+                @if (Model.PaymentMethod == PaymentMethod.BankTransfer && Model.PaymentStatus == PaymentStatus.Unpaid && Model.Status != OrderStatus.Cancelled)
+                {
+                    <form asp-action="MarkPaid" asp-route-id="@Model.Id" method="post" class="mt-2" data-confirm="Xác nhận đã nhận chuyển khoản @Model.TotalAmount.ToString("N0") đ?">
+                        <button class="btn btn-sm btn-outline-success w-100"><i class="bi bi-cash-stack"></i> Đã nhận chuyển khoản</button>
+                    </form>
+                }
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header fw-semibold">Người nhận</div>
+            <div class="card-body small">
+                <div><strong>@Model.CustomerName</strong></div>
+                <div><i class="bi bi-telephone"></i> <a href="tel:@Model.Phone">@Model.Phone</a></div>
+                @if (!string.IsNullOrEmpty(Model.Email)) { <div><i class="bi bi-envelope"></i> @Model.Email</div> }
+                <div class="mt-2"><i class="bi bi-geo-alt"></i> @Model.ShippingAddress, @Model.Ward, @Model.District, @Model.Province</div>
+                @if (!string.IsNullOrEmpty(Model.Note)) { <div class="mt-2 alert alert-warning py-1 px-2 mb-0">Ghi chú khách: @Model.Note</div> }
+                @if (!string.IsNullOrEmpty(Model.CancelReason)) { <div class="mt-2 text-danger">Lý do hủy: @Model.CancelReason</div> }
+            </div>
+        </div>
+    </div>
+</div>

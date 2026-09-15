@@ -1,0 +1,91 @@
+@using VietThang.Web.Helpers
+@using VietThang.Web.ViewModels.Admin
+@model PagedList<InventoryRow>
+@{
+    ViewData["Title"] = "Tồn kho";
+    var f = (InventoryFilter)ViewBag.Filter;
+    int low = ViewBag.LowThreshold;
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Tồn kho theo biến thể</h1>
+    <a class="btn btn-outline-secondary" asp-action="History"><i class="bi bi-clock-history"></i> Lịch sử xuất nhập</a>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted small">Tổng tồn (theo bộ lọc)</div><div class="fs-4 fw-bold">@(((int)ViewBag.TotalStock).ToString("N0"))</div></div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted small">Giá trị tồn theo giá vốn</div><div class="fs-4 fw-bold">@(((decimal)ViewBag.StockValue).ToString("N0")) đ</div></div></div></div>
+    <div class="col-md-4"><div class="card @(((int)ViewBag.LowCount) > 0 ? "border-danger" : "")"><div class="card-body"><div class="text-muted small">Biến thể sắp hết (≤ @low)</div><div class="fs-4 fw-bold text-danger">@ViewBag.LowCount</div></div></div></div>
+</div>
+
+<form method="get" class="card card-body mb-3">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-4"><label class="form-label small text-muted">Tìm SKU / tên / mã SP</label><input name="q" value="@f.Q" class="form-control" /></div>
+        <div class="col-md-3"><label class="form-label small text-muted">Nhóm</label><select name="categoryId" class="form-select" asp-items="ViewBag.Categories"><option value="">Tất cả</option></select></div>
+        <div class="col-md-2"><label class="form-check mt-4"><input type="checkbox" name="lowOnly" value="true" class="form-check-input" checked="@f.LowOnly" /> Chỉ sắp hết</label></div>
+        <div class="col-md-3 d-flex gap-2"><button class="btn btn-outline-primary"><i class="bi bi-search"></i> Lọc</button><a class="btn btn-outline-secondary" asp-action="Index">Xóa lọc</a></div>
+    </div>
+</form>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light"><tr><th>Sản phẩm</th><th>Biến thể</th><th>SKU</th><th class="text-center">Tồn</th><th class="text-end">Giá vốn</th><th class="text-end">Giá bán</th><th class="text-end" style="width:150px"></th></tr></thead>
+            <tbody>
+            @foreach (var r in Model.Items)
+            {
+                <tr class="@(r.IsActive ? "" : "text-muted")">
+                    <td>@r.ProductName<div class="small text-muted"><code>@r.Code</code></div></td>
+                    <td>@r.ColorName / @r.SizeName</td>
+                    <td><code>@r.Sku</code></td>
+                    <td class="text-center"><span class="fw-bold @(r.Stock == 0 ? "text-danger" : r.Stock <= low ? "text-warning" : "")">@r.Stock</span></td>
+                    <td class="text-end">@r.CostPrice.ToString("N0")</td>
+                    <td class="text-end">@r.Price.ToString("N0")</td>
+                    <td class="text-end">
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#adjustModal" data-variant-id="@r.VariantId" data-label="@r.ProductName – @r.ColorName / @r.SizeName" data-stock="@r.Stock" title="Điều chỉnh"><i class="bi bi-sliders"></i></button>
+                        <a class="btn btn-sm btn-outline-secondary" asp-action="History" asp-route-variantId="@r.VariantId" title="Lịch sử"><i class="bi bi-clock-history"></i></a>
+                    </td>
+                </tr>
+            }
+            @if (!Model.Items.Any()) { <tr><td colspan="7" class="text-center text-muted py-4">Không có biến thể phù hợp.</td></tr> }
+            </tbody>
+        </table>
+    </div>
+    @if (Model.TotalPages > 1)
+    {
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <span class="small text-muted">Trang @Model.PageIndex / @Model.TotalPages · @Model.TotalCount biến thể</span>
+            <ul class="pagination pagination-sm mb-0">
+                @for (int i = Math.Max(1, Model.PageIndex - 3); i <= Math.Min(Model.TotalPages, Model.PageIndex + 3); i++) { <li class="page-item @(i == Model.PageIndex ? "active" : "")"><a class="page-link" href="@Context.Request.WithPage(i)">@i</a></li> }
+            </ul>
+        </div>
+    }
+</div>
+
+<div class="modal fade" id="adjustModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form asp-action="Adjust" method="post" class="modal-content">
+            <input type="hidden" name="returnUrl" value="@returnUrl" />
+            <input type="hidden" name="VariantId" id="adj-variant" />
+            <div class="modal-header"><h5 class="modal-title">Điều chỉnh tồn kho</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <p class="fw-semibold mb-1" id="adj-label"></p>
+                <p class="small text-muted">Tồn hiện tại: <span id="adj-stock"></span>. Dùng khi kiểm kê phát hiện chênh lệch; nhập hàng từ nhà cung cấp hãy lập phiếu nhập.</p>
+                <div class="mb-3"><label class="form-label">Số lượng thực tế</label><input type="number" name="NewQuantity" id="adj-qty" min="0" class="form-control" required /></div>
+                <div class="mb-0"><label class="form-label">Lý do</label><input name="Note" class="form-control" placeholder="VD: kiểm kê ngày 15/9, hàng lỗi 2 cái" /></div>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button><button class="btn btn-primary">Lưu điều chỉnh</button></div>
+        </form>
+    </div>
+</div>
+@section Scripts {
+<script>
+    document.getElementById('adjustModal').addEventListener('show.bs.modal', e => {
+        const b = e.relatedTarget;
+        document.getElementById('adj-variant').value = b.dataset.variantId;
+        document.getElementById('adj-label').textContent = b.dataset.label;
+        document.getElementById('adj-stock').textContent = b.dataset.stock;
+        document.getElementById('adj-qty').value = b.dataset.stock;
+    });
+</script>
+}

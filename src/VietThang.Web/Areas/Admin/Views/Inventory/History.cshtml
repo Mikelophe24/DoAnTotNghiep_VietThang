@@ -1,0 +1,65 @@
+@using VietThang.Web.Helpers
+@using VietThang.Web.ViewModels.Admin
+@model PagedList<InventoryTransaction>
+@{
+    ViewData["Title"] = "Lịch sử xuất nhập kho";
+    var f = (HistoryFilter)ViewBag.Filter;
+    string? variantLabel = ViewBag.VariantLabel;
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="h4 mb-0">Lịch sử xuất nhập kho</h1>
+        @if (variantLabel is not null) { <div class="small text-muted">Biến thể: @variantLabel</div> }
+    </div>
+    <a class="btn btn-outline-secondary" asp-action="Index"><i class="bi bi-arrow-left"></i> Tồn kho</a>
+</div>
+<form method="get" class="card card-body mb-3">
+    <input type="hidden" name="variantId" value="@f.VariantId" />
+    <div class="row g-2 align-items-end">
+        <div class="col-md-3"><label class="form-label small text-muted">Tìm SKU / tên / ghi chú</label><input name="q" value="@f.Q" class="form-control" /></div>
+        <div class="col-md-2"><label class="form-label small text-muted">Loại</label>
+            <select name="type" class="form-select">
+                <option value="">Tất cả</option>
+                <option value="1" selected="@(f.Type == InventoryType.Import)">Nhập kho</option>
+                <option value="2" selected="@(f.Type == InventoryType.Export)">Xuất bán</option>
+                <option value="3" selected="@(f.Type == InventoryType.Return)">Hoàn tồn</option>
+                <option value="4" selected="@(f.Type == InventoryType.Adjust)">Điều chỉnh</option>
+            </select></div>
+        <div class="col-md-2"><label class="form-label small text-muted">Từ ngày</label><input type="date" name="from" value="@f.From?.ToString("yyyy-MM-dd")" class="form-control" /></div>
+        <div class="col-md-2"><label class="form-label small text-muted">Đến ngày</label><input type="date" name="to" value="@f.To?.ToString("yyyy-MM-dd")" class="form-control" /></div>
+        <div class="col-md-3 d-flex gap-2"><button class="btn btn-outline-primary"><i class="bi bi-search"></i> Lọc</button><a class="btn btn-outline-secondary" asp-action="History">Xóa lọc</a></div>
+    </div>
+</form>
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light"><tr><th>Thời gian</th><th>Sản phẩm / biến thể</th><th>Loại</th><th class="text-center">Số lượng</th><th class="text-center">Tồn sau</th><th>Tham chiếu</th><th>Người thực hiện</th></tr></thead>
+            <tbody>
+            @foreach (var t in Model.Items)
+            {
+                var cls = t.Type switch { InventoryType.Import => "bg-success", InventoryType.Export => "bg-primary", InventoryType.Return => "bg-info text-dark", _ => "bg-warning text-dark" };
+                <tr>
+                    <td class="small text-nowrap">@t.CreatedAt.ToString("HH:mm dd/MM/yyyy")</td>
+                    <td>@t.Variant.Product.Name<div class="small text-muted">@t.Variant.Color.Name / @t.Variant.Size.Name · <code>@t.Variant.Sku</code></div></td>
+                    <td><span class="badge @cls">@t.Type.ToDisplay()</span></td>
+                    <td class="text-center fw-semibold @(t.Quantity < 0 ? "text-danger" : "text-success")">@(t.Quantity > 0 ? "+" : "")@t.Quantity</td>
+                    <td class="text-center">@t.StockAfter</td>
+                    <td class="small">
+                        @if (t.ReferenceType == "Order" && t.ReferenceId.HasValue) { <a asp-controller="Orders" asp-action="Details" asp-route-id="@t.ReferenceId">@t.Note</a> }
+                        else if (t.ReferenceType == "GoodsReceipt" && t.ReferenceId.HasValue) { <a asp-controller="GoodsReceipts" asp-action="Edit" asp-route-id="@t.ReferenceId">@t.Note</a> }
+                        else { @t.Note }
+                    </td>
+                    <td class="small">@(t.CreatedBy?.FullName ?? "Khách hàng")</td>
+                </tr>
+            }
+            @if (!Model.Items.Any()) { <tr><td colspan="7" class="text-center text-muted py-4">Chưa có giao dịch kho.</td></tr> }
+            </tbody>
+        </table>
+    </div>
+    @if (Model.TotalPages > 1)
+    {
+        <div class="card-footer"><ul class="pagination pagination-sm mb-0 justify-content-end">
+            @for (int i = Math.Max(1, Model.PageIndex - 3); i <= Math.Min(Model.TotalPages, Model.PageIndex + 3); i++) { <li class="page-item @(i == Model.PageIndex ? "active" : "")"><a class="page-link" href="@Context.Request.WithPage(i)">@i</a></li> }
+        </ul></div>
+    }
+</div>

@@ -94,6 +94,12 @@ public class ProductsController : Controller
             };
         }).ToList();
 
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            var uid = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            ViewBag.InWishlist = await _db.Wishlists.AnyAsync(w => w.UserId == uid && w.ProductId == product.Id);
+        }
+
         var reviews = await _db.Reviews.AsNoTracking().Include(r => r.User)
             .Where(r => r.ProductId == product.Id && r.IsApproved)
             .OrderByDescending(r => r.CreatedAt).Take(20).ToListAsync();

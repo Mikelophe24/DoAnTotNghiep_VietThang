@@ -1,0 +1,42 @@
+@model List<Supplier>
+@{
+    ViewData["Title"] = "Nhà cung cấp";
+    var counts = (Dictionary<int, int>)ViewBag.ReceiptCounts;
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Nhà cung cấp</h1>
+    <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg"></i> Thêm nhà cung cấp</a>
+</div>
+<form method="get" class="card card-body mb-3">
+    <div class="input-group" style="max-width:420px">
+        <input name="q" value="@ViewBag.Q" class="form-control" placeholder="Tìm theo tên, điện thoại" />
+        <button class="btn btn-outline-primary"><i class="bi bi-search"></i></button>
+    </div>
+</form>
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light"><tr><th>Nhà cung cấp</th><th>Liên hệ</th><th>Địa chỉ</th><th class="text-center">Phiếu nhập</th><th class="text-center">Trạng thái</th><th class="text-end" style="width:140px"></th></tr></thead>
+            <tbody>
+            @foreach (var s in Model)
+            {
+                <tr>
+                    <td class="fw-semibold">@s.Name</td>
+                    <td>@s.ContactName<div class="small text-muted">@s.Phone @(string.IsNullOrEmpty(s.Email) ? "" : "· " + s.Email)</div></td>
+                    <td class="small">@s.Address</td>
+                    <td class="text-center"><a asp-controller="GoodsReceipts" asp-action="Index" asp-route-supplierId="@s.Id">@(counts.TryGetValue(s.Id, out var n) ? n : 0)</a></td>
+                    <td class="text-center"><span class="badge @(s.IsActive ? "bg-success" : "bg-secondary")">@(s.IsActive ? "Đang hợp tác" : "Ngừng")</span></td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-primary" asp-controller="GoodsReceipts" asp-action="Create" asp-route-supplierId="@s.Id" title="Lập phiếu nhập"><i class="bi bi-box-arrow-in-down"></i></a>
+                        <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@s.Id"><i class="bi bi-pencil"></i></a>
+                        <form asp-action="Delete" asp-route-id="@s.Id" method="post" class="d-inline" data-confirm="Xóa nhà cung cấp '@s.Name'?">
+                            <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            @if (!Model.Any()) { <tr><td colspan="6" class="text-center text-muted py-4">Chưa có nhà cung cấp.</td></tr> }
+            </tbody>
+        </table>
+    </div>
+</div>

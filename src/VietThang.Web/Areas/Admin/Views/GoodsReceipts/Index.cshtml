@@ -1,0 +1,54 @@
+@using VietThang.Web.Helpers
+@using VietThang.Web.ViewModels.Admin
+@model PagedList<GoodsReceipt>
+@{
+    ViewData["Title"] = "Phiếu nhập hàng";
+    var f = (ReceiptListFilter)ViewBag.Filter;
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Phiếu nhập hàng <span class="badge bg-secondary">@Model.TotalCount</span></h1>
+    <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg"></i> Lập phiếu nhập</a>
+</div>
+<form method="get" class="card card-body mb-3">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-3"><label class="form-label small text-muted">Nhà cung cấp</label><select name="supplierId" class="form-select" asp-items="ViewBag.Suppliers"><option value="">Tất cả</option></select></div>
+        <div class="col-md-2"><label class="form-label small text-muted">Trạng thái</label>
+            <select name="status" class="form-select">
+                <option value="">Tất cả</option>
+                <option value="0" selected="@(f.Status == ReceiptStatus.Draft)">Nháp</option>
+                <option value="1" selected="@(f.Status == ReceiptStatus.Completed)">Đã nhập kho</option>
+                <option value="2" selected="@(f.Status == ReceiptStatus.Cancelled)">Đã hủy</option>
+            </select></div>
+        <div class="col-md-2"><label class="form-label small text-muted">Từ ngày</label><input type="date" name="from" value="@f.From?.ToString("yyyy-MM-dd")" class="form-control" /></div>
+        <div class="col-md-2"><label class="form-label small text-muted">Đến ngày</label><input type="date" name="to" value="@f.To?.ToString("yyyy-MM-dd")" class="form-control" /></div>
+        <div class="col-md-3 d-flex gap-2"><button class="btn btn-outline-primary"><i class="bi bi-search"></i> Lọc</button><a class="btn btn-outline-secondary" asp-action="Index">Xóa lọc</a></div>
+    </div>
+</form>
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light"><tr><th>Mã phiếu</th><th>Ngày nhập</th><th>Nhà cung cấp</th><th>Người lập</th><th class="text-end">Tổng tiền</th><th class="text-center">Trạng thái</th><th></th></tr></thead>
+            <tbody>
+            @foreach (var r in Model.Items)
+            {
+                <tr>
+                    <td><a asp-action="Edit" asp-route-id="@r.Id" class="fw-semibold">@r.Code</a></td>
+                    <td>@r.ReceiptDate.ToString("dd/MM/yyyy")</td>
+                    <td>@r.Supplier.Name</td>
+                    <td>@r.CreatedBy.FullName</td>
+                    <td class="text-end">@r.TotalAmount.ToString("N0") đ</td>
+                    <td class="text-center"><span class="badge @(r.Status == ReceiptStatus.Completed ? "bg-success" : r.Status == ReceiptStatus.Draft ? "bg-warning text-dark" : "bg-secondary")">@r.Status.ToDisplay()</span></td>
+                    <td class="text-end"><a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@r.Id"><i class="bi bi-eye"></i></a></td>
+                </tr>
+            }
+            @if (!Model.Items.Any()) { <tr><td colspan="7" class="text-center text-muted py-4">Chưa có phiếu nhập.</td></tr> }
+            </tbody>
+        </table>
+    </div>
+    @if (Model.TotalPages > 1)
+    {
+        <div class="card-footer"><ul class="pagination pagination-sm mb-0 justify-content-end">
+            @for (int i = 1; i <= Model.TotalPages; i++) { <li class="page-item @(i == Model.PageIndex ? "active" : "")"><a class="page-link" href="@Context.Request.WithPage(i)">@i</a></li> }
+        </ul></div>
+    }
+</div>

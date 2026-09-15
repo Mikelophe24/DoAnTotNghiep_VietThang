@@ -1,10 +1,54 @@
+@using VietThang.Web.Helpers
 @{
     ViewData["Title"] = "Bảng điều khiển";
+    var recent = (List<Order>)ViewBag.RecentOrders;
 }
-<h1 class="h3 mb-4">Bảng điều khiển</h1>
+<h1 class="h4 mb-3">Bảng điều khiển</h1>
+<div class="row g-3 mb-3">
+    <div class="col-6 col-xl-3"><div class="card h-100"><div class="card-body"><div class="text-muted small">Đơn hôm nay</div><div class="fs-3 fw-bold">@ViewBag.OrdersToday</div></div></div></div>
+    <div class="col-6 col-xl-3"><div class="card h-100 @(((int)ViewBag.PendingOrders) > 0 ? "border-warning" : "")"><div class="card-body"><div class="text-muted small">Chờ xác nhận</div><div class="fs-3 fw-bold">@ViewBag.PendingOrders</div><a class="small" asp-controller="Orders" asp-action="Index" asp-route-status="0">Xử lý ngay →</a></div></div></div>
+    <div class="col-6 col-xl-3"><div class="card h-100"><div class="card-body"><div class="text-muted small">Doanh thu hôm nay</div><div class="fs-3 fw-bold">@(((decimal)ViewBag.RevenueToday).ToString("N0")) đ</div><div class="small text-muted">Tháng này: @(((decimal)ViewBag.RevenueMonth).ToString("N0")) đ</div></div></div></div>
+    <div class="col-6 col-xl-3"><div class="card h-100 @(((int)ViewBag.LowStock) > 0 ? "border-danger" : "")"><div class="card-body"><div class="text-muted small">Sản phẩm đang bán / sắp hết</div><div class="fs-3 fw-bold">@ViewBag.ProductCount <span class="text-danger fs-6">(@ViewBag.LowStock)</span></div><a class="small" asp-controller="Inventory" asp-action="Index" asp-route-lowOnly="true">Xem tồn kho →</a></div></div></div>
+</div>
+<div class="row g-3 mb-3">
+    <div class="col-md-4"><div class="card"><div class="card-body py-2 d-flex justify-content-between"><span class="text-muted small">Khách đã mua hàng</span><strong>@ViewBag.CustomerCount</strong></div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body py-2 d-flex justify-content-between"><span class="text-muted small">Đánh giá chờ duyệt</span><strong>@ViewBag.PendingReviews</strong></div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body py-2 d-flex justify-content-between"><span class="text-muted small">Liên hệ chưa xử lý</span><strong>@ViewBag.NewContacts</strong></div></div></div>
+</div>
 <div class="row g-3">
-    <div class="col-md-3"><div class="card"><div class="card-body"><div class="text-muted small">Đơn hôm nay</div><div class="fs-3 fw-bold">@ViewBag.OrdersToday</div></div></div></div>
-    <div class="col-md-3"><div class="card"><div class="card-body"><div class="text-muted small">Chờ xác nhận</div><div class="fs-3 fw-bold">@ViewBag.PendingOrders</div></div></div></div>
-    <div class="col-md-3"><div class="card"><div class="card-body"><div class="text-muted small">Doanh thu hôm nay</div><div class="fs-3 fw-bold">@(((decimal)ViewBag.RevenueToday).ToString("N0")) đ</div></div></div></div>
-    <div class="col-md-3"><div class="card"><div class="card-body"><div class="text-muted small">Sản phẩm đang bán / sắp hết</div><div class="fs-3 fw-bold">@ViewBag.ProductCount <span class="text-danger fs-6">(@ViewBag.LowStock)</span></div></div></div></div>
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header fw-semibold d-flex justify-content-between"><span>Đơn hàng gần đây</span><a class="small" asp-controller="Orders" asp-action="Index">Tất cả</a></div>
+            <table class="table table-sm mb-0 align-middle">
+                <tbody>
+                @foreach (var o in recent)
+                {
+                    <tr>
+                        <td><a asp-controller="Orders" asp-action="Details" asp-route-id="@o.Id" class="fw-semibold">@o.OrderCode</a><div class="small text-muted">@o.CreatedAt.ToString("HH:mm dd/MM")</div></td>
+                        <td>@o.CustomerName<div class="small text-muted">@o.Phone</div></td>
+                        <td class="text-end">@o.TotalAmount.ToString("N0") đ</td>
+                        <td class="text-end"><span class="badge @o.Status.ToBadgeClass()">@o.Status.ToDisplay()</span></td>
+                    </tr>
+                }
+                @if (!recent.Any()) { <tr><td class="text-center text-muted py-3">Chưa có đơn hàng.</td></tr> }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-header fw-semibold d-flex justify-content-between"><span>Sắp hết hàng</span><a class="small" asp-controller="GoodsReceipts" asp-action="Create">Lập phiếu nhập</a></div>
+            <table class="table table-sm mb-0 align-middle">
+                <tbody>
+                @foreach (var v in ViewBag.LowStockItems)
+                {
+                    <tr>
+                        <td>@v.ProductName<div class="small text-muted">@v.ColorName / @v.SizeName · <code>@v.Sku</code></div></td>
+                        <td class="text-end"><span class="badge @(v.StockQuantity == 0 ? "bg-danger" : "bg-warning text-dark")">@v.StockQuantity</span></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>

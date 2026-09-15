@@ -1,0 +1,126 @@
+@using VietThang.Web.ViewModels.Admin
+@model GoodsReceipt
+@{
+    var isDraft = Model.Status == ReceiptStatus.Draft;
+    ViewData["Title"] = (isDraft ? "Phiếu nhập nháp " : "Phiếu nhập ") + Model.Code;
+    var header = new GoodsReceiptFormViewModel { Id = Model.Id, SupplierId = Model.SupplierId, ReceiptDate = Model.ReceiptDate, Note = Model.Note };
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="h4 mb-0">Phiếu nhập <code>@Model.Code</code>
+            <span class="badge @(Model.Status == ReceiptStatus.Completed ? "bg-success" : isDraft ? "bg-warning text-dark" : "bg-secondary")">@Model.Status.ToDisplay()</span></h1>
+        <div class="small text-muted">Người lập: @Model.CreatedBy.FullName · Tạo lúc @Model.CreatedAt.ToString("HH:mm dd/MM/yyyy") @(Model.CompletedAt.HasValue ? "· Nhập kho lúc " + Model.CompletedAt.Value.ToString("HH:mm dd/MM/yyyy") : "")</div>
+    </div>
+    <div class="d-flex gap-2">
+        @if (isDraft)
+        {
+            <form asp-action="Complete" asp-route-id="@Model.Id" method="post" data-confirm="Duyệt nhập kho phiếu @Model.Code? Tồn kho sẽ được cộng và phiếu không sửa được nữa.">
+                <button class="btn btn-success" @(Model.Details.Any() ? "" : "disabled")><i class="bi bi-check2-circle"></i> Duyệt nhập kho</button>
+            </form>
+            <form asp-action="Cancel" asp-route-id="@Model.Id" method="post" data-confirm="Hủy phiếu nháp này?">
+                <button class="btn btn-outline-danger"><i class="bi bi-x-circle"></i> Hủy phiếu</button>
+            </form>
+        }
+        <a class="btn btn-outline-secondary" asp-action="Index"><i class="bi bi-arrow-left"></i> Danh sách</a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header fw-semibold">Thông tin phiếu</div>
+            <div class="card-body">
+                @if (isDraft)
+                {
+                    <form asp-action="UpdateHeader" method="post">
+                        <input type="hidden" name="Id" value="@Model.Id" />
+                        <div class="mb-3"><label class="form-label">Nhà cung cấp</label><select name="SupplierId" class="form-select" asp-items="ViewBag.Suppliers"></select></div>
+                        <div class="mb-3"><label class="form-label">Ngày nhập</label><input type="date" name="ReceiptDate" value="@Model.ReceiptDate.ToString("yyyy-MM-dd")" class="form-control" /></div>
+                        <div class="mb-3"><label class="form-label">Ghi chú</label><textarea name="Note" class="form-control" rows="2">@Model.Note</textarea></div>
+                        <button class="btn btn-outline-primary btn-sm"><i class="bi bi-save"></i> Lưu thông tin</button>
+                    </form>
+                }
+                else
+                {
+                    <dl class="row mb-0 small">
+                        <dt class="col-5">Nhà cung cấp</dt><dd class="col-7">@Model.Supplier.Name</dd>
+                        <dt class="col-5">Ngày nhập</dt><dd class="col-7">@Model.ReceiptDate.ToString("dd/MM/yyyy")</dd>
+                        <dt class="col-5">Ghi chú</dt><dd class="col-7">@Model.Note</dd>
+                    </dl>
+                }
+            </div>
+        </div>
+
+        @if (isDraft)
+        {
+            <div class="card mt-3">
+                <div class="card-header fw-semibold">Thêm dòng hàng</div>
+                <div class="card-body">
+                    <form asp-action="AddLine" method="post" id="line-form">
+                        <input type="hidden" name="ReceiptId" value="@Model.Id" />
+                        <div class="mb-2"><label class="form-label small">Sản phẩm</label><select id="product-select" class="form-select form-select-sm" asp-items="ViewBag.Products"><option value="">— Chọn sản phẩm —</option></select></div>
+                        <div class="mb-2"><label class="form-label small">Biến thể (màu / size)</label><select name="VariantId" id="variant-select" class="form-select form-select-sm" required disabled><option value="">— Chọn sản phẩm trước —</option></select></div>
+                        <div class="row g-2 mb-2">
+                            <div class="col-5"><label class="form-label small">Số lượng</label><input type="number" name="Quantity" value="1" min="1" class="form-control form-control-sm" required /></div>
+                            <div class="col-7"><label class="form-label small">Giá vốn (đ)</label><input type="number" name="UnitCost" id="unit-cost" value="0" min="0" step="1000" class="form-control form-control-sm" required /></div>
+                        </div>
+                        <div class="small text-muted mb-2" id="variant-info"></div>
+                        <button class="btn btn-primary btn-sm w-100"><i class="bi bi-plus-lg"></i> Thêm dòng</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header fw-semibold">Dòng hàng (@Model.Details.Count)</div>
+            <div class="table-responsive">
+                <table class="table mb-0 align-middle">
+                    <thead class="table-light"><tr><th>Sản phẩm</th><th>Biến thể</th><th>SKU</th><th class="text-center">SL</th><th class="text-end">Giá vốn</th><th class="text-end">Thành tiền</th>@if (isDraft) { <th></th> }</tr></thead>
+                    <tbody>
+                    @foreach (var d in Model.Details)
+                    {
+                        <tr>
+                            <td>@d.Variant.Product.Name</td>
+                            <td>@d.Variant.Color.Name / @d.Variant.Size.Name</td>
+                            <td><code>@d.Variant.Sku</code></td>
+                            <td class="text-center">@d.Quantity</td>
+                            <td class="text-end">@d.UnitCost.ToString("N0")</td>
+                            <td class="text-end fw-semibold">@d.LineTotal.ToString("N0")</td>
+                            @if (isDraft)
+                            {
+                                <td class="text-end"><form asp-action="RemoveLine" asp-route-id="@d.Id" method="post"><button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button></form></td>
+                            }
+                        </tr>
+                    }
+                    @if (!Model.Details.Any()) { <tr><td colspan="7" class="text-center text-muted py-4">Chưa có dòng hàng nào.</td></tr> }
+                    </tbody>
+                    <tfoot class="table-light"><tr><th colspan="5" class="text-end">Tổng tiền nhập</th><th class="text-end">@Model.Details.Sum(d => d.LineTotal).ToString("N0") đ</th>@if (isDraft) { <th></th> }</tr></tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+<script>
+    const ps = document.getElementById('product-select'), vs = document.getElementById('variant-select');
+    if (ps) {
+        let variants = [];
+        ps.addEventListener('change', async () => {
+            vs.innerHTML = '<option value="">Đang tải...</option>'; vs.disabled = true;
+            if (!ps.value) { vs.innerHTML = '<option value="">— Chọn sản phẩm trước —</option>'; return; }
+            const res = await fetch('@Url.Action("Variants")?productId=' + ps.value);
+            variants = await res.json();
+            vs.innerHTML = '<option value="">— Chọn biến thể —</option>' + variants.map(v => `<option value="${v.id}">${v.label} · tồn ${v.stock}</option>`).join('');
+            vs.disabled = false;
+        });
+        vs.addEventListener('change', () => {
+            const v = variants.find(x => x.id == vs.value);
+            if (!v) return;
+            document.getElementById('unit-cost').value = v.costPrice;
+            document.getElementById('variant-info').textContent = 'Tồn hiện tại: ' + v.stock + ' · Giá vốn gần nhất: ' + Number(v.costPrice).toLocaleString('vi-VN') + ' đ';
+        });
+    }
+</script>
+}

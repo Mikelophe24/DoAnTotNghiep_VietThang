@@ -38,5 +38,29 @@ window.VT = (function () {
     }
   }
 
-  return { addToCart, toast };
+  async function toggleWishlist(productId) {
+    try {
+      const res = await fetch('/yeu-thich/toggle', {
+        method: 'POST',
+        headers: { 'RequestVerificationToken': token(), 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+        body: new URLSearchParams({ productId })
+      });
+      if (res.redirected || res.status === 401) {
+        window.location.href = '/dang-nhap?ReturnUrl=' + encodeURIComponent(window.location.pathname);
+        return null;
+      }
+      const data = await res.json();
+      toast(data.message, true);
+      document.querySelectorAll('[data-wishlist="' + productId + '"] i').forEach(i => {
+        i.classList.toggle('bi-heart-fill', data.added);
+        i.classList.toggle('bi-heart', !data.added);
+      });
+      return data;
+    } catch (e) {
+      toast('Không thực hiện được, vui lòng thử lại.', false);
+      return null;
+    }
+  }
+
+  return { addToCart, toast, toggleWishlist };
 })();

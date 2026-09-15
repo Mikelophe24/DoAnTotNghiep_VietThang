@@ -14,21 +14,60 @@ public interface IOrderService
 {
     Task<PlaceOrderResult> PlaceOrderAsync(CheckoutViewModel model, string? userId);
     Task<string> GenerateOrderCodeAsync();
+    /// <summary>Chuyển trạng thái đơn theo máy trạng thái; hủy thì hoàn tồn, hoàn thành thì đánh dấu đã thanh toán.</summary>
+    Task<(bool Success, string Message)> ChangeStatusAsync(int orderId, OrderStatus to, string? note, string? actorUserId);
 }
 
 public class OrderService : IOrderService
 {
     private readonly ApplicationDbContext _db;
     private readonly ICartService _cart;
+    private readonly IInventoryService _inventory;
     private readonly IAppEmailSender _email;
     private readonly ILogger<OrderService> _logger;
 
-    public OrderService(ApplicationDbContext db, ICartService cart, IAppEmailSender email, ILogger<OrderService> logger)
+    public OrderService(ApplicationDbContext db, ICartService cart, IInventoryService inventory, IAppEmailSender email, ILogger<OrderService> logger)
     {
         _db = db;
         _cart = cart;
+        _inventory = inventory;
         _email = email;
         _logger = logger;
+    }
+
+    public async Task<(bool Success, string Message)> ChangeStatusAsync(int orderId, OrderStatus to, string? note, string? actorUserId)
+    {
+        var order = await _db.Orders.Include(o => o.Details).FirstOrDefaultAsync(o => o.Id == orderId);
+        if (order is null) return (false, "Không tìm thấy đơn hàng.");
+        if (!OrderStateMachine.CanTransition(order.Status, to))
+            return (false, $"Không thể chuyển từ \"{order.Status.ToDisplay()}\" sang \"{to.ToDisplay()}\".");
+
+        await using var tx = await _db.Database.BeginTransactionAsync();
+        var from = order.Status;
+        if (to == OrderStatus.Cancelled)
+        {
+            await _inventory.ReturnStockForOrderAsync(order, actorUserId);
+            order.CancelReason = note;
+            if (order.PaymentStatus == PaymentStatus.Paid) order.PaymentStatus = PaymentStatus.Refunded;
+        }
+        if (to == OrderStatus.Completed)
+        {
+            order.PaymentStatus = PaymentStatus.Paid;
+            order.CompletedAt = DateTime.Now;
+        }
+        order.Status = to;
+        order.StatusHistories.Add(new OrderStatusHistory { FromStatus = from, ToStatus = to, Note = note, ChangedByUserId = actorUserId });
+        await _db.SaveChangesAsync();
+        await tx.CommitAsync();
+
+        try
+        {
+            await _email.SendAsync(order.Email, $"[Việt Thắng] Đơn {order.OrderCode}: {to.ToDisplay()}",
+                $"<p>Đơn hàng <b>{order.OrderCode}</b> của bạn đã chuyển sang trạng thái <b>{to.ToDisplay()}</b>.</p>{(string.IsNullOrEmpty(note) ? "" : $"<p>Ghi chú: {note}</p>")}");
+        }
+        catch (Exception ex) { _logger.LogWarning(ex, "Không gửi được email trạng thái đơn {Code}", order.OrderCode); }
+
+        return (true, $"Đơn {order.OrderCode} đã chuyển sang \"{to.ToDisplay()}\".");
     }
 
     public async Task<string> GenerateOrderCodeAsync()

@@ -1,0 +1,28 @@
+@model List<ProductCardVm>
+@{
+    ViewData["Title"] = "Sản phẩm yêu thích";
+}
+<div class="container mt-3">
+    <div class="row g-4">
+        <div class="col-lg-3"><partial name="_CustomerNav" /></div>
+        <div class="col-lg-9">
+            <h1 class="h4 mb-3">Sản phẩm yêu thích <span class="text-muted fs-6">(@Model.Count)</span></h1>
+            @if (!Model.Any())
+            {
+                <div class="bg-white border rounded p-5 text-center text-muted">Chưa có sản phẩm yêu thích. Bấm <i class="bi bi-heart"></i> ở trang sản phẩm để lưu.</div>
+            }
+            else
+            {
+                <div class="row g-3 row-cols-2 row-cols-md-3">
+                    @foreach (var p in Model)
+                    {
+                        <div class="col">
+                            <partial name="_ProductCard" model="p" />
+                            <button type="button" class="btn btn-sm btn-link text-danger w-100" onclick="VT.toggleWishlist(@p.Id).then(r => r && r.success && location.reload())"><i class="bi bi-heartbreak"></i> Bỏ yêu thích</button>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

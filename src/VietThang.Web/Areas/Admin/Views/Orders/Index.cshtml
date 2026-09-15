@@ -1,0 +1,55 @@
+@using VietThang.Web.Helpers
+@using VietThang.Web.ViewModels.Admin
+@model PagedList<Order>
+@{
+    ViewData["Title"] = "Đơn hàng";
+    var f = (OrderListFilter)ViewBag.Filter;
+    var counts = (Dictionary<OrderStatus, int>)ViewBag.Counts;
+    int CountOf(OrderStatus? s) => s is null ? counts.Values.Sum() : (counts.TryGetValue(s.Value, out var n) ? n : 0);
+    var tabs = new (OrderStatus? Status, string Label)[] { (null, "Tất cả"), (OrderStatus.Pending, "Chờ xác nhận"), (OrderStatus.Confirmed, "Đã xác nhận"), (OrderStatus.Shipping, "Đang giao"), (OrderStatus.Completed, "Hoàn thành"), (OrderStatus.Cancelled, "Đã hủy") };
+}
+<h1 class="h4 mb-3">Đơn hàng</h1>
+<ul class="nav nav-pills mb-3 gap-1">
+    @foreach (var t in tabs)
+    {
+        <li class="nav-item"><a class="nav-link @(f.Status == t.Status ? "active" : "")" asp-action="Index" asp-route-status="@t.Status" asp-route-q="@f.Q">@t.Label <span class="badge @(f.Status == t.Status ? "bg-light text-dark" : "bg-secondary")">@CountOf(t.Status)</span></a></li>
+    }
+</ul>
+<form method="get" class="card card-body mb-3">
+    <input type="hidden" name="status" value="@f.Status" />
+    <div class="row g-2 align-items-end">
+        <div class="col-md-4"><label class="form-label small text-muted">Mã đơn / SĐT / tên khách</label><input name="q" value="@f.Q" class="form-control" /></div>
+        <div class="col-md-2"><label class="form-label small text-muted">Từ ngày</label><input type="date" name="from" value="@f.From?.ToString("yyyy-MM-dd")" class="form-control" /></div>
+        <div class="col-md-2"><label class="form-label small text-muted">Đến ngày</label><input type="date" name="to" value="@f.To?.ToString("yyyy-MM-dd")" class="form-control" /></div>
+        <div class="col-md-3 d-flex gap-2"><button class="btn btn-outline-primary"><i class="bi bi-search"></i> Lọc</button><a class="btn btn-outline-secondary" asp-action="Index">Xóa lọc</a></div>
+    </div>
+</form>
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light"><tr><th>Mã đơn</th><th>Thời gian</th><th>Khách hàng</th><th class="text-center">SP</th><th class="text-end">Tổng tiền</th><th>Thanh toán</th><th class="text-center">Trạng thái</th><th></th></tr></thead>
+            <tbody>
+            @foreach (var o in Model.Items)
+            {
+                <tr>
+                    <td><a asp-action="Details" asp-route-id="@o.Id" class="fw-semibold">@o.OrderCode</a></td>
+                    <td class="small">@o.CreatedAt.ToString("HH:mm dd/MM/yyyy")</td>
+                    <td>@o.CustomerName<div class="small text-muted">@o.Phone</div></td>
+                    <td class="text-center">@o.Details.Sum(d => d.Quantity)</td>
+                    <td class="text-end fw-semibold">@o.TotalAmount.ToString("N0") đ</td>
+                    <td class="small">@(o.PaymentMethod == PaymentMethod.Cod ? "COD" : "Chuyển khoản")<br /><span class="@(o.PaymentStatus == PaymentStatus.Paid ? "text-success" : "text-muted")">@o.PaymentStatus.ToDisplay()</span></td>
+                    <td class="text-center"><span class="badge @o.Status.ToBadgeClass()">@o.Status.ToDisplay()</span></td>
+                    <td class="text-end"><a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@o.Id">Xử lý</a></td>
+                </tr>
+            }
+            @if (!Model.Items.Any()) { <tr><td colspan="8" class="text-center text-muted py-4">Không có đơn hàng.</td></tr> }
+            </tbody>
+        </table>
+    </div>
+    @if (Model.TotalPages > 1)
+    {
+        <div class="card-footer"><ul class="pagination pagination-sm mb-0 justify-content-end">
+            @for (int i = Math.Max(1, Model.PageIndex - 3); i <= Math.Min(Model.TotalPages, Model.PageIndex + 3); i++) { <li class="page-item @(i == Model.PageIndex ? "active" : "")"><a class="page-link" href="@Context.Request.WithPage(i)">@i</a></li> }
+        </ul></div>
+    }
+</div>
