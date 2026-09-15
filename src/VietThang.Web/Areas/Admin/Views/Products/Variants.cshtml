@@ -1,0 +1,115 @@
+@model Product
+@{
+    ViewData["Title"] = "Biến thể sản phẩm";
+    var colors = (List<Color>)ViewBag.Colors;
+    var sizes = (List<Size>)ViewBag.Sizes;
+    var usedIds = (List<int>)ViewBag.UsedVariantIds;
+    var variants = Model.Variants.OrderBy(v => v.Color.Name).ThenBy(v => v.Size.DisplayOrder).ToList();
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="h4 mb-0">Biến thể: @Model.Name</h1>
+        <div class="small text-muted"><code>@Model.Code</code> · Giá niêm yết @Model.Price.ToString("N0") đ · @variants.Count biến thể · tồn @variants.Sum(v => v.StockQuantity)</div>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-secondary" asp-action="Edit" asp-route-id="@Model.Id"><i class="bi bi-pencil"></i> Sửa sản phẩm</a>
+        <a class="btn btn-outline-secondary" asp-action="Index"><i class="bi bi-arrow-left"></i> Danh sách</a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header fw-semibold">Danh sách biến thể</div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Màu</th><th>Size</th><th>SKU</th>
+                            <th style="width:160px">Giá riêng (đ)</th>
+                            <th class="text-end">Giá vốn</th>
+                            <th class="text-center">Tồn</th>
+                            <th class="text-center">Bán</th>
+                            <th class="text-end" style="width:120px"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var v in variants)
+                    {
+                        var used = usedIds.Contains(v.Id);
+                        <tr>
+                            <td><span class="color-dot" style="background:@(v.Color.HexCode ?? "#fff")"></span>@v.Color.Name</td>
+                            <td>@v.Size.Name</td>
+                            <td><code>@v.Sku</code></td>
+                            <td><input type="number" name="Price" form="upd-@v.Id" value="@v.Price" min="0" step="1000" class="form-control form-control-sm" placeholder="@Model.Price.ToString("N0")" /></td>
+                            <td class="text-end">@v.CostPrice.ToString("N0")</td>
+                            <td class="text-center @(v.StockQuantity == 0 ? "text-danger fw-semibold" : "")">@v.StockQuantity</td>
+                            <td class="text-center"><input type="checkbox" name="IsActive" value="true" form="upd-@v.Id" class="form-check-input" checked="@v.IsActive" /></td>
+                            <td class="text-end">
+                                <button type="submit" form="upd-@v.Id" class="btn btn-sm btn-outline-primary" title="Lưu"><i class="bi bi-check-lg"></i></button>
+                                @if (used)
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" disabled title="Đã có lịch sử bán/nhập"><i class="bi bi-lock"></i></button>
+                                }
+                                else
+                                {
+                                    <button type="submit" form="del-@v.Id" class="btn btn-sm btn-outline-danger" title="Xóa"><i class="bi bi-trash"></i></button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    @if (!variants.Any())
+                    {
+                        <tr><td colspan="8" class="text-center text-muted py-4">Chưa có biến thể. Chọn màu và size ở bên phải để tạo.</td></tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer small text-muted">
+                Giá riêng để trống thì dùng giá niêm yết của sản phẩm. Tồn kho thay đổi qua Phiếu nhập / Điều chỉnh kho (tuần 6), không sửa trực tiếp ở đây.
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header fw-semibold">Tạo biến thể theo ma trận màu × size</div>
+            <div class="card-body">
+                <form asp-action="GenerateVariants" asp-route-id="@Model.Id" method="post">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <label class="form-label fw-semibold">Màu</label>
+                            <label class="small"><input type="checkbox" class="form-check-input" data-check-all="colorIds" /> chọn hết</label>
+                        </div>
+                        <div class="row row-cols-2 g-1">
+                        @foreach (var c in colors)
+                        {
+                            <div class="col"><label class="form-check small"><input class="form-check-input" type="checkbox" name="colorIds" value="@c.Id" /> <span class="color-dot" style="background:@(c.HexCode ?? "#fff")"></span>@c.Name</label></div>
+                        }
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <label class="form-label fw-semibold">Size</label>
+                            <label class="small"><input type="checkbox" class="form-check-input" data-check-all="sizeIds" /> chọn hết</label>
+                        </div>
+                        <div class="row row-cols-2 g-1">
+                        @foreach (var s in sizes)
+                        {
+                            <div class="col"><label class="form-check small"><input class="form-check-input" type="checkbox" name="sizeIds" value="@s.Id" /> @s.Name</label></div>
+                        }
+                        </div>
+                    </div>
+                    <button class="btn btn-primary w-100"><i class="bi bi-magic"></i> Tạo biến thể còn thiếu</button>
+                    <div class="form-text">Tổ hợp đã tồn tại sẽ được bỏ qua. SKU sinh tự động: MÃ-MÀU-SIZE.</div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@foreach (var v in variants)
+{
+    <form id="upd-@v.Id" asp-action="UpdateVariant" method="post"><input type="hidden" name="Id" value="@v.Id" /></form>
+    <form id="del-@v.Id" asp-action="DeleteVariant" asp-route-id="@v.Id" method="post" data-confirm="Xóa biến thể @v.Sku?"></form>
+}

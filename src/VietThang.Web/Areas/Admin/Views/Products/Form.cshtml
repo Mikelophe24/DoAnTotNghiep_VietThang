@@ -1,0 +1,158 @@
+@model VietThang.Web.ViewModels.Admin.ProductFormViewModel
+@{
+    var isEdit = Model.Id > 0;
+    ViewData["Title"] = isEdit ? "Sửa sản phẩm" : "Thêm sản phẩm";
+    var product = ViewBag.Product as Product;
+    var categories = (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.Categories;
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="h4 mb-0">@ViewData["Title"]</h1>
+        @if (isEdit) { <div class="small text-muted"><code>@Model.Code</code> · @product?.Variants.Count biến thể · tồn @product?.Variants.Sum(v => v.StockQuantity)</div> }
+    </div>
+    <div class="d-flex gap-2">
+        @if (isEdit)
+        {
+            <a class="btn btn-outline-primary" asp-action="Variants" asp-route-id="@Model.Id"><i class="bi bi-grid-3x3-gap"></i> Biến thể màu / size</a>
+        }
+        <a class="btn btn-outline-secondary" asp-action="Index"><i class="bi bi-arrow-left"></i> Danh sách</a>
+    </div>
+</div>
+
+<form asp-action="@(isEdit ? "Edit" : "Create")" method="post" enctype="multipart/form-data">
+    <input type="hidden" asp-for="Id" />
+    <div class="row g-3">
+        <div class="col-lg-8">
+            <div class="card mb-3">
+                <div class="card-header fw-semibold">Thông tin cơ bản</div>
+                <div class="card-body">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="Code" class="form-label required"></label>
+                            <input asp-for="Code" class="form-control text-uppercase" placeholder="VT-BL-011" />
+                            <span asp-validation-for="Code" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-8 mb-3">
+                            <label asp-for="Name" class="form-label required"></label>
+                            <input asp-for="Name" class="form-control" data-slug-source />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Slug" class="form-label"></label>
+                        <input asp-for="Slug" class="form-control" data-slug-target placeholder="Để trống sẽ tự sinh từ tên" />
+                        <span asp-validation-for="Slug" class="text-danger small"></span>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="CategoryId" class="form-label required"></label>
+                            <select asp-for="CategoryId" asp-items="categories" class="form-select"><option value="">— Chọn danh mục —</option></select>
+                            <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label asp-for="Material" class="form-label"></label>
+                            <input asp-for="Material" class="form-control" list="materials" />
+                            <datalist id="materials"><option value="Lanh"></option><option value="Cotton"></option><option value="Thun lạnh"></option><option value="Lụa"></option><option value="Đũi"></option></datalist>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label asp-for="Price" class="form-label required"></label>
+                            <div class="input-group">
+                                <input asp-for="Price" type="number" step="1000" min="0" class="form-control" />
+                                <span class="input-group-text">đ</span>
+                            </div>
+                            <span asp-validation-for="Price" class="text-danger small"></span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="ShortDescription" class="form-label"></label>
+                        <textarea asp-for="ShortDescription" class="form-control" rows="2"></textarea>
+                        <span asp-validation-for="ShortDescription" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-0">
+                        <label asp-for="Description" class="form-label"></label>
+                        <textarea asp-for="Description" class="form-control" rows="10"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            @if (isEdit && product is not null)
+            {
+                <div class="card">
+                    <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
+                        <span>Ảnh sản phẩm (@product.Images.Count)</span>
+                    </div>
+                    <div class="card-body">
+                        @if (product.Images.Any())
+                        {
+                            <div class="d-flex flex-wrap gap-3 mb-3">
+                            @foreach (var img in product.Images)
+                            {
+                                <div class="text-center" style="width:120px">
+                                    <img src="@img.Url" class="thumb-md @(img.IsMain ? "border border-2 border-primary" : "")" alt="" />
+                                    <div class="small text-muted mt-1">@(img.IsMain ? "Ảnh chính" : "")</div>
+                                    <div class="btn-group btn-group-sm mt-1">
+                                        @if (!img.IsMain)
+                                        {
+                                            <button type="submit" class="btn btn-outline-primary" form="setmain-@img.Id" title="Đặt làm ảnh chính"><i class="bi bi-star"></i></button>
+                                        }
+                                        <button type="submit" class="btn btn-outline-danger" form="delimg-@img.Id" title="Xóa ảnh"><i class="bi bi-trash"></i></button>
+                                    </div>
+                                </div>
+                            }
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted">Chưa có ảnh. Thêm ảnh bên dưới.</p>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card mb-3">
+                <div class="card-header fw-semibold">Hiển thị</div>
+                <div class="card-body">
+                    <div class="form-check mb-2"><input asp-for="IsActive" class="form-check-input" /><label asp-for="IsActive" class="form-check-label"></label></div>
+                    <div class="form-check mb-2"><input asp-for="IsNew" class="form-check-input" /><label asp-for="IsNew" class="form-check-label"></label></div>
+                    <div class="form-check"><input asp-for="IsFeatured" class="form-check-input" /><label asp-for="IsFeatured" class="form-check-label"></label></div>
+                </div>
+            </div>
+            <div class="card mb-3">
+                <div class="card-header fw-semibold">@(isEdit ? "Thêm ảnh mới" : "Ảnh sản phẩm")</div>
+                <div class="card-body">
+                    <input asp-for="ImageFiles" type="file" accept="image/*" multiple class="form-control" />
+                    <div class="form-text">Chọn nhiều ảnh. Ảnh đầu tiên sẽ là ảnh chính nếu chưa có.</div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-check-lg"></i> @(isEdit ? "Lưu thay đổi" : "Thêm sản phẩm")</button>
+        </div>
+    </div>
+</form>
+
+@if (isEdit && product is not null)
+{
+    @foreach (var img in product.Images)
+    {
+        <form id="setmain-@img.Id" asp-action="SetMainImage" asp-route-id="@img.Id" method="post"></form>
+        <form id="delimg-@img.Id" asp-action="DeleteImage" asp-route-id="@img.Id" method="post" data-confirm="Xóa ảnh này?"></form>
+    }
+}
+
+@section Scripts {
+    <partial name="/Views/Shared/_ValidationScriptsPartial.cshtml" />
+    <script src="https://cdn.jsdelivr.net/npm/tinymce@6.8.3/tinymce.min.js"></script>
+    <script>
+        tinymce.init({
+            selector: '#Description',
+            height: 360,
+            menubar: false,
+            plugins: 'lists link table code',
+            toolbar: 'undo redo | blocks | bold italic underline | bullist numlist | link table | code',
+            branding: false,
+            promotion: false
+        });
+    </script>
+}

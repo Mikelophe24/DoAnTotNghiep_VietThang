@@ -1,0 +1,35 @@
+@model VietThang.Web.ViewModels.Account.LoginViewModel
+@{
+    ViewData["Title"] = "Đăng nhập";
+}
+<div class="row justify-content-center my-5">
+    <div class="col-md-5 col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h1 class="h4 mb-3 text-center">Đăng nhập</h1>
+                <form asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" autocomplete="username" autofocus />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label"></label>
+                        <input asp-for="Password" class="form-control" autocomplete="current-password" />
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input asp-for="RememberMe" class="form-check-input" />
+                        <label asp-for="RememberMe" class="form-check-label"></label>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
+                </form>
+                <p class="text-center small mt-3 mb-0">Chưa có tài khoản? <a asp-action="Register">Đăng ký</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

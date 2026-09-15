@@ -1,0 +1,22 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.swp
+TestResults/
+publish/
+
+## Secrets / local config
+appsettings.Development.local.json
+*.pfx
+
+## Uploads (ảnh sản phẩm do người dùng tải lên)
+src/VietThang.Web/wwwroot/uploads/*
+!src/VietThang.Web/wwwroot/uploads/.gitkeep
+
+## Node / misc
+node_modules/
+.DS_Store
+Thumbs.db

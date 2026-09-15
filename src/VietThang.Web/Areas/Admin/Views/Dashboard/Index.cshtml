@@ -1,0 +1,10 @@
+@{
+    ViewData["Title"] = "Bảng điều khiển";
+}
+<h1 class="h3 mb-4">Bảng điều khiển</h1>
+<div class="row g-3">
+    <div class="col-md-3"><div class="card"><div class="card-body"><div class="text-muted small">Đơn hôm nay</div><div class="fs-3 fw-bold">@ViewBag.OrdersToday</div></div></div></div>
+    <div class="col-md-3"><div class="card"><div class="card-body"><div class="text-muted small">Chờ xác nhận</div><div class="fs-3 fw-bold">@ViewBag.PendingOrders</div></div></div></div>
+    <div class="col-md-3"><div class="card"><div class="card-body"><div class="text-muted small">Doanh thu hôm nay</div><div class="fs-3 fw-bold">@(((decimal)ViewBag.RevenueToday).ToString("N0")) đ</div></div></div></div>
+    <div class="col-md-3"><div class="card"><div class="card-body"><div class="text-muted small">Sản phẩm đang bán / sắp hết</div><div class="fs-3 fw-bold">@ViewBag.ProductCount <span class="text-danger fs-6">(@ViewBag.LowStock)</span></div></div></div></div>
+</div>

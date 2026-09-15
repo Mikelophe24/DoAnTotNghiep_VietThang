@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800">
+  <rect width="600" height="800" fill="#EEF2F8"/>
+  <path d="M180 220 L230 180 L270 200 Q300 215 330 200 L370 180 L420 220 L400 270 L370 255 L370 620 L230 620 L230 255 L200 270 Z" fill="#C9D4E5"/>
+  <text x="300" y="700" text-anchor="middle" font-family="Arial, sans-serif" font-size="26" fill="#7A8699">Ảnh sản phẩm</text>
+</svg>

@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/VietThang.Web/VietThang.Web.csproj" />
+  </Folder>
+</Solution>

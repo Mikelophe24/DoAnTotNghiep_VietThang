@@ -1,0 +1,111 @@
+@using VietThang.Web.Helpers
+@using VietThang.Web.ViewModels.Admin
+@model PagedList<ProductListItem>
+@{
+    ViewData["Title"] = "Sản phẩm";
+    var f = (ProductListFilter)ViewBag.Filter;
+    var categories = (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.Categories;
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Sản phẩm <span class="badge bg-secondary">@Model.TotalCount</span></h1>
+    <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg"></i> Thêm sản phẩm</a>
+</div>
+
+<form method="get" class="card card-body mb-3">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label small text-muted">Tìm theo tên / mã</label>
+            <input name="q" value="@f.Q" class="form-control" placeholder="VD: lanh nữ, VT-BL-001" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small text-muted">Danh mục</label>
+            <select name="categoryId" class="form-select" asp-items="categories"><option value="">Tất cả</option></select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small text-muted">Trạng thái</label>
+            <select name="active" class="form-select">
+                <option value="">Tất cả</option>
+                <option value="true" selected="@(f.Active == true)">Đang bán</option>
+                <option value="false" selected="@(f.Active == false)">Ngừng bán</option>
+            </select>
+        </div>
+        <div class="col-md-3 d-flex gap-2">
+            <button class="btn btn-outline-primary"><i class="bi bi-search"></i> Lọc</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">Xóa lọc</a>
+        </div>
+    </div>
+</form>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th style="width:64px"></th>
+                    <th>Sản phẩm</th>
+                    <th>Danh mục</th>
+                    <th class="text-end">Giá</th>
+                    <th class="text-center">Biến thể</th>
+                    <th class="text-center">Tồn</th>
+                    <th class="text-center">Trạng thái</th>
+                    <th class="text-end" style="width:170px"></th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var p in Model.Items)
+            {
+                <tr>
+                    <td><img src="@(p.ImageUrl ?? "/images/products/placeholder.svg")" class="thumb-sm" alt="" /></td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@p.Id" class="fw-semibold text-decoration-none">@p.Name</a>
+                        @if (p.IsNew) { <span class="badge bg-info text-dark">Mới</span> }
+                        <div class="small text-muted"><code>@p.Code</code></div>
+                    </td>
+                    <td>@p.CategoryName</td>
+                    <td class="text-end">@p.Price.ToString("N0") đ</td>
+                    <td class="text-center">@p.VariantCount</td>
+                    <td class="text-center @(p.TotalStock == 0 ? "text-danger fw-semibold" : "")">@p.TotalStock</td>
+                    <td class="text-center">
+                        <form asp-action="ToggleActive" asp-route-id="@p.Id" asp-route-returnUrl="@Context.Request.Path@Context.Request.QueryString" method="post" class="d-inline">
+                            <button class="btn btn-sm @(p.IsActive ? "btn-success" : "btn-outline-secondary")">@(p.IsActive ? "Đang bán" : "Ngừng bán")</button>
+                        </form>
+                    </td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-primary" asp-action="Variants" asp-route-id="@p.Id" title="Biến thể"><i class="bi bi-grid-3x3-gap"></i></a>
+                        <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@p.Id" title="Sửa"><i class="bi bi-pencil"></i></a>
+                        <form asp-action="Delete" asp-route-id="@p.Id" method="post" class="d-inline" data-confirm="Xóa sản phẩm '@p.Name'? Ảnh và biến thể sẽ bị xóa theo.">
+                            <button class="btn btn-sm btn-outline-danger" title="Xóa"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            @if (!Model.Items.Any())
+            {
+                <tr><td colspan="8" class="text-center text-muted py-4">Không có sản phẩm phù hợp.</td></tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    @if (Model.TotalPages > 1)
+    {
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <span class="small text-muted">Trang @Model.PageIndex / @Model.TotalPages</span>
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item @(Model.HasPrevious ? "" : "disabled")">
+                        <a class="page-link" asp-action="Index" asp-route-q="@f.Q" asp-route-categoryId="@f.CategoryId" asp-route-active="@f.Active" asp-route-page="@(Model.PageIndex - 1)">‹</a>
+                    </li>
+                    @for (int i = Math.Max(1, Model.PageIndex - 2); i <= Math.Min(Model.TotalPages, Model.PageIndex + 2); i++)
+                    {
+                        <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                            <a class="page-link" asp-action="Index" asp-route-q="@f.Q" asp-route-categoryId="@f.CategoryId" asp-route-active="@f.Active" asp-route-page="@i">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(Model.HasNext ? "" : "disabled")">
+                        <a class="page-link" asp-action="Index" asp-route-q="@f.Q" asp-route-categoryId="@f.CategoryId" asp-route-active="@f.Active" asp-route-page="@(Model.PageIndex + 1)">›</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    }
+</div>
