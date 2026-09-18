@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#EEF2F8"/></linearGradient>
+  <pattern id="pat" width="44" height="44" patternUnits="userSpaceOnUse"><g fill="#D96C8A" opacity="0.55"><circle cx="12" cy="12" r="3"/><circle cx="17" cy="9" r="3"/><circle cx="17" cy="15" r="3"/><circle cx="7" cy="9" r="3"/><circle cx="7" cy="15" r="3"/><circle cx="12" cy="12" r="1.6" fill="#F2C14E"/><circle cx="33" cy="32" r="2.4"/><circle cx="37" cy="29" r="2.4"/><circle cx="37" cy="35" r="2.4"/><circle cx="29" cy="29" r="2.4"/><circle cx="29" cy="35" r="2.4"/></g></pattern>
+</defs>
+<rect width="600" height="800" fill="url(#bg)"/>
+<circle cx="300" cy="400" r="250" fill="#F4A7B9" opacity="0.25"/>
+<g transform="translate(300,460) scale(1) translate(-300,-460)"><path d="M200,170 L150,182 L108,300 L172,322 L182,440 L418,440 L428,322 L492,300 L450,182 L400,170 Q300,250 200,170 Z" fill="#F4A7B9" stroke="#B9C2CF" stroke-width="4" stroke-linejoin="round"/><path d="M200,170 L150,182 L108,300 L172,322 L182,440 L418,440 L428,322 L492,300 L450,182 L400,170 Q300,250 200,170 Z" fill="url(#pat)" opacity="0.85"/><path d="M215,172 Q300,232 385,172" fill="none" stroke="#C9D1DC" stroke-width="7"/><path d="M300,250 L300,438" stroke="#C9D1DC" stroke-width="2" opacity="0.5"/><g transform="translate(0,0)"><path d="M186,458 L414,458 L432,600 L318,600 L300,520 L282,600 L168,600 Z" fill="#F4A7B9" stroke="#B9C2CF" stroke-width="4" stroke-linejoin="round"/><path d="M186,458 L414,458 L432,600 L318,600 L300,520 L282,600 L168,600 Z" fill="url(#pat)" opacity="0.85"/><path d="M186,470 L414,470" stroke="#C9D1DC" stroke-width="5"/></g></g>
+<rect x="0" y="690" width="600" height="110" fill="#FFFFFF" opacity="0.9"/>
+<text x="300" y="728" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700" fill="#1F3A5F">Bộ lanh nữ quần đùi họa</text>
+<text x="300" y="756" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="600" fill="#1F3A5F">tiết hoa nhí</text>
+<g transform="translate(300,782)"><rect x="-70" y="-13" width="140" height="22" rx="11" fill="#F4A7B9" stroke="#B9C2CF" stroke-width="1"/><text y="4" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#1F3A5F">Hồng</text></g>
+<text x="24" y="40" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" fill="#1F3A5F" opacity="0.7">VT · Việt Thắng</text>
+<text x="576" y="40" text-anchor="end" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#6b7280">VT-BL-001</text>
+</svg>

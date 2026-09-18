@@ -36,6 +36,39 @@ public static class SeedData
         await SeedProductsAsync(db);
         await SeedPromotionsAndCouponsAsync(db);
         await SeedPostsAsync(db, admin);
+        await UpgradeImagesAsync(db, services.GetRequiredService<IWebHostEnvironment>());
+    }
+
+    /// <summary>Đường dẫn ảnh minh họa theo mã sản phẩm + màu (sinh bởi tools/gen-images.mjs).</summary>
+    private static string ProductImagePath(string code, string colorName) => $"/images/products/{code}-{SlugHelper.ToCodePart(colorName)}.svg";
+
+    /// <summary>
+    /// Chạy mỗi lần khởi động: sản phẩm chỉ có ảnh placeholder sẽ được gắn ảnh theo từng màu (nếu file tồn tại);
+    /// danh mục gốc chưa có ảnh sẽ dùng ảnh /images/categories/{slug}.svg.
+    /// </summary>
+    private static async Task UpgradeImagesAsync(ApplicationDbContext db, IWebHostEnvironment env)
+    {
+        bool Exists(string url) => File.Exists(Path.Combine(env.WebRootPath, url.TrimStart('/').Replace('/', Path.DirectorySeparatorChar)));
+
+        var products = await db.Products.Include(p => p.Images).Include(p => p.Variants).ThenInclude(v => v.Color).ToListAsync();
+        foreach (var p in products)
+        {
+            if (p.Images.Any(i => !i.Url.EndsWith("placeholder.svg"))) continue;
+            var colors = p.Variants.Select(v => v.Color).DistinctBy(c => c.Id).OrderBy(c => c.Name).ToList();
+            var images = colors.Select(c => (Color: c, Url: ProductImagePath(p.Code, c.Name))).Where(x => Exists(x.Url)).ToList();
+            if (images.Count == 0) continue;
+            p.Images.Clear();
+            int order = 0;
+            foreach (var (color, url) in images)
+                p.Images.Add(new ProductImage { Url = url, ColorId = color.Id, IsMain = order == 0, DisplayOrder = order++ });
+        }
+
+        foreach (var c in await db.Categories.Where(c => c.ParentId == null && c.ImageUrl == null).ToListAsync())
+        {
+            var url = $"/images/categories/{c.Slug}.svg";
+            if (Exists(url)) c.ImageUrl = url;
+        }
+        await db.SaveChangesAsync();
     }
 
     private static async Task SeedRolesAsync(RoleManager<IdentityRole> roleManager)
@@ -236,11 +269,11 @@ public static class SeedData
                 ShortDescription = $"Chất liệu {s.material.ToLower()} mềm mát, thoáng khí, phù hợp mặc nhà và đi chơi.",
                 Description = $"<p><strong>{s.name}</strong> được may từ chất liệu {s.material.ToLower()} cao cấp, thấm hút tốt, không xù lông sau nhiều lần giặt.</p><ul><li>Form dáng thoải mái, dễ mặc.</li><li>Đường may tỉ mỉ, chắc chắn.</li><li>Sản xuất tại xưởng của Việt Thắng.</li></ul>"
             };
-            product.Images.Add(new ProductImage { Url = "/images/products/placeholder.svg", IsMain = true, DisplayOrder = 0 });
-
+            int imageOrder = 0;
             foreach (var colorName in s.colorNames)
             {
                 var color = colors[colorName];
+                product.Images.Add(new ProductImage { Url = ProductImagePath(s.code, colorName), ColorId = color.Id, IsMain = imageOrder == 0, DisplayOrder = imageOrder++ });
                 foreach (var sizeName in s.sizeNames)
                 {
                     var size = sizes[sizeName];

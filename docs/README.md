@@ -35,6 +35,10 @@ cd src/vietthang-web && npm start
 
 Storefront Razor cũ (`/`, `/danh-muc/...` trên cổng 5292) vẫn chạy và có thể dùng làm bản so sánh; Admin ở `http://localhost:5292/Admin`.
 
+## Ảnh sản phẩm mẫu
+
+`tools/gen-images.mjs` (chạy `node tools/gen-images.mjs` ở thư mục gốc) sinh 31 ảnh SVG minh họa theo mã sản phẩm + màu (`/images/products/{MÃ}-{MÀU}.svg`) và 4 ảnh nhóm danh mục. `SeedData.UpgradeImagesAsync` chạy mỗi lần khởi động: sản phẩm chỉ có ảnh placeholder sẽ được gắn ảnh theo từng màu (gallery đổi ảnh khi chọn màu), sản phẩm đã có ảnh thật tải lên qua Admin được giữ nguyên. Ảnh thật của cửa hàng thêm qua Admin → Sản phẩm → Sửa → Thêm ảnh (chọn màu tương ứng).
+
 ## Chạy dự án
 
 ```powershell

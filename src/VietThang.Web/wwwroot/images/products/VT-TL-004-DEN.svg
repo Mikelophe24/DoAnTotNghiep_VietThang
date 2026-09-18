@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#EEF2F8"/></linearGradient>
+  
+</defs>
+<rect width="600" height="800" fill="url(#bg)"/>
+<circle cx="300" cy="400" r="250" fill="#2B2B2B" opacity="0.12"/>
+<g transform="translate(300,305) scale(1) translate(-300,-305)"><path d="M200,170 L150,182 L108,300 L172,322 L182,440 L418,440 L428,322 L492,300 L450,182 L400,170 L300,235 L200,170 Z" fill="#2B2B2B" stroke="#1e1e1e" stroke-width="4" stroke-linejoin="round"/><path d="M200,170 L300,235 L400,170" fill="none" stroke="#222222" stroke-width="6" stroke-linejoin="round"/><path d="M300,250 L300,438" stroke="#222222" stroke-width="2" opacity="0.5"/></g>
+<rect x="0" y="690" width="600" height="110" fill="#FFFFFF" opacity="0.9"/>
+<text x="300" y="728" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700" fill="#1F3A5F">Áo thun lạnh nữ cổ tim</text>
+
+<g transform="translate(300,758)"><rect x="-70" y="-13" width="140" height="22" rx="11" fill="#2B2B2B" stroke="#B9C2CF" stroke-width="0"/><text y="4" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#FFFFFF">Đen</text></g>
+<text x="24" y="40" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" fill="#1F3A5F" opacity="0.7">VT · Việt Thắng</text>
+<text x="576" y="40" text-anchor="end" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#6b7280">VT-TL-004</text>
+</svg>

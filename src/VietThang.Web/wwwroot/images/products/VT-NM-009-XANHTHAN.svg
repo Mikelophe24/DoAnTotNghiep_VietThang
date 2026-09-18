@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800">
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#EEF2F8"/></linearGradient>
+  
+</defs>
+<rect width="600" height="800" fill="url(#bg)"/>
+<circle cx="300" cy="400" r="250" fill="#1F3A5F" opacity="0.12"/>
+<g transform="translate(300,460) scale(1) translate(-300,-460)"><path d="M200,170 L150,182 L108,300 L172,322 L182,440 L418,440 L428,322 L492,300 L450,182 L400,170 Q300,250 200,170 Z" fill="#1F3A5F" stroke="#162943" stroke-width="4" stroke-linejoin="round"/><path d="M215,172 Q300,232 385,172" fill="none" stroke="#192e4c" stroke-width="7"/><path d="M300,250 L300,438" stroke="#192e4c" stroke-width="2" opacity="0.5"/><g transform="translate(0,0)"><path d="M186,458 L414,458 L432,600 L318,600 L300,520 L282,600 L168,600 Z" fill="#1F3A5F" stroke="#162943" stroke-width="4" stroke-linejoin="round"/><path d="M186,470 L414,470" stroke="#192e4c" stroke-width="5"/></g></g>
+<rect x="0" y="690" width="600" height="110" fill="#FFFFFF" opacity="0.9"/>
+<text x="300" y="728" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700" fill="#1F3A5F">Bộ thun nam cổ tròn quần</text>
+<text x="300" y="756" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="600" fill="#1F3A5F">đùi</text>
+<g transform="translate(300,782)"><rect x="-70" y="-13" width="140" height="22" rx="11" fill="#1F3A5F" stroke="#B9C2CF" stroke-width="0"/><text y="4" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#FFFFFF">Xanh than</text></g>
+<text x="24" y="40" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" fill="#1F3A5F" opacity="0.7">VT · Việt Thắng</text>
+<text x="576" y="40" text-anchor="end" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#6b7280">VT-NM-009</text>
+</svg>
