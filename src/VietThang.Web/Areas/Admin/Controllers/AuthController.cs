@@ -21,7 +21,7 @@ public class AuthController : Controller
         _userManager = userManager;
     }
 
-    [HttpGet("Admin/dang-nhap")]
+    [HttpGet("Admin/login")]
     public IActionResult Login(string? returnUrl = null)
     {
         if (User.Identity?.IsAuthenticated == true && (User.IsInRole(SeedData.RoleAdmin) || User.IsInRole(SeedData.RoleEmployee)))
@@ -30,7 +30,7 @@ public class AuthController : Controller
         return View();
     }
 
-    [HttpPost("Admin/dang-nhap")]
+    [HttpPost("Admin/login")]
     public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
     {
         ViewData["ReturnUrl"] = returnUrl;
@@ -59,12 +59,16 @@ public class AuthController : Controller
         return View(model);
     }
 
-    [HttpPost("Admin/dang-xuat")]
+    [HttpPost("Admin/logout")]
     public async Task<IActionResult> Logout()
     {
         await _signInManager.SignOutAsync();
         return RedirectToAction(nameof(Login));
     }
+
+    /// <summary>Hiện khi tài khoản đã đăng nhập nhưng không đủ vai trò (ví dụ nhân viên vào trang chỉ dành cho Admin).</summary>
+    [HttpGet("Admin/access-denied")]
+    public IActionResult AccessDenied() => View();
 
     private IActionResult RedirectToDashboard(string? returnUrl)
         => !string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl)

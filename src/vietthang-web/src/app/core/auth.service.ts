@@ -23,6 +23,16 @@ export class AuthService {
     return this.http.post<AuthResponse>('/api/auth/register', data).pipe(tap(r => this.store(r)));
   }
 
+  /** Yêu cầu gửi email chứa liên kết đặt lại mật khẩu. */
+  forgotPassword(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>('/api/auth/forgot-password', { email });
+  }
+
+  /** Đặt mật khẩu mới bằng token trong liên kết email. */
+  resetPassword(email: string, token: string, newPassword: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>('/api/auth/reset-password', { email, token, newPassword });
+  }
+
   logout() {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);

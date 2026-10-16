@@ -76,11 +76,3 @@ public class AddressFormViewModel
     [Display(Name = "Đặt làm địa chỉ mặc định")]
     public bool IsDefault { get; set; }
 }
-
-public class ReviewFormViewModel
-{
-    public int OrderId { get; set; }
-    public int ProductId { get; set; }
-    [Range(1, 5, ErrorMessage = "Chọn số sao từ 1 đến 5")] public byte Rating { get; set; } = 5;
-    [StringLength(1000)] public string? Comment { get; set; }
-}

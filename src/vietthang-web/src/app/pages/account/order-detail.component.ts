@@ -13,7 +13,7 @@ import { OrderDetailsViewComponent } from '../../shared/order-details-view.compo
   template: `
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h1 class="h4 mb-0">Chi tiết đơn hàng</h1>
-      <a class="btn btn-outline-secondary btn-sm" routerLink="/tai-khoan/don-hang"><i class="bi bi-arrow-left"></i> Danh sách</a>
+      <a class="btn btn-outline-secondary btn-sm" routerLink="/account/orders"><i class="bi bi-arrow-left"></i> Danh sách</a>
     </div>
     @if (data(); as d) {
       <div class="bg-white border rounded p-4">

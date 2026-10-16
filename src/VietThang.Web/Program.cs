@@ -2,7 +2,6 @@ using System.Globalization;
 using System.Text;
 using System.Text.Json.Serialization;
 using Ganss.Xss;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -37,28 +36,23 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
 
+// Cookie Identity chỉ dùng cho trang quản trị Razor (khách hàng đăng nhập bằng JWT qua Angular)
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.LoginPath = "/dang-nhap";
-    options.LogoutPath = "/dang-xuat";
-    options.AccessDeniedPath = "/khong-co-quyen";
+    options.LoginPath = "/Admin/login";
+    options.LogoutPath = "/Admin/logout";
+    options.AccessDeniedPath = "/Admin/access-denied";
     options.ExpireTimeSpan = TimeSpan.FromDays(7);
     options.SlidingExpiration = true;
-    // Khu vực /Admin dùng trang đăng nhập riêng
-    options.Events.OnRedirectToLogin = ctx =>
-    {
-        var loginPath = ctx.Request.Path.StartsWithSegments("/Admin") ? "/Admin/dang-nhap" : "/dang-nhap";
-        var returnUrl = Uri.EscapeDataString(ctx.Request.Path + ctx.Request.QueryString);
-        ctx.Response.Redirect($"{loginPath}?ReturnUrl={returnUrl}");
-        return Task.CompletedTask;
-    };
 });
 
 builder.Services.AddAntiforgery(options => options.HeaderName = "RequestVerificationToken");
 builder.Services.AddMemoryCache();
 
-// ---------- JWT cho REST API (Angular storefront) – cookie Identity vẫn là scheme mặc định cho Razor ----------
-var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Thiếu cấu hình Jwt:Key trong appsettings.json");
+// ---------- JWT cho REST API (Angular storefront) ----------
+// Khóa ký không nằm trong mã nguồn: lấy từ cấu hình/biến môi trường, nếu không có thì dùng file App_Data/jwt-key.txt tự sinh.
+var jwtKey = JwtKeyProvider.Resolve(builder.Configuration, builder.Environment);
+builder.Configuration["Jwt:Key"] = jwtKey;
 builder.Services.AddAuthentication().AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
@@ -74,19 +68,10 @@ builder.Services.AddAuthentication().AddJwtBearer(options =>
     };
 });
 
-// ---------- CORS cho Angular dev server ----------
+// ---------- CORS cho Angular ----------
 builder.Services.AddCors(options => options.AddPolicy("Angular", policy => policy
     .WithOrigins(builder.Configuration.GetSection("Cors:Origins").Get<string[]>() ?? new[] { "http://localhost:4200" })
     .AllowAnyHeader().AllowAnyMethod()));
-
-// ---------- Session (giỏ hàng khách vãng lai) ----------
-builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromHours(2);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
 
 // ---------- Dịch vụ ứng dụng ----------
 builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
@@ -98,8 +83,13 @@ builder.Services.AddScoped<ICatalogService, CatalogService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
-builder.Services.AddScoped<IAppEmailSender, LogEmailSender>();
 builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
+
+// Email: có cấu hình Smtp:Host thì gửi thật qua SMTP, chưa có thì ghi log
+if (!string.IsNullOrWhiteSpace(builder.Configuration["Smtp:Host"]))
+    builder.Services.AddScoped<IAppEmailSender, SmtpEmailSender>();
+else
+    builder.Services.AddScoped<IAppEmailSender, LogEmailSender>();
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddControllersWithViews(options =>
@@ -123,6 +113,10 @@ using (var scope = app.Services.CreateScope())
     {
         await SeedData.SeedAsync(scope.ServiceProvider);
         logger.LogInformation("Đã migrate và seed CSDL.");
+
+        // Dữ liệu demo cho báo cáo/bảo vệ: chạy một lần bằng  dotnet run -- --seed-demo
+        if (args.Contains("--seed-demo"))
+            await DemoDataSeeder.SeedAsync(scope.ServiceProvider);
     }
     catch (Exception ex)
     {
@@ -151,7 +145,6 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseCors("Angular");
-app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 

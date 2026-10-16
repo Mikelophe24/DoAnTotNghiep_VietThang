@@ -24,7 +24,7 @@ export class HeaderComponent {
 
   search() {
     const q = this.q.trim();
-    if (q) this.router.navigate(['/tim-kiem'], { queryParams: { q } });
+    if (q) this.router.navigate(['/search'], { queryParams: { q } });
   }
 
   logout() {

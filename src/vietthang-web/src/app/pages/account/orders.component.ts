@@ -22,12 +22,12 @@ import { PaginationComponent } from '../../shared/pagination.component';
             <tbody>
               @for (o of d.items; track o.id) {
                 <tr>
-                  <td><a [routerLink]="['/tai-khoan/don-hang', o.orderCode]" class="fw-semibold">{{ o.orderCode }}</a></td>
+                  <td><a [routerLink]="['/account/orders', o.orderCode]" class="fw-semibold">{{ o.orderCode }}</a></td>
                   <td class="small">{{ o.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
                   <td class="text-center">{{ o.itemCount }}</td>
                   <td class="text-end fw-semibold">{{ o.totalAmount | vnd }}</td>
                   <td class="text-center"><span [class]="'badge ' + badge(o.status)">{{ o.statusName }}</span></td>
-                  <td class="text-end"><a class="btn btn-sm btn-outline-secondary" [routerLink]="['/tai-khoan/don-hang', o.orderCode]">Chi tiết</a></td>
+                  <td class="text-end"><a class="btn btn-sm btn-outline-secondary" [routerLink]="['/account/orders', o.orderCode]">Chi tiết</a></td>
                 </tr>
               }
             </tbody>

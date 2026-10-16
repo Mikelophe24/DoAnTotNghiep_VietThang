@@ -15,6 +15,8 @@ public class OrderDetail
     public string SizeName { get; set; } = string.Empty;
     /// <summary>Đơn giá sau khuyến mãi sản phẩm tại thời điểm mua.</summary>
     public decimal UnitPrice { get; set; }
+    /// <summary>Giá vốn của biến thể tại thời điểm mua (snapshot) để tính lợi nhuận gộp chính xác.</summary>
+    public decimal UnitCost { get; set; }
     public int Quantity { get; set; }
 
     public decimal LineTotal => UnitPrice * Quantity;

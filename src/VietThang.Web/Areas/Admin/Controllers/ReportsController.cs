@@ -43,7 +43,7 @@ public class ReportsController : AdminBaseController
         vm.TotalOrders = await _db.Orders.CountAsync(o => o.CreatedAt >= f && o.CreatedAt < tEnd);
         vm.CancelledOrders = await _db.Orders.CountAsync(o => o.Status == OrderStatus.Cancelled && o.CreatedAt >= f && o.CreatedAt < tEnd);
         vm.ItemsSold = await details.SumAsync(d => (int?)d.Quantity) ?? 0;
-        vm.GrossProfit = await details.SumAsync(d => (decimal?)((d.UnitPrice - d.Variant.CostPrice) * d.Quantity)) ?? 0;
+        vm.GrossProfit = await details.SumAsync(d => (decimal?)((d.UnitPrice - d.UnitCost) * d.Quantity)) ?? 0;
 
         // Doanh thu theo ngày / tháng, điền đủ các mốc không có đơn
         if (groupBy == "month")
@@ -83,7 +83,7 @@ public class ReportsController : AdminBaseController
             .Select(x => new NamedValue(x.Name, x.Rev, x.Qty)).ToList();
 
         var profitRows = await details.GroupBy(d => new { d.Order.CompletedAt!.Value.Year, d.Order.CompletedAt.Value.Month })
-            .Select(g => new { g.Key.Year, g.Key.Month, Profit = g.Sum(d => (d.UnitPrice - d.Variant.CostPrice) * d.Quantity), Rev = g.Sum(d => d.UnitPrice * d.Quantity) }).ToListAsync();
+            .Select(g => new { g.Key.Year, g.Key.Month, Profit = g.Sum(d => (d.UnitPrice - d.UnitCost) * d.Quantity), Rev = g.Sum(d => d.UnitPrice * d.Quantity) }).ToListAsync();
         for (var m = new DateTime(f.Year, f.Month, 1); m <= t; m = m.AddMonths(1))
         {
             var r = profitRows.FirstOrDefault(x => x.Year == m.Year && x.Month == m.Month);

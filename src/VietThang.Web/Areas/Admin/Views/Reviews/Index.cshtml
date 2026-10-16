@@ -1,4 +1,5 @@
 @model PagedList<Review>
+@inject IConfiguration Config
 @{
     ViewData["Title"] = "Đánh giá sản phẩm";
     bool? approved = ViewBag.Approved;
@@ -19,7 +20,7 @@
         @foreach (var r in Model.Items)
         {
             <tr>
-                <td><a asp-area="" asp-controller="Products" asp-action="Details" asp-route-slug="@r.Product.Slug" target="_blank">@r.Product.Name</a></td>
+                <td><a href="@(Config["Storefront:Url"])/product/@r.Product.Slug" target="_blank">@r.Product.Name</a></td>
                 <td>@r.User.FullName<div class="small text-muted">@r.User.Email</div></td>
                 <td><div class="text-warning small">@for (int i = 1; i <= 5; i++) { <i class="bi @(i <= r.Rating ? "bi-star-fill" : "bi-star")"></i> }</div><div class="small">@r.Comment</div></td>
                 <td class="small text-nowrap">@r.CreatedAt.ToString("HH:mm dd/MM/yyyy")</td>

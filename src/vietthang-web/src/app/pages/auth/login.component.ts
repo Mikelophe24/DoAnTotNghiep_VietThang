@@ -15,10 +15,13 @@ import { AuthService } from '../../core/auth.service';
         @if (error()) { <div class="alert alert-danger py-2 small">{{ error() }}</div> }
         <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
           <div class="mb-3"><label class="form-label">Email</label><input class="form-control" formControlName="email" autocomplete="username" [class.is-invalid]="invalid('email')" /><div class="invalid-feedback">Email không hợp lệ</div></div>
-          <div class="mb-3"><label class="form-label">Mật khẩu</label><input type="password" class="form-control" formControlName="password" autocomplete="current-password" [class.is-invalid]="invalid('password')" /><div class="invalid-feedback">Nhập mật khẩu</div></div>
+          <div class="mb-3">
+            <div class="d-flex justify-content-between"><label class="form-label">Mật khẩu</label><a class="small" routerLink="/forgot-password">Quên mật khẩu?</a></div>
+            <input type="password" class="form-control" formControlName="password" autocomplete="current-password" [class.is-invalid]="invalid('password')" /><div class="invalid-feedback">Nhập mật khẩu</div>
+          </div>
           <button class="btn btn-brand w-100" [disabled]="loading()">@if (loading()) { <span class="spinner-border spinner-border-sm"></span> } Đăng nhập</button>
         </form>
-        <p class="text-center small mt-3 mb-0">Chưa có tài khoản? <a routerLink="/dang-ky" [queryParams]="{ returnUrl }">Đăng ký</a></p>
+        <p class="text-center small mt-3 mb-0">Chưa có tài khoản? <a routerLink="/register" [queryParams]="{ returnUrl }">Đăng ký</a></p>
       </div></div>
     </div></div></div>
   `

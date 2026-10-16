@@ -2,7 +2,7 @@
   <nav aria-label="breadcrumb">
     <ol class="breadcrumb small">
       <li class="breadcrumb-item"><a routerLink="/">Trang chủ</a></li>
-      @if (data()?.category?.parent; as parent) { <li class="breadcrumb-item"><a [routerLink]="['/danh-muc', parent.slug]">{{ parent.name }}</a></li> }
+      @if (data()?.category?.parent; as parent) { <li class="breadcrumb-item"><a [routerLink]="['/category', parent.slug]">{{ parent.name }}</a></li> }
       <li class="breadcrumb-item active">{{ title }}</li>
     </ol>
   </nav>
@@ -18,7 +18,7 @@
             <h6 class="filter-title">Danh mục</h6>
             <ul class="list-unstyled small mb-0">
               @for (c of data()!.subCategories; track c.id) {
-                <li><a [routerLink]="['/danh-muc', c.slug]" [class.fw-bold]="data()?.category?.id === c.id" [class.text-brand]="data()?.category?.id === c.id">{{ c.name }}</a></li>
+                <li><a [routerLink]="['/category', c.slug]" [class.fw-bold]="data()?.category?.id === c.id" [class.text-brand]="data()?.category?.id === c.id">{{ c.name }}</a></li>
               }
             </ul>
           </div>

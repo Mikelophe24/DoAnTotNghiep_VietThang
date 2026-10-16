@@ -17,7 +17,7 @@ import { PaginationComponent } from '../../shared/pagination.component';
         <div class="row g-3">
           @for (post of d.items; track post.id) {
             <div class="col-md-4">
-              <a class="post-card" [routerLink]="['/tin-tuc', post.slug]">
+              <a class="post-card" [routerLink]="['/news', post.slug]">
                 <img [src]="post.thumbnailUrl || '/images/banners/banner-1.svg'" [alt]="post.title" loading="lazy" />
                 <div class="post-card-body">
                   <div class="small text-muted">{{ post.publishedAt | date:'dd/MM/yyyy' }}</div>

@@ -9,13 +9,14 @@ import { ToastService } from '../../core/toast.service';
 import { CatalogService } from '../../core/catalog.service';
 import { Address, CheckoutPayload, CheckoutResult, Profile } from '../../core/models';
 import { VndPipe } from '../../core/vnd.pipe';
+import { AddressSelectComponent } from '../../shared/address-select.component';
 
 const PHONE = /^(0|\+84)\d{9,10}$/;
 
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [RouterLink, ReactiveFormsModule, VndPipe],
+  imports: [RouterLink, ReactiveFormsModule, VndPipe, AddressSelectComponent],
   templateUrl: './checkout.component.html'
 })
 export class CheckoutComponent implements OnInit {
@@ -47,8 +48,8 @@ export class CheckoutComponent implements OnInit {
 
   async ngOnInit() {
     const s = await this.cart.refresh();
-    if (!s || s.isEmpty) { this.toast.error('Giỏ hàng của bạn đang trống.'); this.router.navigateByUrl('/gio-hang'); return; }
-    if (s.lines.some(l => !l.isAvailable)) { this.toast.error('Một số sản phẩm trong giỏ không đủ hàng, vui lòng cập nhật số lượng.'); this.router.navigateByUrl('/gio-hang'); return; }
+    if (!s || s.isEmpty) { this.toast.error('Giỏ hàng của bạn đang trống.'); this.router.navigateByUrl('/cart'); return; }
+    if (s.lines.some(l => !l.isAvailable)) { this.toast.error('Một số sản phẩm trong giỏ không đủ hàng, vui lòng cập nhật số lượng.'); this.router.navigateByUrl('/cart'); return; }
     this.catalog.settings().subscribe(st => this.bankAccount.set(st.bankAccount ?? null));
 
     if (this.auth.isLoggedIn()) {
@@ -88,7 +89,7 @@ export class CheckoutComponent implements OnInit {
     try {
       const r = await firstValueFrom(this.http.post<CheckoutResult>('/api/checkout', payload));
       await this.cart.afterCheckout();
-      this.router.navigate(['/thanh-toan/thanh-cong', r.orderCode], { state: { result: r } });
+      this.router.navigate(['/checkout/success', r.orderCode], { state: { result: r } });
     } catch (e: any) {
       this.toast.error(e?.error?.message ?? 'Đặt hàng thất bại, vui lòng thử lại.');
       await this.cart.refresh();

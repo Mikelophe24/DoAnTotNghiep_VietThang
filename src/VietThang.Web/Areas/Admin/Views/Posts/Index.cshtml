@@ -1,4 +1,5 @@
 @model PagedList<Post>
+@inject IConfiguration Config
 @{
     ViewData["Title"] = "Tin tức & tuyển dụng";
     PostType? type = ViewBag.Type;
@@ -29,7 +30,7 @@
                 <td class="small">@((p.PublishedAt ?? p.CreatedAt).ToString("dd/MM/yyyy"))</td>
                 <td class="text-center"><span class="badge @(p.IsPublished ? "bg-success" : "bg-secondary")">@(p.IsPublished ? "Đã đăng" : "Nháp")</span></td>
                 <td class="text-end">
-                    @if (p.IsPublished) { <a class="btn btn-sm btn-outline-secondary" asp-area="" asp-controller="Posts" asp-action="Details" asp-route-slug="@p.Slug" target="_blank" title="Xem"><i class="bi bi-eye"></i></a> }
+                    @if (p.IsPublished) { <a class="btn btn-sm btn-outline-secondary" href="@(Config["Storefront:Url"])/news/@p.Slug" target="_blank" title="Xem"><i class="bi bi-eye"></i></a> }
                     <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@p.Id"><i class="bi bi-pencil"></i></a>
                     <form asp-action="Delete" asp-route-id="@p.Id" method="post" class="d-inline" data-confirm="Xóa bài '@p.Title'?"><button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button></form>
                 </td>

@@ -856,6 +856,10 @@ namespace VietThang.Web.Data.Migrations
                         .HasMaxLength(60)
                         .HasColumnType("nvarchar(60)");
 
+                    b.Property<decimal>("UnitCost")
+                        .HasPrecision(18)
+                        .HasColumnType("decimal(18,0)");
+
                     b.Property<decimal>("UnitPrice")
                         .HasPrecision(18)
                         .HasColumnType("decimal(18,0)");
@@ -1013,6 +1017,13 @@ namespace VietThang.Web.Data.Migrations
                     b.Property<decimal>("Price")
                         .HasPrecision(18)
                         .HasColumnType("decimal(18,0)");
+
+                    b.Property<string>("SearchText")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)")
+                        .HasDefaultValue("");
 
                     b.Property<string>("ShortDescription")
                         .HasMaxLength(500)

@@ -105,13 +105,13 @@ export class ProductDetailComponent implements OnInit {
     this.adding.set(true);
     const ok = await this.cart.add(v.id, this.qty());
     this.adding.set(false);
-    if (ok && buyNow) this.router.navigateByUrl('/gio-hang');
+    if (ok && buyNow) this.router.navigateByUrl('/cart');
   }
 
   toggleWishlist() {
     const p = this.product();
     if (!p) return;
-    if (!this.auth.isLoggedIn()) { this.router.navigate(['/dang-nhap'], { queryParams: { returnUrl: this.router.url } }); return; }
+    if (!this.auth.isLoggedIn()) { this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } }); return; }
     this.http.post<{ added: boolean; message: string }>(`/api/account/wishlist/${p.id}/toggle`, {}).subscribe(r => {
       this.product.set({ ...p, inWishlist: r.added });
       this.toast.success(r.message);

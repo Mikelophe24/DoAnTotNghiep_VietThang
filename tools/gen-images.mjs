@@ -20,7 +20,18 @@ const PRODUCTS = [
   { code: 'VT-BT-007', name: 'Bộ cotton bé trai in khủng long', type: 'set-shorts', pattern: 'dino', kid: true, colors: ['Xanh than', 'Xám', 'Vàng'] },
   { code: 'VT-BG-008', name: 'Bộ lanh bé gái hoa nhí cổ bèo', type: 'set-shorts', pattern: 'flower', kid: true, colors: ['Hồng', 'Xanh mint', 'Trắng'] },
   { code: 'VT-NM-009', name: 'Bộ thun nam cổ tròn quần đùi', type: 'set-shorts', pattern: 'none', colors: ['Đen', 'Xám', 'Xanh than'] },
-  { code: 'VT-NM-010', name: 'Quần lửng nam lanh lưng thun', type: 'pants-capri', pattern: 'none', colors: ['Be', 'Xám', 'Đen'] }
+  { code: 'VT-NM-010', name: 'Quần lửng nam lanh lưng thun', type: 'pants-capri', pattern: 'none', colors: ['Be', 'Xám', 'Đen'] },
+  // Sản phẩm bổ sung cho dữ liệu demo (DemoDataSeeder)
+  { code: 'VT-BL-011', name: 'Bộ lanh nữ quần dài cổ vuông', type: 'set-long', pattern: 'none', colors: ['Be', 'Xanh mint', 'Hồng'] },
+  { code: 'VT-BD-012', name: 'Bộ đũi nữ quần đùi tay cánh tiên', type: 'set-shorts', pattern: 'flower', colors: ['Trắng', 'Vàng', 'Tím'] },
+  { code: 'VT-TE-013', name: 'Bộ thun teen in chữ quần lửng', type: 'set-capri', pattern: 'none', colors: ['Đen', 'Trắng', 'Hồng'] },
+  { code: 'VT-QN-014', name: 'Quần lanh nữ ống rộng lưng thun', type: 'pants-long', pattern: 'none', colors: ['Be', 'Đen', 'Xanh than'] },
+  { code: 'VT-TN-015', name: 'Áo lanh trung niên cổ tàu tay lỡ', type: 'top', pattern: 'flower', colors: ['Đỏ đô', 'Tím', 'Xanh than'] },
+  { code: 'VT-TN-016', name: 'Chân váy lanh trung niên xếp ly', type: 'skirt', pattern: 'none', colors: ['Đen', 'Be', 'Xanh than'] },
+  { code: 'VT-BT-017', name: 'Bộ thun bé trai sọc ngang quần đùi', type: 'set-shorts', pattern: 'stripe', kid: true, colors: ['Xanh than', 'Đỏ đô', 'Xám'] },
+  { code: 'VT-BG-018', name: 'Váy lanh bé gái hai dây hoa nhí', type: 'dress', pattern: 'flower', kid: true, colors: ['Hồng', 'Vàng', 'Trắng'] },
+  { code: 'VT-NM-019', name: 'Bộ lanh nam cổ tàu quần dài', type: 'set-long', pattern: 'none', colors: ['Be', 'Xám', 'Xanh than'] },
+  { code: 'VT-NM-020', name: 'Áo thun lạnh nam cổ tròn', type: 'top', pattern: 'none', colors: ['Trắng', 'Đen', 'Xám', 'Xanh than'] }
 ];
 
 const CATEGORIES = [
@@ -39,6 +50,16 @@ function garment(type, fill, pattern, kid) {
   const detail = isLight(fill) ? '#C9D1DC' : shade(fill, 0.8);
   const pat = pattern !== 'none' ? `fill="url(#pat)"` : '';
   const s = kid ? 0.78 : 1;
+  // Chân váy và váy liền: một khối hình thang, không dùng dáng áo + quần
+  if (type === 'skirt' || type === 'dress') {
+    const shape = type === 'skirt'
+      ? 'M205,300 L395,300 L455,580 L145,580 Z'
+      : 'M238,170 L262,170 Q300,215 338,170 L362,170 L384,320 L468,640 L132,640 L216,320 Z';
+    const extra = type === 'skirt'
+      ? `<path d="M205,312 L395,312" stroke="${detail}" stroke-width="6"/><path d="M255,320 L225,575 M300,320 L300,578 M345,320 L375,575" stroke="${detail}" stroke-width="2" opacity="0.6"/>`
+      : `<path d="M216,320 L384,320" stroke="${detail}" stroke-width="5"/>`;
+    return `<g transform="translate(300,420) scale(${s}) translate(-300,-420)"><path d="${shape}" fill="${fill}" stroke="${stroke}" stroke-width="4" stroke-linejoin="round"/>${pat ? `<path d="${shape}" ${pat} opacity="0.85"/>` : ''}${extra}</g>`;
+  }
   const parts = [];
   const shirtNeck = type === 'top-v' ? 'L300,235' : 'Q300,250 400,170';
   const shirt = `M200,170 L150,182 L108,300 L172,322 L182,440 L418,440 L428,322 L492,300 L450,182 L400,170 ${type === 'top-v' ? 'L300,235 L200,170' : 'Q300,250 200,170'} Z`;
@@ -61,6 +82,7 @@ function garment(type, fill, pattern, kid) {
 function patternDef(pattern, fill) {
   const c = isLight(fill) ? '#D96C8A' : '#FFFFFF';
   if (pattern === 'flower') return `<pattern id="pat" width="44" height="44" patternUnits="userSpaceOnUse"><g fill="${c}" opacity="0.55"><circle cx="12" cy="12" r="3"/><circle cx="17" cy="9" r="3"/><circle cx="17" cy="15" r="3"/><circle cx="7" cy="9" r="3"/><circle cx="7" cy="15" r="3"/><circle cx="12" cy="12" r="1.6" fill="${isLight(fill) ? '#F2C14E' : '#F2C14E'}"/><circle cx="33" cy="32" r="2.4"/><circle cx="37" cy="29" r="2.4"/><circle cx="37" cy="35" r="2.4"/><circle cx="29" cy="29" r="2.4"/><circle cx="29" cy="35" r="2.4"/></g></pattern>`;
+  if (pattern === 'stripe') return `<pattern id="pat" width="40" height="36" patternUnits="userSpaceOnUse"><rect width="40" height="12" fill="${c}" opacity="0.5"/></pattern>`;
   if (pattern === 'dino') return `<pattern id="pat" width="60" height="50" patternUnits="userSpaceOnUse"><g fill="${c}" opacity="0.6"><path d="M6,30 L14,14 L22,30 Z"/><path d="M14,30 L20,20 L26,30 Z"/><path d="M36,44 L44,28 L52,44 Z"/><circle cx="46" cy="12" r="4"/></g></pattern>`;
   return '';
 }

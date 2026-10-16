@@ -28,7 +28,7 @@ function match(a: string, b: string) {
           <div class="form-text mb-3">Mật khẩu tối thiểu 8 ký tự, có chữ in hoa, chữ thường và số.</div>
           <button class="btn btn-brand w-100" [disabled]="loading()">@if (loading()) { <span class="spinner-border spinner-border-sm"></span> } Đăng ký</button>
         </form>
-        <p class="text-center small mt-3 mb-0">Đã có tài khoản? <a routerLink="/dang-nhap">Đăng nhập</a></p>
+        <p class="text-center small mt-3 mb-0">Đã có tài khoản? <a routerLink="/login">Đăng nhập</a></p>
       </div></div>
     </div></div></div>
   `

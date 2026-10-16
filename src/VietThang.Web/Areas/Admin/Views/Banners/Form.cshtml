@@ -14,7 +14,7 @@
         @if (!string.IsNullOrEmpty(Model.ImageUrl)) { <img src="@Model.ImageUrl" class="img-fluid rounded mb-3" alt="" /> }
         <div class="mb-3"><label asp-for="ImageFile" class="form-label @(isEdit ? "" : "required")"></label><input asp-for="ImageFile" type="file" accept="image/*" class="form-control" /><span asp-validation-for="ImageFile" class="text-danger small"></span></div>
         <div class="mb-3"><label asp-for="Title" class="form-label"></label><input asp-for="Title" class="form-control" /></div>
-        <div class="mb-3"><label asp-for="LinkUrl" class="form-label"></label><input asp-for="LinkUrl" class="form-control" placeholder="/danh-muc/nu hoặc /sale" /></div>
+        <div class="mb-3"><label asp-for="LinkUrl" class="form-label"></label><input asp-for="LinkUrl" class="form-control" placeholder="/category/nu hoặc /sale" /></div>
         <div class="row">
             <div class="col-md-6 mb-3"><label asp-for="Position" class="form-label"></label><select asp-for="Position" class="form-select"><option value="1">Slider trang chủ</option><option value="2">Giữa trang chủ</option><option value="3">Đầu trang danh mục</option></select></div>
             <div class="col-md-6 mb-3"><label asp-for="DisplayOrder" class="form-label"></label><input asp-for="DisplayOrder" type="number" class="form-control" /></div>

@@ -43,7 +43,7 @@
     <div class="row g-3">
       @for (c of data()!.categories; track c.id) {
         <div class="col-6 col-md-3">
-          <a class="cat-tile" [routerLink]="['/danh-muc', c.slug]">
+          <a class="cat-tile" [routerLink]="['/category', c.slug]">
             <img [src]="c.imageUrl || '/images/products/placeholder.svg'" [alt]="c.name" loading="lazy" />
             <span class="cat-tile-name">{{ c.name }}</span>
           </a>
@@ -56,7 +56,7 @@
     <section class="container mt-5">
       <div class="d-flex justify-content-between align-items-end mb-3">
         <h2 class="section-title mb-0">Hàng mới về</h2>
-        <a class="link-more" routerLink="/hang-moi-ve">Xem tất cả →</a>
+        <a class="link-more" routerLink="/new-arrivals">Xem tất cả →</a>
       </div>
       <div class="row g-3 row-cols-2 row-cols-md-4">
         @for (p of data()!.newProducts; track p.id) { <div class="col"><app-product-card [p]="p" /></div> }
@@ -89,12 +89,12 @@
     <section class="container mt-5">
       <div class="d-flex justify-content-between align-items-end mb-3">
         <h2 class="section-title mb-0">Tin tức</h2>
-        <a class="link-more" routerLink="/tin-tuc">Xem tất cả →</a>
+        <a class="link-more" routerLink="/news">Xem tất cả →</a>
       </div>
       <div class="row g-3">
         @for (post of data()!.posts; track post.id) {
           <div class="col-md-4">
-            <a class="post-card" [routerLink]="['/tin-tuc', post.slug]">
+            <a class="post-card" [routerLink]="['/news', post.slug]">
               <img [src]="post.thumbnailUrl || '/images/banners/banner-1.svg'" [alt]="post.title" loading="lazy" />
               <div class="post-card-body">
                 <div class="small text-muted">{{ post.publishedAt | date:'dd/MM/yyyy' }}</div>

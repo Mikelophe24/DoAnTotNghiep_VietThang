@@ -53,7 +53,10 @@ public static class SeedData
         var products = await db.Products.Include(p => p.Images).Include(p => p.Variants).ThenInclude(v => v.Color).ToListAsync();
         foreach (var p in products)
         {
-            if (p.Images.Any(i => !i.Url.EndsWith("placeholder.svg"))) continue;
+            // Bổ sung chuỗi tìm kiếm không dấu cho sản phẩm tạo trước khi có cột SearchText
+            if (string.IsNullOrEmpty(p.SearchText)) p.SearchText = SlugHelper.ToSearchText(p.Name, p.Code, p.Material);
+
+            if (p.Images.Count == 0 || p.Images.Any(i => !i.Url.EndsWith("placeholder.svg"))) continue;
             var colors = p.Variants.Select(v => v.Color).DistinctBy(c => c.Id).OrderBy(c => c.Name).ToList();
             var images = colors.Select(c => (Color: c, Url: ProductImagePath(p.Code, c.Name))).Where(x => Exists(x.Url)).ToList();
             if (images.Count == 0) continue;
@@ -62,6 +65,10 @@ public static class SeedData
             foreach (var (color, url) in images)
                 p.Images.Add(new ProductImage { Url = url, ColorId = color.Id, IsMain = order == 0, DisplayOrder = order++ });
         }
+
+        // Banner tạo trước khi storefront đổi sang đường dẫn tiếng Anh: /danh-muc/... → /category/...
+        foreach (var b in await db.Banners.Where(b => b.LinkUrl != null && b.LinkUrl.StartsWith("/danh-muc/")).ToListAsync())
+            b.LinkUrl = "/category/" + b.LinkUrl!.Substring("/danh-muc/".Length);
 
         foreach (var c in await db.Categories.Where(c => c.ParentId == null && c.ImageUrl == null).ToListAsync())
         {
@@ -223,7 +230,7 @@ public static class SeedData
     {
         if (await db.Banners.AnyAsync()) return;
         db.Banners.AddRange(
-            new Banner { Title = "Bộ sưu tập lanh mùa hè", ImageUrl = "/images/banners/banner-1.svg", LinkUrl = "/danh-muc/nu", Position = BannerPosition.HomeSlider, DisplayOrder = 1 },
+            new Banner { Title = "Bộ sưu tập lanh mùa hè", ImageUrl = "/images/banners/banner-1.svg", LinkUrl = "/category/nu", Position = BannerPosition.HomeSlider, DisplayOrder = 1 },
             new Banner { Title = "Sale đến 30%", ImageUrl = "/images/banners/banner-2.svg", LinkUrl = "/sale", Position = BannerPosition.HomeSlider, DisplayOrder = 2 });
         await db.SaveChangesAsync();
     }
@@ -261,6 +268,7 @@ public static class SeedData
                 Code = s.code,
                 Name = s.name,
                 Slug = s.slug,
+                SearchText = SlugHelper.ToSearchText(s.name, s.code, s.material),
                 CategoryId = cats[s.cat].Id,
                 Material = s.material,
                 Price = s.price,

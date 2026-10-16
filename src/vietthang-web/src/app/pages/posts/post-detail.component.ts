@@ -14,7 +14,7 @@ import { PostDetail } from '../../core/models';
       @if (post(); as p) {
         <nav aria-label="breadcrumb"><ol class="breadcrumb small">
           <li class="breadcrumb-item"><a routerLink="/">Trang chủ</a></li>
-          <li class="breadcrumb-item"><a [routerLink]="p.type === 2 ? '/tuyen-dung' : '/tin-tuc'">{{ p.type === 2 ? 'Tuyển dụng' : 'Tin tức' }}</a></li>
+          <li class="breadcrumb-item"><a [routerLink]="p.type === 2 ? '/careers' : '/news'">{{ p.type === 2 ? 'Tuyển dụng' : 'Tin tức' }}</a></li>
           <li class="breadcrumb-item active">{{ p.title }}</li>
         </ol></nav>
         <div class="row g-4">
@@ -26,7 +26,7 @@ import { PostDetail } from '../../core/models';
           </article>
           <aside class="col-lg-4">
             <h2 class="h6">Bài viết khác</h2>
-            <ul class="list-unstyled">@for (r of p.recent; track r.slug) { <li class="mb-2"><a [routerLink]="['/tin-tuc', r.slug]">{{ r.title }}</a></li> }</ul>
+            <ul class="list-unstyled">@for (r of p.recent; track r.slug) { <li class="mb-2"><a [routerLink]="['/news', r.slug]">{{ r.title }}</a></li> }</ul>
           </aside>
         </div>
       } @else if (notFound()) { <div class="alert alert-warning">Không tìm thấy bài viết.</div> }

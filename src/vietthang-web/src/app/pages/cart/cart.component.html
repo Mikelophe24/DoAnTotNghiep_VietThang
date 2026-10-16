@@ -21,9 +21,9 @@
             <tbody>
               @for (l of s.lines; track l.variantId) {
                 <tr [class.table-warning]="!l.isAvailable">
-                  <td style="width:80px"><a [routerLink]="['/san-pham', l.slug]"><img [src]="l.imageUrl || '/images/products/placeholder.svg'" class="cart-thumb" alt="" /></a></td>
+                  <td style="width:80px"><a [routerLink]="['/product', l.slug]"><img [src]="l.imageUrl || '/images/products/placeholder.svg'" class="cart-thumb" alt="" /></a></td>
                   <td>
-                    <a class="fw-semibold text-decoration-none text-dark" [routerLink]="['/san-pham', l.slug]">{{ l.productName }}</a>
+                    <a class="fw-semibold text-decoration-none text-dark" [routerLink]="['/product', l.slug]">{{ l.productName }}</a>
                     <div class="small text-muted">{{ l.colorName }} / {{ l.sizeName }} · <code>{{ l.sku }}</code></div>
                     @if (!l.isActive) { <div class="small text-danger">Sản phẩm không còn kinh doanh</div> }
                     @else if (l.stock < l.quantity) { <div class="small text-danger">Chỉ còn {{ l.stock }} sản phẩm</div> }
@@ -75,7 +75,7 @@
           @if (s.shippingFee > 0) {
             <div class="small text-muted mb-3"><i class="bi bi-info-circle"></i> Mua thêm {{ (s.freeShippingThreshold - s.subTotal) | vnd }} để được miễn phí vận chuyển.</div>
           }
-          <a class="btn btn-brand w-100 btn-lg" [class.disabled]="hasUnavailable" routerLink="/thanh-toan">Tiến hành đặt hàng</a>
+          <a class="btn btn-brand w-100 btn-lg" [class.disabled]="hasUnavailable" routerLink="/checkout">Tiến hành đặt hàng</a>
         </div>
       </div>
     </div>

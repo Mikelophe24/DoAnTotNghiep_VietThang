@@ -34,8 +34,12 @@ public class CatalogService : ICatalogService
     {
         if (!string.IsNullOrWhiteSpace(f.Q))
         {
-            var q = f.Q.Trim();
-            query = query.Where(p => p.Name.Contains(q) || p.Code.Contains(q) || (p.Material != null && p.Material.Contains(q)));
+            // Tìm không dấu: mỗi từ khóa phải xuất hiện trong SearchText ("bo lanh" khớp "Bộ lanh nữ ...")
+            foreach (var term in SlugHelper.ToSearchText(f.Q).Split(' ', StringSplitOptions.RemoveEmptyEntries))
+            {
+                var t = term;
+                query = query.Where(p => p.SearchText.Contains(t));
+            }
         }
         if (f.ColorIds.Count > 0)
             query = query.Where(p => p.Variants.Any(v => v.IsActive && f.ColorIds.Contains(v.ColorId)));

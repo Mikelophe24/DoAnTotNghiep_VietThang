@@ -7,6 +7,8 @@ public class Product
     public string Code { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Slug { get; set; } = string.Empty;
+    /// <summary>Chuỗi tìm kiếm không dấu, chữ thường (tên + mã + chất liệu), cập nhật mỗi khi lưu sản phẩm.</summary>
+    public string SearchText { get; set; } = string.Empty;
     public int CategoryId { get; set; }
     public Category Category { get; set; } = null!;
     public string? Material { get; set; }

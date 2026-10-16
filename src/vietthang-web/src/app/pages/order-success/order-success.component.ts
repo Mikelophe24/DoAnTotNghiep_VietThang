@@ -24,7 +24,7 @@ import { VndPipe } from '../../core/vnd.pipe';
         }
         <div class="d-flex gap-2 justify-content-center mt-4">
           <a class="btn btn-brand" routerLink="/">Tiếp tục mua sắm</a>
-          <a class="btn btn-outline-secondary" routerLink="/tra-cuu-don-hang" [queryParams]="{ code }">Tra cứu đơn hàng</a>
+          <a class="btn btn-outline-secondary" routerLink="/order-lookup" [queryParams]="{ code }">Tra cứu đơn hàng</a>
         </div>
       </div></div>
     </div>

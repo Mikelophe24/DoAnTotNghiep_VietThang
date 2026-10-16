@@ -18,6 +18,18 @@ public class RegisterRequest
     [Required(ErrorMessage = "Nhập mật khẩu"), StringLength(100, MinimumLength = 8, ErrorMessage = "Mật khẩu tối thiểu 8 ký tự")] public string Password { get; set; } = string.Empty;
 }
 
+public class ForgotPasswordRequest
+{
+    [Required(ErrorMessage = "Nhập email"), EmailAddress(ErrorMessage = "Email không hợp lệ")] public string Email { get; set; } = string.Empty;
+}
+
+public class ResetPasswordRequest
+{
+    [Required, EmailAddress] public string Email { get; set; } = string.Empty;
+    [Required(ErrorMessage = "Thiếu mã xác thực")] public string Token { get; set; } = string.Empty;
+    [Required(ErrorMessage = "Nhập mật khẩu mới"), StringLength(100, MinimumLength = 8, ErrorMessage = "Mật khẩu tối thiểu 8 ký tự")] public string NewPassword { get; set; } = string.Empty;
+}
+
 public record AuthResponse(string Token, DateTime ExpiresAt, UserInfo User);
 public record UserInfo(string Id, string FullName, string? Email, string? Phone, IList<string> Roles);
 

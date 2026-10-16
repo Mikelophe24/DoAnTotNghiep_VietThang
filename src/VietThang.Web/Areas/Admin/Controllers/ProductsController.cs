@@ -32,8 +32,11 @@ public class ProductsController : AdminBaseController
 
         if (!string.IsNullOrWhiteSpace(filter.Q))
         {
-            var q = filter.Q.Trim();
-            query = query.Where(p => p.Name.Contains(q) || p.Code.Contains(q));
+            foreach (var term in SlugHelper.ToSearchText(filter.Q).Split(' ', StringSplitOptions.RemoveEmptyEntries))
+            {
+                var t = term;
+                query = query.Where(p => p.SearchText.Contains(t));
+            }
         }
         if (filter.CategoryId.HasValue)
             query = query.Where(p => p.CategoryId == filter.CategoryId || p.Category.ParentId == filter.CategoryId);
@@ -340,6 +343,7 @@ public class ProductsController : AdminBaseController
         product.Slug = model.Slug!;
         product.CategoryId = model.CategoryId!.Value;
         product.Material = model.Material?.Trim();
+        product.SearchText = SlugHelper.ToSearchText(model.Name, model.Code, model.Material);
         product.ShortDescription = model.ShortDescription?.Trim();
         product.Description = string.IsNullOrWhiteSpace(model.Description) ? null : _sanitizer.Sanitize(model.Description);
         product.Price = model.Price;

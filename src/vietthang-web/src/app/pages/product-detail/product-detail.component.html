@@ -8,8 +8,8 @@
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb small">
         <li class="breadcrumb-item"><a routerLink="/">Trang chủ</a></li>
-        @if (p.category.parent) { <li class="breadcrumb-item"><a [routerLink]="['/danh-muc', p.category.parent.slug]">{{ p.category.parent.name }}</a></li> }
-        <li class="breadcrumb-item"><a [routerLink]="['/danh-muc', p.category.slug]">{{ p.category.name }}</a></li>
+        @if (p.category.parent) { <li class="breadcrumb-item"><a [routerLink]="['/category', p.category.parent.slug]">{{ p.category.parent.name }}</a></li> }
+        <li class="breadcrumb-item"><a [routerLink]="['/category', p.category.slug]">{{ p.category.name }}</a></li>
         <li class="breadcrumb-item active">{{ p.name }}</li>
       </ol>
     </nav>

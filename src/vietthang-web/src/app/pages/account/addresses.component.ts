@@ -3,11 +3,12 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ToastService } from '../../core/toast.service';
 import { Address } from '../../core/models';
+import { AddressSelectComponent } from '../../shared/address-select.component';
 
 @Component({
   selector: 'app-addresses',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, AddressSelectComponent],
   template: `
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h1 class="h4 mb-0">Sổ địa chỉ</h1>
@@ -21,11 +22,7 @@ import { Address } from '../../core/models';
           <div class="col-md-6 mb-3"><label class="form-label required">Người nhận</label><input class="form-control" formControlName="receiverName" [class.is-invalid]="invalid('receiverName')" /></div>
           <div class="col-md-6 mb-3"><label class="form-label required">Số điện thoại</label><input class="form-control" formControlName="phone" [class.is-invalid]="invalid('phone')" /></div>
         </div>
-        <div class="row">
-          <div class="col-md-4 mb-3"><label class="form-label required">Tỉnh / Thành phố</label><input class="form-control" formControlName="province" [class.is-invalid]="invalid('province')" /></div>
-          <div class="col-md-4 mb-3"><label class="form-label required">Quận / Huyện</label><input class="form-control" formControlName="district" [class.is-invalid]="invalid('district')" /></div>
-          <div class="col-md-4 mb-3"><label class="form-label required">Phường / Xã</label><input class="form-control" formControlName="ward" [class.is-invalid]="invalid('ward')" /></div>
-        </div>
+        <app-address-select [group]="form" />
         <div class="mb-3"><label class="form-label required">Số nhà, tên đường</label><input class="form-control" formControlName="street" [class.is-invalid]="invalid('street')" /></div>
         <div class="form-check mb-3"><input type="checkbox" class="form-check-input" id="isDefault" formControlName="isDefault" /><label class="form-check-label" for="isDefault">Đặt làm địa chỉ mặc định</label></div>
         <div class="d-flex gap-2"><button class="btn btn-brand"><i class="bi bi-check-lg"></i> Lưu địa chỉ</button><button type="button" class="btn btn-outline-secondary" (click)="editing.set(false)">Hủy</button></div>

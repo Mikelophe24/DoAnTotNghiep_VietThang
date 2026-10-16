@@ -2,4 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/VietThang.Web/VietThang.Web.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/VietThang.Tests/VietThang.Tests.csproj" />
+  </Folder>
 </Solution>

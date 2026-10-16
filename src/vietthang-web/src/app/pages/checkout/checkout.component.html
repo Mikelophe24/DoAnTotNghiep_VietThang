@@ -37,11 +37,7 @@
             <input class="form-control" formControlName="email" [class.is-invalid]="invalid('email')" />
             <div class="invalid-feedback">Email không hợp lệ</div>
           </div>
-          <div class="row">
-            <div class="col-md-4 mb-3"><label class="form-label required">Tỉnh / Thành phố</label><input class="form-control" formControlName="province" placeholder="Hà Nội" [class.is-invalid]="invalid('province')" /><div class="invalid-feedback">Nhập tỉnh / thành phố</div></div>
-            <div class="col-md-4 mb-3"><label class="form-label required">Quận / Huyện</label><input class="form-control" formControlName="district" placeholder="Cầu Giấy" [class.is-invalid]="invalid('district')" /><div class="invalid-feedback">Nhập quận / huyện</div></div>
-            <div class="col-md-4 mb-3"><label class="form-label required">Phường / Xã</label><input class="form-control" formControlName="ward" placeholder="Dịch Vọng" [class.is-invalid]="invalid('ward')" /><div class="invalid-feedback">Nhập phường / xã</div></div>
-          </div>
+          <app-address-select [group]="form" [showErrors]="submitted()" />
           <div class="mb-3">
             <label class="form-label required">Số nhà, tên đường</label>
             <input class="form-control" formControlName="street" placeholder="Số 12, ngõ 34 Trần Thái Tông" [class.is-invalid]="invalid('street')" />

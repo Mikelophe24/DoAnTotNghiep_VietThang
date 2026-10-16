@@ -34,7 +34,8 @@ public class InventoryController : AdminBaseController
         if (!string.IsNullOrWhiteSpace(filter.Q))
         {
             var q = filter.Q.Trim();
-            query = query.Where(v => v.Sku.Contains(q) || v.Product.Name.Contains(q) || v.Product.Code.Contains(q));
+            var normalized = SlugHelper.ToSearchText(q);
+            query = query.Where(v => v.Sku.Contains(q) || v.Product.SearchText.Contains(normalized));
         }
         if (filter.CategoryId.HasValue)
             query = query.Where(v => v.Product.CategoryId == filter.CategoryId || v.Product.Category.ParentId == filter.CategoryId);

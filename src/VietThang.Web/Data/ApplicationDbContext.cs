@@ -105,6 +105,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             e.Property(x => x.Code).HasMaxLength(50).IsRequired();
             e.Property(x => x.Name).HasMaxLength(200).IsRequired();
             e.Property(x => x.Slug).HasMaxLength(220).IsRequired();
+            e.Property(x => x.SearchText).HasMaxLength(400).IsRequired().HasDefaultValue("");
             e.Property(x => x.Material).HasMaxLength(100);
             e.Property(x => x.Description).HasColumnType("nvarchar(max)");
             e.HasIndex(x => x.Code).IsUnique();

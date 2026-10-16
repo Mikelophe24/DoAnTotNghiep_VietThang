@@ -17,7 +17,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       const isAuthEndpoint = req.url.startsWith('/api/auth/login') || req.url.startsWith('/api/auth/register');
       if (err.status === 401 && token && !isAuthEndpoint) {
         auth.logout();
-        router.navigate(['/dang-nhap'], { queryParams: { returnUrl: router.url, expired: 1 } });
+        router.navigate(['/login'], { queryParams: { returnUrl: router.url, expired: 1 } });
       }
       return throwError(() => err);
     })

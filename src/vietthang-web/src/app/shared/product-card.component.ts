@@ -9,7 +9,7 @@ import { VndPipe } from '../core/vnd.pipe';
   imports: [RouterLink, VndPipe],
   template: `
     <div class="product-card">
-      <a class="product-thumb" [routerLink]="['/san-pham', p.slug]">
+      <a class="product-thumb" [routerLink]="['/product', p.slug]">
         <img [src]="p.imageUrl || '/images/products/placeholder.svg'" [alt]="p.name" loading="lazy" />
         <div class="product-badges">
           @if (p.hasDiscount) { <span class="badge-sale">-{{ p.discountPercent }}%</span> }
@@ -19,7 +19,7 @@ import { VndPipe } from '../core/vnd.pipe';
       </a>
       <div class="product-info">
         @if (p.categoryName) { <div class="product-cat">{{ p.categoryName }}</div> }
-        <a class="product-name" [routerLink]="['/san-pham', p.slug]">{{ p.name }}</a>
+        <a class="product-name" [routerLink]="['/product', p.slug]">{{ p.name }}</a>
         <div class="product-price">
           <span class="price-sale">{{ p.salePrice | vnd }}</span>
           @if (p.hasDiscount) { <span class="price-original">{{ p.originalPrice | vnd }}</span> }

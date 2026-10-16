@@ -23,6 +23,13 @@ public static class SlugHelper
         return Regex.Replace(s, @"[^A-Z0-9]", "");
     }
 
+    /// <summary>Ghép các phần và chuẩn hóa về không dấu, chữ thường để tìm kiếm: "Bộ lanh nữ" → "bo lanh nu".</summary>
+    public static string ToSearchText(params string?[] parts)
+    {
+        var joined = string.Join(' ', parts.Where(p => !string.IsNullOrWhiteSpace(p)).Select(p => p!.Trim()));
+        return Regex.Replace(RemoveDiacritics(joined).ToLowerInvariant(), @"\s+", " ").Trim();
+    }
+
     public static string RemoveDiacritics(string text)
     {
         var normalized = text.Normalize(NormalizationForm.FormD);

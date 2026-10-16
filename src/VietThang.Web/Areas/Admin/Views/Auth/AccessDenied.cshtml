@@ -1,0 +1,20 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Không có quyền truy cập - Quản trị Việt Thắng</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+</head>
+<body class="bg-light">
+    <div class="container text-center my-5">
+        <h1 class="display-6">403</h1>
+        <p class="lead">Tài khoản của bạn không có quyền truy cập trang này.</p>
+        <p class="text-muted">Một số chức năng chỉ dành cho Quản trị viên. Liên hệ quản trị viên nếu bạn cần được cấp quyền.</p>
+        <a class="btn btn-primary" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Về bảng điều khiển</a>
+    </div>
+</body>
+</html>

@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using VietThang.Web.Data;
 using VietThang.Web.Models.Entities;
@@ -18,6 +18,8 @@ public class CartLine
     public string Sku { get; set; } = string.Empty;
     public decimal OriginalPrice { get; set; }
     public decimal UnitPrice { get; set; }
+    /// <summary>Giá vốn hiện tại của biến thể, dùng để lưu snapshot vào chi tiết đơn. Không trả về cho client.</summary>
+    [JsonIgnore] public decimal CostPrice { get; set; }
     public int Quantity { get; set; }
     public int Stock { get; set; }
     public bool IsActive { get; set; }
@@ -40,11 +42,14 @@ public class CartSummary
     public bool IsEmpty => Lines.Count == 0;
 }
 
-/// <summary>Giỏ hàng (KH05): khách vãng lai lưu Session, khách đăng nhập lưu CSDL.</summary>
+/// <summary>
+/// Giỏ hàng (KH05). Khách vãng lai giữ giỏ ở trình duyệt (Angular localStorage) và gọi BuildLines/BuildSummary để tính giá;
+/// khách đăng nhập (JWT) có giỏ lưu trong CSDL qua các phương thức Add/Update/Remove.
+/// </summary>
 public interface ICartService
 {
+    /// <summary>Các dòng trong giỏ CSDL của người dùng hiện tại (rỗng nếu chưa đăng nhập).</summary>
     Task<List<CartLine>> GetLinesAsync();
-    Task<CartSummary> GetSummaryAsync();
     /// <summary>Dựng dòng giỏ từ danh sách biến thể bất kỳ (giỏ khách vãng lai gửi từ Angular).</summary>
     Task<List<CartLine>> BuildLinesAsync(IEnumerable<(int VariantId, int Quantity)> items);
     /// <summary>Tính tổng, phí ship, mã giảm giá cho các dòng đã dựng.</summary>
@@ -54,17 +59,10 @@ public interface ICartService
     Task RemoveAsync(int variantId);
     Task ClearAsync();
     Task<int> CountAsync();
-    Task MergeSessionCartToUserAsync(string userId);
-    string? GetCouponCode();
-    void SetCouponCode(string? code);
 }
 
 public class CartService : ICartService
 {
-    private const string SessionKey = "Cart";
-    private const string CouponKey = "CouponCode";
-    private record SessionItem(int VariantId, int Quantity);
-
     private readonly ApplicationDbContext _db;
     private readonly IHttpContextAccessor _http;
     private readonly IPricingService _pricing;
@@ -81,18 +79,17 @@ public class CartService : ICartService
         _settings = settings;
     }
 
-    private HttpContext Ctx => _http.HttpContext ?? throw new InvalidOperationException("Không có HttpContext.");
-    private string? UserId => Ctx.User.Identity?.IsAuthenticated == true ? Ctx.User.FindFirstValue(ClaimTypes.NameIdentifier) : null;
-
-    // ---------- Session ----------
-    private List<SessionItem> ReadSession()
+    private string? UserId
     {
-        var json = Ctx.Session.GetString(SessionKey);
-        return string.IsNullOrEmpty(json) ? new List<SessionItem>() : JsonSerializer.Deserialize<List<SessionItem>>(json) ?? new List<SessionItem>();
+        get
+        {
+            var user = _http.HttpContext?.User;
+            return user?.Identity?.IsAuthenticated == true ? user.FindFirstValue(ClaimTypes.NameIdentifier) : null;
+        }
     }
-    private void WriteSession(List<SessionItem> items) => Ctx.Session.SetString(SessionKey, JsonSerializer.Serialize(items));
 
-    // ---------- DB ----------
+    private string RequireUserId() => UserId ?? throw new InvalidOperationException("Giỏ hàng trong CSDL chỉ dùng cho khách đã đăng nhập.");
+
     private async Task<Cart> GetOrCreateDbCartAsync(string userId)
     {
         var cart = await _db.Carts.Include(c => c.Items).FirstOrDefaultAsync(c => c.UserId == userId);
@@ -104,17 +101,13 @@ public class CartService : ICartService
         return cart;
     }
 
-    private async Task<List<(int VariantId, int Quantity)>> GetRawItemsAsync()
+    public async Task<List<CartLine>> GetLinesAsync()
     {
-        if (UserId is { } uid)
-        {
-            return await _db.CartItems.AsNoTracking().Where(i => i.Cart.UserId == uid)
-                .Select(i => new ValueTuple<int, int>(i.VariantId, i.Quantity)).ToListAsync();
-        }
-        return ReadSession().Select(s => (s.VariantId, s.Quantity)).ToList();
+        if (UserId is not { } uid) return new List<CartLine>();
+        var raw = await _db.CartItems.AsNoTracking().Where(i => i.Cart.UserId == uid)
+            .Select(i => new ValueTuple<int, int>(i.VariantId, i.Quantity)).ToListAsync();
+        return await BuildLinesAsync(raw);
     }
-
-    public async Task<List<CartLine>> GetLinesAsync() => await BuildLinesAsync(await GetRawItemsAsync());
 
     public async Task<List<CartLine>> BuildLinesAsync(IEnumerable<(int VariantId, int Quantity)> items)
     {
@@ -127,7 +120,7 @@ public class CartService : ICartService
             .Where(v => ids.Contains(v.Id))
             .Select(v => new
             {
-                v.Id, v.ProductId, v.Sku, v.StockQuantity, v.Price,
+                v.Id, v.ProductId, v.Sku, v.StockQuantity, v.Price, v.CostPrice,
                 IsActive = v.IsActive && v.Product.IsActive,
                 ProductName = v.Product.Name, v.Product.Slug, BasePrice = v.Product.Price,
                 ColorName = v.Color.Name, SizeName = v.Size.Name,
@@ -142,20 +135,17 @@ public class CartService : ICartService
         {
             var v = variants.FirstOrDefault(x => x.Id == r.VariantId);
             if (v is null) continue;
-            var basePrice = v.Price ?? v.BasePrice;
-            var price = _pricing.Calculate(basePrice, promos.GetValueOrDefault(v.ProductId));
+            var price = _pricing.Calculate(v.Price ?? v.BasePrice, promos.GetValueOrDefault(v.ProductId));
             lines.Add(new CartLine
             {
                 VariantId = v.Id, ProductId = v.ProductId, ProductName = v.ProductName, Slug = v.Slug, ImageUrl = v.ImageUrl,
                 ColorName = v.ColorName, SizeName = v.SizeName, Sku = v.Sku,
-                OriginalPrice = price.OriginalPrice, UnitPrice = price.SalePrice,
+                OriginalPrice = price.OriginalPrice, UnitPrice = price.SalePrice, CostPrice = v.CostPrice,
                 Quantity = r.Quantity, Stock = v.StockQuantity, IsActive = v.IsActive
             });
         }
         return lines;
     }
-
-    public async Task<CartSummary> GetSummaryAsync() => await BuildSummaryAsync(await GetLinesAsync(), GetCouponCode());
 
     public async Task<CartSummary> BuildSummaryAsync(List<CartLine> lines, string? couponCode)
     {
@@ -183,6 +173,7 @@ public class CartService : ICartService
 
     public async Task<(bool Ok, string Message)> AddAsync(int variantId, int quantity)
     {
+        var uid = RequireUserId();
         if (quantity < 1) quantity = 1;
         var variant = await _db.ProductVariants.AsNoTracking()
             .Where(v => v.Id == variantId)
@@ -191,94 +182,42 @@ public class CartService : ICartService
         if (variant is null || !variant.IsActive) return (false, "Sản phẩm không còn kinh doanh.");
         if (variant.StockQuantity <= 0) return (false, "Sản phẩm đã hết hàng.");
 
-        if (UserId is { } uid)
-        {
-            var cart = await GetOrCreateDbCartAsync(uid);
-            var item = cart.Items.FirstOrDefault(i => i.VariantId == variantId);
-            var newQty = (item?.Quantity ?? 0) + quantity;
-            if (newQty > variant.StockQuantity) return (false, $"Chỉ còn {variant.StockQuantity} sản phẩm trong kho.");
-            if (item is null) cart.Items.Add(new CartItem { VariantId = variantId, Quantity = newQty });
-            else item.Quantity = newQty;
-            cart.UpdatedAt = DateTime.Now;
-            await _db.SaveChangesAsync();
-        }
-        else
-        {
-            var items = ReadSession();
-            var idx = items.FindIndex(i => i.VariantId == variantId);
-            var newQty = (idx >= 0 ? items[idx].Quantity : 0) + quantity;
-            if (newQty > variant.StockQuantity) return (false, $"Chỉ còn {variant.StockQuantity} sản phẩm trong kho.");
-            if (idx >= 0) items[idx] = new SessionItem(variantId, newQty);
-            else items.Add(new SessionItem(variantId, newQty));
-            WriteSession(items);
-        }
+        var cart = await GetOrCreateDbCartAsync(uid);
+        var item = cart.Items.FirstOrDefault(i => i.VariantId == variantId);
+        var newQty = (item?.Quantity ?? 0) + quantity;
+        if (newQty > variant.StockQuantity) return (false, $"Chỉ còn {variant.StockQuantity} sản phẩm trong kho.");
+        if (item is null) cart.Items.Add(new CartItem { VariantId = variantId, Quantity = newQty });
+        else item.Quantity = newQty;
+        cart.UpdatedAt = DateTime.Now;
+        await _db.SaveChangesAsync();
         return (true, $"Đã thêm \"{variant.Name}\" vào giỏ hàng.");
     }
 
     public async Task UpdateAsync(int variantId, int quantity)
     {
+        var uid = RequireUserId();
         if (quantity <= 0) { await RemoveAsync(variantId); return; }
         var stock = await _db.ProductVariants.Where(v => v.Id == variantId).Select(v => v.StockQuantity).FirstOrDefaultAsync();
         quantity = Math.Min(quantity, Math.Max(stock, 1));
-
-        if (UserId is { } uid)
-        {
-            var item = await _db.CartItems.FirstOrDefaultAsync(i => i.Cart.UserId == uid && i.VariantId == variantId);
-            if (item is not null) { item.Quantity = quantity; await _db.SaveChangesAsync(); }
-        }
-        else
-        {
-            var items = ReadSession();
-            var idx = items.FindIndex(i => i.VariantId == variantId);
-            if (idx >= 0) { items[idx] = new SessionItem(variantId, quantity); WriteSession(items); }
-        }
+        var item = await _db.CartItems.FirstOrDefaultAsync(i => i.Cart.UserId == uid && i.VariantId == variantId);
+        if (item is not null) { item.Quantity = quantity; await _db.SaveChangesAsync(); }
     }
 
     public async Task RemoveAsync(int variantId)
     {
-        if (UserId is { } uid)
-        {
-            await _db.CartItems.Where(i => i.Cart.UserId == uid && i.VariantId == variantId).ExecuteDeleteAsync();
-        }
-        else
-        {
-            var items = ReadSession();
-            items.RemoveAll(i => i.VariantId == variantId);
-            WriteSession(items);
-        }
+        var uid = RequireUserId();
+        await _db.CartItems.Where(i => i.Cart.UserId == uid && i.VariantId == variantId).ExecuteDeleteAsync();
     }
 
     public async Task ClearAsync()
     {
-        if (UserId is { } uid)
-            await _db.CartItems.Where(i => i.Cart.UserId == uid).ExecuteDeleteAsync();
-        else
-            Ctx.Session.Remove(SessionKey);
+        var uid = RequireUserId();
+        await _db.CartItems.Where(i => i.Cart.UserId == uid).ExecuteDeleteAsync();
     }
 
-    public async Task<int> CountAsync() => (await GetRawItemsAsync()).Sum(r => r.Quantity);
-
-    public async Task MergeSessionCartToUserAsync(string userId)
+    public async Task<int> CountAsync()
     {
-        var items = ReadSession();
-        if (items.Count == 0) return;
-        var cart = await GetOrCreateDbCartAsync(userId);
-        foreach (var s in items)
-        {
-            var existing = cart.Items.FirstOrDefault(i => i.VariantId == s.VariantId);
-            if (existing is null) cart.Items.Add(new CartItem { VariantId = s.VariantId, Quantity = s.Quantity });
-            else existing.Quantity += s.Quantity;
-        }
-        cart.UpdatedAt = DateTime.Now;
-        await _db.SaveChangesAsync();
-        Ctx.Session.Remove(SessionKey);
-    }
-
-    public string? GetCouponCode() => Ctx.Session.GetString(CouponKey);
-
-    public void SetCouponCode(string? code)
-    {
-        if (string.IsNullOrWhiteSpace(code)) Ctx.Session.Remove(CouponKey);
-        else Ctx.Session.SetString(CouponKey, code.Trim().ToUpperInvariant());
+        if (UserId is not { } uid) return 0;
+        return await _db.CartItems.Where(i => i.Cart.UserId == uid).SumAsync(i => (int?)i.Quantity) ?? 0;
     }
 }

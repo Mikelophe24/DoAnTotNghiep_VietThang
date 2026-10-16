@@ -8,6 +8,9 @@ obj/
 TestResults/
 publish/
 
+## Khóa JWT tự sinh và dữ liệu cục bộ (không đưa lên git)
+src/VietThang.Web/App_Data/
+
 ## Secrets / local config
 appsettings.Development.local.json
 *.pfx

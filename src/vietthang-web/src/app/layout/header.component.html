@@ -22,7 +22,7 @@
       </div>
     </form>
     <div class="header-actions d-flex align-items-center gap-3">
-      <a class="header-action" routerLink="/tra-cuu-don-hang" title="Tra cứu đơn hàng"><i class="bi bi-box-seam"></i><span class="d-none d-lg-inline"> Tra cứu đơn</span></a>
+      <a class="header-action" routerLink="/order-lookup" title="Tra cứu đơn hàng"><i class="bi bi-box-seam"></i><span class="d-none d-lg-inline"> Tra cứu đơn</span></a>
 
       @if (auth.user(); as u) {
         <div class="dropdown">
@@ -30,10 +30,10 @@
             <i class="bi bi-person-circle"></i><span class="d-none d-lg-inline"> {{ u.fullName }}</span>
           </button>
           <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" routerLink="/tai-khoan"><i class="bi bi-person"></i> Hồ sơ của tôi</a></li>
-            <li><a class="dropdown-item" routerLink="/tai-khoan/don-hang"><i class="bi bi-receipt"></i> Đơn hàng của tôi</a></li>
-            <li><a class="dropdown-item" routerLink="/tai-khoan/dia-chi"><i class="bi bi-geo-alt"></i> Sổ địa chỉ</a></li>
-            <li><a class="dropdown-item" routerLink="/tai-khoan/yeu-thich"><i class="bi bi-heart"></i> Yêu thích</a></li>
+            <li><a class="dropdown-item" routerLink="/account"><i class="bi bi-person"></i> Hồ sơ của tôi</a></li>
+            <li><a class="dropdown-item" routerLink="/account/orders"><i class="bi bi-receipt"></i> Đơn hàng của tôi</a></li>
+            <li><a class="dropdown-item" routerLink="/account/addresses"><i class="bi bi-geo-alt"></i> Sổ địa chỉ</a></li>
+            <li><a class="dropdown-item" routerLink="/account/wishlist"><i class="bi bi-heart"></i> Yêu thích</a></li>
             @if (isStaff()) {
               <li><hr class="dropdown-divider" /></li>
               <li><a class="dropdown-item" href="http://localhost:5292/Admin" target="_blank"><i class="bi bi-speedometer2"></i> Trang quản trị</a></li>
@@ -43,10 +43,10 @@
           </ul>
         </div>
       } @else {
-        <a class="header-action" routerLink="/dang-nhap"><i class="bi bi-person"></i><span class="d-none d-lg-inline"> Đăng nhập</span></a>
+        <a class="header-action" routerLink="/login"><i class="bi bi-person"></i><span class="d-none d-lg-inline"> Đăng nhập</span></a>
       }
 
-      <a class="header-action position-relative" routerLink="/gio-hang" title="Giỏ hàng">
+      <a class="header-action position-relative" routerLink="/cart" title="Giỏ hàng">
         <i class="bi bi-bag"></i><span class="d-none d-lg-inline"> Giỏ hàng</span>
         @if (cart.count() > 0) { <span class="cart-badge">{{ cart.count() }}</span> }
       </a>
@@ -60,25 +60,25 @@
       </button>
       <div class="collapse navbar-collapse" id="mainNav">
         <ul class="navbar-nav main-nav">
-          <li class="nav-item"><a class="nav-link" routerLink="/hang-moi-ve" routerLinkActive="active"><i class="bi bi-stars text-warning"></i> Hàng mới về</a></li>
+          <li class="nav-item"><a class="nav-link" routerLink="/new-arrivals" routerLinkActive="active"><i class="bi bi-stars text-warning"></i> Hàng mới về</a></li>
           @for (c of menu$ | async; track c.id) {
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" [routerLink]="['/danh-muc', c.slug]" data-bs-toggle="dropdown" data-bs-auto-close="outside">{{ c.name }}</a>
+              <a class="nav-link dropdown-toggle" [routerLink]="['/category', c.slug]" data-bs-toggle="dropdown" data-bs-auto-close="outside">{{ c.name }}</a>
               @if (c.children.length) {
                 <ul class="dropdown-menu">
-                  <li><a class="dropdown-item fw-semibold" [routerLink]="['/danh-muc', c.slug]">Tất cả {{ c.name.toLowerCase() }}</a></li>
+                  <li><a class="dropdown-item fw-semibold" [routerLink]="['/category', c.slug]">Tất cả {{ c.name.toLowerCase() }}</a></li>
                   <li><hr class="dropdown-divider" /></li>
                   @for (ch of c.children; track ch.id) {
-                    <li><a class="dropdown-item" [routerLink]="['/danh-muc', ch.slug]">{{ ch.name }}</a></li>
+                    <li><a class="dropdown-item" [routerLink]="['/category', ch.slug]">{{ ch.name }}</a></li>
                   }
                 </ul>
               }
             </li>
           }
           <li class="nav-item"><a class="nav-link text-danger fw-semibold" routerLink="/sale" routerLinkActive="active">Sale</a></li>
-          <li class="nav-item"><a class="nav-link" routerLink="/he-thong-cua-hang" routerLinkActive="active">Cửa hàng</a></li>
-          <li class="nav-item"><a class="nav-link" routerLink="/tin-tuc" routerLinkActive="active">Tin tức</a></li>
-          <li class="nav-item"><a class="nav-link" routerLink="/tuyen-dung" routerLinkActive="active">Tuyển dụng</a></li>
+          <li class="nav-item"><a class="nav-link" routerLink="/stores" routerLinkActive="active">Cửa hàng</a></li>
+          <li class="nav-item"><a class="nav-link" routerLink="/news" routerLinkActive="active">Tin tức</a></li>
+          <li class="nav-item"><a class="nav-link" routerLink="/careers" routerLinkActive="active">Tuyển dụng</a></li>
         </ul>
       </div>
     </div>
