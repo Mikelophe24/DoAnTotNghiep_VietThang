@@ -74,7 +74,17 @@ builder.Services.AddCors(options => options.AddPolicy("Angular", policy => polic
     .AllowAnyHeader().AllowAnyMethod()));
 
 // ---------- Dịch vụ ứng dụng ----------
-builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
+// Ảnh tải lên: có đủ Cloudinary:CloudName/ApiKey/ApiSecret (user-secrets) thì lưu lên Cloudinary, chưa có thì lưu wwwroot/uploads
+var cloudinaryOptions = builder.Configuration.GetSection("Cloudinary").Get<CloudinaryOptions>() ?? new CloudinaryOptions();
+if (cloudinaryOptions.IsConfigured)
+{
+    builder.Services.AddSingleton(cloudinaryOptions);
+    builder.Services.AddScoped<IFileStorageService, CloudinaryFileStorageService>();
+}
+else
+{
+    builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
+}
 builder.Services.AddTransient<IHtmlSanitizer, HtmlSanitizer>();
 builder.Services.AddScoped<ISettingService, SettingService>();
 builder.Services.AddScoped<IPricingService, PricingService>();

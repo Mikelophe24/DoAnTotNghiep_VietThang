@@ -63,7 +63,8 @@ Truy cập `http://localhost:5292/` sẽ tự chuyển sang `http://localhost:42
 |---|---|---|
 | Khóa ký JWT | `src/VietThang.Web/App_Data/jwt-key.txt` | Tự sinh lại khi chạy lần đầu. Token cũ hết hiệu lực, đăng nhập lại là xong. |
 | Cấu hình SMTP (gửi email thật) | user-secrets | Không bắt buộc. Chưa cấu hình thì email (quên mật khẩu) ghi ra console. Muốn gửi thật: xem mục 6. |
-| Ảnh tải lên qua Admin | `src/VietThang.Web/wwwroot/uploads/` | Chỉ cần chép khi khôi phục CSDL cũ (mục 5). CSDL mới tạo không tham chiếu các ảnh này. |
+| Ảnh tải lên qua Admin | `src/VietThang.Web/wwwroot/uploads/` | Chỉ cần chép khi khôi phục CSDL cũ (mục 5). CSDL mới tạo không tham chiếu các ảnh này. Cấu hình Cloudinary (mục 6b) để không còn phụ thuộc máy. |
+| Khóa Cloudinary | user-secrets | Không bắt buộc. Xem mục 6b. |
 | Database | LocalDB `VietThangFashion` | Tự tạo lại từ migration + seed. Muốn giữ dữ liệu nhập tay: mục 5. |
 | `node_modules/`, `bin/`, `obj/`, `dist/` | | `setup.ps1` tạo lại. |
 
@@ -84,6 +85,23 @@ dotnet user-secrets set "Smtp:User" "dia-chi@gmail.com"
 dotnet user-secrets set "Smtp:Password" "xxxx xxxx xxxx xxxx"   # App password 16 ký tự
 dotnet user-secrets set "Smtp:FromEmail" "dia-chi@gmail.com"
 ```
+
+## 6b. (Khuyên dùng) Lưu ảnh tải lên trên Cloudinary
+
+Mặc định ảnh tải qua Admin lưu vào `wwwroot/uploads` trên đĩa máy đang chạy, nên **không đi theo Git** và mỗi máy một bộ ảnh khác nhau. Khi cấu hình Cloudinary, ảnh được tải lên đám mây và URL lưu trong CSDL là tuyệt đối (`https://res.cloudinary.com/...`), máy nào mở cũng thấy, deploy lại không mất.
+
+Lấy ba giá trị trong Cloudinary Dashboard (mục *API Keys*), rồi lưu bằng user-secrets trên **mỗi máy** chạy backend:
+
+```powershell
+cd src\VietThang.Web
+dotnet user-secrets set "Cloudinary:CloudName" "ten-cloud"
+dotnet user-secrets set "Cloudinary:ApiKey" "123456789012345"
+dotnet user-secrets set "Cloudinary:ApiSecret" "xxxxxxxxxxxxxxxxxxxxxxx"
+```
+
+Khởi động lại `dotnet run`. Kiểm tra: Admin → Sản phẩm → Sửa → Thêm ảnh; ảnh mới hiện ra với URL bắt đầu bằng `https://res.cloudinary.com/`. Ảnh nằm trong thư mục `vietthang/products/{id}`, `vietthang/categories`, `vietthang/banners`, `vietthang/posts` trên Cloudinary (đổi tên gốc bằng `Cloudinary:Folder`).
+
+Thiếu bất kỳ khóa nào trong ba khóa trên thì ứng dụng tự quay về lưu trên đĩa, không báo lỗi. Ảnh cũ dạng `/uploads/...` vẫn hiển thị bình thường; muốn chuyển lên Cloudinary thì xóa và tải lại qua Admin. Gói miễn phí của Cloudinary là 25 GB lưu trữ và băng thông mỗi tháng.
 
 ## 7. Dùng SQL Server khác thay LocalDB
 

@@ -68,6 +68,7 @@ Hai ứng dụng chạy song song, **một backend .NET 8 duy nhất** `src/Viet
 - `CatalogService` – lọc/sắp xếp/phân trang sản phẩm; tìm kiếm không dấu qua cột `Products.SearchText` (sinh bởi `SlugHelper.ToSearchText`, phải cập nhật khi đổi tên/mã/chất liệu).
 - `SettingService` – đọc bảng `Settings` có cache 10 phút; gọi `Invalidate()` sau khi Admin lưu cấu hình. Khóa trong `SettingKeys`.
 - `IAppEmailSender` – `SmtpEmailSender` (MailKit) khi có `Smtp:Host`, ngược lại `LogEmailSender` ghi log.
+- `IFileStorageService` – `CloudinaryFileStorageService` khi có đủ `Cloudinary:CloudName/ApiKey/ApiSecret` (user-secrets), ngược lại `LocalFileStorageService` lưu `wwwroot/uploads`. URL ảnh lưu trong CSDL có thể là tương đối `/uploads/...` hoặc tuyệt đối `https://res.cloudinary.com/...`; Angular và Admin dùng nguyên URL, không nối thêm host.
 
 **Máy trạng thái đơn hàng** `Helpers/OrderStateMachine.cs`: Pending → Confirmed → Shipping → Completed; Pending/Confirmed → Cancelled. Hủy phải hoàn tồn; Completed đặt `PaymentStatus = Paid` và `CompletedAt` (báo cáo doanh thu tính theo mốc này). Mọi chuyển trạng thái phải qua `CanTransition`.
 

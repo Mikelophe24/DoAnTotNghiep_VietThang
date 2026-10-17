@@ -132,6 +132,7 @@ Sơ đồ viết bằng Mermaid: xem trực tiếp trên GitHub/VS Code (extensi
 | 12 | Báo cáo (Chart.js): doanh thu theo ngày/tháng, đơn theo trạng thái, top 10 bán chạy, doanh thu theo nhóm hàng, lợi nhuận gộp theo tháng, khách mới; thẻ tổng hợp; xuất Excel đơn hàng + chi tiết (ClosedXML) | ✅ Xong (15/09/2026) |
 | GĐ1 | Gỡ storefront Razor, quên mật khẩu + SMTP, tìm kiếm không dấu, giá vốn snapshot, chống trùng mã đơn, khóa JWT ngoài mã nguồn, chọn tỉnh/quận/phường | ✅ Xong (03/10/2026) |
 | 13a | Dữ liệu demo (`--seed-demo`), 93 unit test xUnit | ✅ Xong (03/10/2026) |
+| GĐ3 | Lưu ảnh tải lên trên Cloudinary (`CloudinaryFileStorageService`, bật qua user-secrets, tự quay về lưu đĩa khi chưa cấu hình); `setup.ps1` + `06-huong-dan-cai-dat.md` để chuyển dự án sang máy khác; 104 unit test | ✅ Xong (17/10/2026) |
 | 13b | Bảng test case chức năng, rà responsive Angular, ảnh sản phẩm thật | ⏳ Tiếp theo |
 | 14–15 | Viết báo cáo, slide, bảo vệ | |
 
@@ -144,7 +145,7 @@ Phân quyền Admin: Employee dùng được Sản phẩm, Đơn hàng, Kho, Đ�
 
 Ghi chú báo cáo: doanh thu tính theo đơn **Hoàn thành** tại mốc `CompletedAt`; lợi nhuận gộp = Σ(UnitPrice − CostPrice hiện tại của biến thể) × SL (giá vốn không lưu snapshot theo đơn, nêu trong phần hạn chế của báo cáo).
 
-Dịch vụ nghiệp vụ (`Services/`): `PricingService` (giá khuyến mãi), `PromotionService` (mã giảm giá), `CartService`, `OrderService` (đặt hàng trong transaction), `CatalogService` (lọc/sắp xếp/thẻ sản phẩm), `SettingService` (cấu hình có cache), `FileStorageService`, `LogEmailSender` (email ghi log, thay bằng SMTP ở tuần 13).
+Dịch vụ nghiệp vụ (`Services/`): `PricingService` (giá khuyến mãi), `PromotionService` (mã giảm giá), `CartService`, `OrderService` (đặt hàng trong transaction), `CatalogService` (lọc/sắp xếp/thẻ sản phẩm), `SettingService` (cấu hình có cache), `IFileStorageService` (`LocalFileStorageService` lưu `wwwroot/uploads`, `CloudinaryFileStorageService` khi có khóa Cloudinary), `IAppEmailSender` (`SmtpEmailSender` khi có `Smtp:Host`, ngược lại `LogEmailSender`).
 
 ## Quyết định đã chốt
 - ASP.NET Core MVC (.NET 8 LTS) + EF Core + Identity + SQL Server.
