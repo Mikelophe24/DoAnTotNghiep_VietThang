@@ -9,7 +9,7 @@ import { AuthService } from '../../core/auth.service';
   imports: [RouterLink, ReactiveFormsModule],
   template: `
     <div class="container"><div class="row justify-content-center my-5"><div class="col-md-5 col-lg-4">
-      <div class="card shadow-sm"><div class="card-body p-4">
+      <div class="card auth-card"><div class="card-body">
         <h1 class="h4 mb-2 text-center">Quên mật khẩu</h1>
         @if (sent()) {
           <div class="alert alert-success small">{{ sent() }}</div>

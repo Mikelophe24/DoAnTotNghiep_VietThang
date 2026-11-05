@@ -1,5 +1,9 @@
 {
   "/api": { "target": "http://localhost:5292", "secure": false, "changeOrigin": true },
   "/images": { "target": "http://localhost:5292", "secure": false, "changeOrigin": true },
-  "/uploads": { "target": "http://localhost:5292", "secure": false, "changeOrigin": true }
+  "/uploads": { "target": "http://localhost:5292", "secure": false, "changeOrigin": true },
+  "/Admin": { "target": "http://localhost:5292", "secure": false, "changeOrigin": false },
+  "/lib": { "target": "http://localhost:5292", "secure": false, "changeOrigin": false },
+  "/css": { "target": "http://localhost:5292", "secure": false, "changeOrigin": false },
+  "/js": { "target": "http://localhost:5292", "secure": false, "changeOrigin": false }
 }

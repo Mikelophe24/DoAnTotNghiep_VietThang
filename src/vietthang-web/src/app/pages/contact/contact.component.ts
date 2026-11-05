@@ -11,7 +11,7 @@ import { ToastService } from '../../core/toast.service';
   template: `
     <div class="container mt-3"><div class="row g-4">
       <div class="col-lg-7">
-        <h1 class="h4 mb-3">Liên hệ với cửa hàng</h1>
+        <h1 class="page-title">Liên hệ với cửa hàng</h1>
         <form [formGroup]="form" (ngSubmit)="submit()" class="bg-white border rounded p-4" novalidate>
           <div class="row">
             <div class="col-md-6 mb-3"><label class="form-label required">Họ và tên</label><input class="form-control" formControlName="fullName" [class.is-invalid]="invalid('fullName')" /><div class="invalid-feedback">Nhập họ tên</div></div>

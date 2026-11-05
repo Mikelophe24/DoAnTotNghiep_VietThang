@@ -1,5 +1,5 @@
 <div class="container mt-3">
-  <h1 class="h4 mb-3">Thanh toán</h1>
+  <h1 class="page-title">Thanh toán</h1>
   @let s = cart.summary();
   @if (s && !s.isEmpty) {
   <form [formGroup]="form" (ngSubmit)="submit()" novalidate>

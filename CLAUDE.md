@@ -17,7 +17,7 @@ cd src\VietThang.Web
 dotnet run
 dotnet run -- --seed-demo          # nạp dữ liệu demo một lần (DemoDataSeeder, đánh dấu bằng Settings.DemoDataSeededAt)
 
-# Angular storefront tại http://localhost:4200 (proxy /api, /images, /uploads sang 5292)
+# Angular storefront tại http://localhost:4200 (proxy /api, /images, /uploads và /Admin, /lib, /css, /js sang 5292 – trang quản trị mở được tại http://localhost:4200/Admin)
 cd src\vietthang-web
 npm install
 npm start                          # ng serve

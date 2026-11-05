@@ -12,7 +12,7 @@ import { OrderDetailsViewComponent } from '../../shared/order-details-view.compo
   template: `
     <div class="container mt-3">
       <div class="row justify-content-center"><div class="col-lg-8">
-        <h1 class="h4 mb-3">Tra cứu đơn hàng</h1>
+        <h1 class="page-title">Tra cứu đơn hàng</h1>
         <form class="bg-white border rounded p-4 mb-4" (ngSubmit)="lookup()">
           <div class="row g-3 align-items-end">
             <div class="col-md-5"><label class="form-label">Mã đơn hàng</label><input class="form-control text-uppercase" name="code" [(ngModel)]="code" placeholder="VT260915001" required /></div>

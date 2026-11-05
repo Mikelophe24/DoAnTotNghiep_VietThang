@@ -46,8 +46,8 @@ const shade = (hex, f) => { const n = parseInt(hex.slice(1), 16); const r = (n >
 const isLight = hex => { const n = parseInt(hex.slice(1), 16); return ((n >> 16) & 255) * 0.299 + ((n >> 8) & 255) * 0.587 + (n & 255) * 0.114 > 186; };
 
 function garment(type, fill, pattern, kid) {
-  const stroke = isLight(fill) ? '#B9C2CF' : shade(fill, 0.7);
-  const detail = isLight(fill) ? '#C9D1DC' : shade(fill, 0.8);
+  const stroke = isLight(fill) ? '#D9CFC5' : shade(fill, 0.7);
+  const detail = isLight(fill) ? '#E3DAD0' : shade(fill, 0.8);
   const pat = pattern !== 'none' ? `fill="url(#pat)"` : '';
   const s = kid ? 0.78 : 1;
   // Chân váy và váy liền: một khối hình thang, không dùng dáng áo + quần
@@ -96,29 +96,29 @@ function wrap(text, max = 26) {
 
 function productSvg(p, colorName) {
   const fill = COLORS[colorName];
-  const bg1 = isLight(fill) ? '#F3F5F8' : shade(fill, 1.0) + '22';
+  const bg1 = isLight(fill) ? '#FAF7F2' : shade(fill, 1.0) + '22';
   const lines = wrap(p.name);
   return `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800">
 <defs>
-  <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#EEF2F8"/></linearGradient>
+  <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#F3EDE6"/></linearGradient>
   ${patternDef(p.pattern, fill)}
 </defs>
 <rect width="600" height="800" fill="url(#bg)"/>
 <circle cx="300" cy="400" r="250" fill="${fill}" opacity="${isLight(fill) ? 0.25 : 0.12}"/>
 ${garment(p.type, fill, p.pattern, p.kid)}
 <rect x="0" y="690" width="600" height="110" fill="#FFFFFF" opacity="0.9"/>
-<text x="300" y="728" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700" fill="#1F3A5F">${lines[0]}</text>
-${lines[1] ? `<text x="300" y="756" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="600" fill="#1F3A5F">${lines[1]}</text>` : ''}
-<g transform="translate(300,${lines[1] ? 782 : 758})"><rect x="-70" y="-13" width="140" height="22" rx="11" fill="${fill}" stroke="#B9C2CF" stroke-width="${isLight(fill) ? 1 : 0}"/><text y="4" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="${isLight(fill) ? '#1F3A5F' : '#FFFFFF'}">${colorName}</text></g>
-<text x="24" y="40" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" fill="#1F3A5F" opacity="0.7">VT · Việt Thắng</text>
-<text x="576" y="40" text-anchor="end" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#6b7280">${p.code}</text>
+<text x="300" y="728" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700" fill="#1F1B18">${lines[0]}</text>
+${lines[1] ? `<text x="300" y="756" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="600" fill="#1F1B18">${lines[1]}</text>` : ''}
+<g transform="translate(300,${lines[1] ? 782 : 758})"><rect x="-70" y="-13" width="140" height="22" rx="11" fill="${fill}" stroke="#D9CFC5" stroke-width="${isLight(fill) ? 1 : 0}"/><text y="4" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="${isLight(fill) ? '#1F1B18' : '#FFFFFF'}">${colorName}</text></g>
+<text x="24" y="40" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="800" fill="#1F1B18" opacity="0.7">VT · Việt Thắng</text>
+<text x="576" y="40" text-anchor="end" font-family="Segoe UI, Arial, sans-serif" font-size="13" fill="#7D746E">${p.code}</text>
 </svg>`;
 }
 
 function categorySvg(c) {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
 <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${shade(c.color, 1.15)}" stop-opacity="0.35"/><stop offset="1" stop-color="${c.color}" stop-opacity="0.75"/></linearGradient></defs>
-<rect width="800" height="600" fill="#F3F5F8"/><rect width="800" height="600" fill="url(#bg)"/>
+<rect width="800" height="600" fill="#FAF7F2"/><rect width="800" height="600" fill="url(#bg)"/>
 <g transform="translate(400,0) scale(0.72) translate(-300,20)">${garment(c.type, c.color, 'none', c.kid)}</g>
 </svg>`;
 }

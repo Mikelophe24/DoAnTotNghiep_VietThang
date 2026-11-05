@@ -11,8 +11,8 @@ import { ToastService } from '../../core/toast.service';
   imports: [RouterLink, ReactiveFormsModule],
   template: `
     <div class="container"><div class="row justify-content-center my-5"><div class="col-md-5 col-lg-4">
-      <div class="card shadow-sm"><div class="card-body p-4">
-        <h1 class="h4 mb-3 text-center">Đặt lại mật khẩu</h1>
+      <div class="card auth-card"><div class="card-body">
+        <h1 class="h3 mb-4 text-center">Đặt lại mật khẩu</h1>
         @if (!email || !token) {
           <div class="alert alert-warning small">Liên kết không hợp lệ. Vui lòng yêu cầu lại từ trang <a routerLink="/forgot-password">Quên mật khẩu</a>.</div>
         } @else {

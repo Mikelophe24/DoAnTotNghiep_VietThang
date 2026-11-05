@@ -1,13 +1,13 @@
 <div class="container mt-3">
   @let s = cart.summary();
-  <h1 class="h4 mb-3">Giỏ hàng <span class="text-muted fs-6">({{ s?.totalQuantity ?? 0 }} sản phẩm)</span></h1>
+  <h1 class="page-title">Giỏ hàng <span class="text-muted fs-6">({{ s?.totalQuantity ?? 0 }} sản phẩm)</span></h1>
 
   @if (!s) {
     <div class="skeleton" style="height:200px"></div>
   } @else if (s.isEmpty) {
-    <div class="text-center py-5 bg-white rounded border">
-      <i class="bi bi-bag-x fs-1 text-muted"></i>
-      <p class="mt-2 text-muted">Giỏ hàng của bạn đang trống.</p>
+    <div class="empty-state">
+      <i class="bi bi-bag-x"></i>
+      <p class="mb-3">Giỏ hàng của bạn đang trống.</p>
       <a class="btn btn-brand" routerLink="/">Tiếp tục mua sắm</a>
     </div>
   } @else {

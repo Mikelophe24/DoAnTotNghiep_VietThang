@@ -11,7 +11,7 @@ import { PaginationComponent } from '../../shared/pagination.component';
   imports: [RouterLink, DatePipe, PaginationComponent],
   template: `
     <div class="container mt-3">
-      <h1 class="h4 mb-3">{{ type === 1 ? 'Tin tức' : 'Tuyển dụng' }}</h1>
+      <h1 class="page-title">{{ type === 1 ? 'Tin tức' : 'Tuyển dụng' }}</h1>
       @if (data(); as d) {
         @if (!d.items.length) { <p class="text-muted">Chưa có bài viết.</p> }
         <div class="row g-3">

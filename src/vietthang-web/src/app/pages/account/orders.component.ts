@@ -11,7 +11,7 @@ import { PaginationComponent } from '../../shared/pagination.component';
   standalone: true,
   imports: [RouterLink, DatePipe, VndPipe, PaginationComponent],
   template: `
-    <h1 class="h4 mb-3">Đơn hàng của tôi</h1>
+    <h1 class="page-title">Đơn hàng của tôi</h1>
     @if (data(); as d) {
       @if (!d.items.length) {
         <div class="bg-white border rounded p-5 text-center text-muted">Bạn chưa có đơn hàng nào. <a routerLink="/">Mua sắm ngay</a></div>

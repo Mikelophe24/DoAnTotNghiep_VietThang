@@ -1,9 +1,9 @@
 :root {
   --admin-sidebar-w: 240px;
-  --admin-navy: #1F3A5F;
-  --admin-navy-dark: #172c49;
+  --admin-navy: #1F1B18;
+  --admin-navy-dark: #15110F;
 }
-.admin-body { background: #f4f6f9; margin: 0; }
+.admin-body { background: #FAF7F2; margin: 0; }
 .admin-sidebar {
   position: fixed; top: 0; left: 0; bottom: 0; width: var(--admin-sidebar-w);
   background: var(--admin-navy); color: #fff; overflow-y: auto;
@@ -18,16 +18,25 @@
 .admin-nav .nav-link { color: rgba(255,255,255,.85); padding: 8px 20px; border-left: 3px solid transparent; }
 .admin-nav .nav-link i { width: 20px; display: inline-block; }
 .admin-nav .nav-link:hover { background: rgba(255,255,255,.08); color: #fff; }
-.admin-nav .nav-link.active { background: rgba(255,255,255,.12); color: #fff; border-left-color: #F2C14E; }
+.admin-nav .nav-link.active { background: rgba(255,255,255,.12); color: #fff; border-left-color: #C9A24D; }
 .admin-nav .nav-link.disabled { color: rgba(255,255,255,.35); }
 .admin-main { margin-left: var(--admin-sidebar-w); min-height: 100vh; }
-.admin-topbar { height: 56px; background: #fff; border-bottom: 1px solid #e3e7ee; }
+.admin-topbar { height: 56px; background: #fff; border-bottom: 1px solid #EAE2DA; }
 .table td, .table th { vertical-align: middle; }
-.thumb-sm { width: 48px; height: 64px; object-fit: cover; border-radius: 4px; background: #eef2f8; }
-.thumb-md { width: 120px; height: 160px; object-fit: cover; border-radius: 6px; background: #eef2f8; }
+.thumb-sm { width: 48px; height: 64px; object-fit: cover; border-radius: 4px; background: #F3EDE6; }
+.thumb-md { width: 120px; height: 160px; object-fit: cover; border-radius: 6px; background: #F3EDE6; }
 .color-dot { display: inline-block; width: 16px; height: 16px; border-radius: 50%; border: 1px solid #ccc; vertical-align: -3px; margin-right: 4px; }
 .required::after { content: " *"; color: #dc3545; }
 @media (max-width: 991px) {
   .admin-sidebar { position: static; width: auto; }
   .admin-main { margin-left: 0; }
 }
+/* Đồng bộ tone màu với storefront (đất nung + kem) */
+:root { --bs-primary: #A3412F; --bs-primary-rgb: 163, 65, 47; --bs-link-color: #A3412F; --bs-link-color-rgb: 163, 65, 47; --bs-link-hover-color: #7E2F21; --bs-link-hover-color-rgb: 126, 47, 33; }
+.btn-primary { --bs-btn-bg: #A3412F; --bs-btn-border-color: #A3412F; --bs-btn-hover-bg: #7E2F21; --bs-btn-hover-border-color: #7E2F21; --bs-btn-active-bg: #7E2F21; --bs-btn-active-border-color: #7E2F21; --bs-btn-disabled-bg: #A3412F; --bs-btn-disabled-border-color: #A3412F; }
+.btn-outline-primary { --bs-btn-color: #A3412F; --bs-btn-border-color: #A3412F; --bs-btn-hover-bg: #A3412F; --bs-btn-hover-border-color: #A3412F; --bs-btn-active-bg: #A3412F; --bs-btn-active-border-color: #A3412F; }
+.form-control:focus, .form-select:focus { border-color: #A3412F; box-shadow: 0 0 0 .25rem rgba(163, 65, 47, .18); }
+.form-check-input:checked { background-color: #A3412F; border-color: #A3412F; }
+.page-link { color: #A3412F; } .page-item.active .page-link { background-color: #A3412F; border-color: #A3412F; }
+.nav-pills .nav-link.active { background-color: #A3412F; }
+.card { border-color: #EAE2DA; border-radius: 10px; }

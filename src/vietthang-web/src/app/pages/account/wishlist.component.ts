@@ -9,7 +9,7 @@ import { ToastService } from '../../core/toast.service';
   standalone: true,
   imports: [ProductCardComponent],
   template: `
-    <h1 class="h4 mb-3">Sản phẩm yêu thích <span class="text-muted fs-6">({{ items().length }})</span></h1>
+    <h1 class="page-title">Sản phẩm yêu thích <span class="text-muted fs-6">({{ items().length }})</span></h1>
     @if (!items().length) {
       <div class="bg-white border rounded p-5 text-center text-muted">Chưa có sản phẩm yêu thích. Bấm <i class="bi bi-heart"></i> ở trang sản phẩm để lưu.</div>
     } @else {

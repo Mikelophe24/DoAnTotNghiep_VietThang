@@ -14,8 +14,8 @@ function match(a: string, b: string) {
   imports: [RouterLink, ReactiveFormsModule],
   template: `
     <div class="container"><div class="row justify-content-center my-5"><div class="col-md-6 col-lg-5">
-      <div class="card shadow-sm"><div class="card-body p-4">
-        <h1 class="h4 mb-3 text-center">Đăng ký tài khoản</h1>
+      <div class="card auth-card"><div class="card-body">
+        <h1 class="h3 mb-4 text-center">Đăng ký tài khoản</h1>
         @if (error()) { <div class="alert alert-danger py-2 small">{{ error() }}</div> }
         <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
           <div class="mb-3"><label class="form-label">Họ và tên</label><input class="form-control" formControlName="fullName" [class.is-invalid]="invalid('fullName')" /><div class="invalid-feedback">Nhập họ tên</div></div>

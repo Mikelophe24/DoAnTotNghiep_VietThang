@@ -16,6 +16,7 @@ import { VndPipe } from '../core/vnd.pipe';
           @if (p.isNew) { <span class="badge-new">Mới</span> }
           @if (!p.inStock) { <span class="badge-out">Hết hàng</span> }
         </div>
+        <span class="product-quick"><i class="bi bi-eye"></i> Xem chi tiết</span>
       </a>
       <div class="product-info">
         @if (p.categoryName) { <div class="product-cat">{{ p.categoryName }}</div> }

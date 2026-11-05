@@ -123,7 +123,7 @@ public static class SeedData
     {
         if (await db.Settings.AnyAsync()) return;
         db.Settings.AddRange(
-            new Setting { Key = SettingKeys.StoreName, Value = "Thời trang gia đình VT - Việt Thắng", Description = "Tên cửa hàng" },
+            new Setting { Key = SettingKeys.StoreName, Value = "Thời trang Việt Thắng", Description = "Tên cửa hàng" },
             new Setting { Key = SettingKeys.Hotline, Value = "1800646859", Description = "Hotline" },
             new Setting { Key = SettingKeys.Email, Value = "info@thoitrangvietthang.vn", Description = "Email liên hệ" },
             new Setting { Key = SettingKeys.DefaultShippingFee, Value = "30000", Description = "Phí vận chuyển mặc định (đ)" },

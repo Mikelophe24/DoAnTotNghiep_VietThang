@@ -1,5 +1,25 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="600" viewBox="0 0 1600 600">
-  <rect width="1600" height="600" fill="#F9E3E7"/>
-  <text x="120" y="290" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="#7B1E3A">Sale đến 30%</text>
-  <text x="120" y="360" font-family="Arial, sans-serif" font-size="32" fill="#9C4A5F">Đồ lanh nữ và trung niên</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#A3412F"/>
+      <stop offset="1" stop-color="#6E2719"/>
+    </linearGradient>
+    <pattern id="linen" width="14" height="14" patternUnits="userSpaceOnUse">
+      <path d="M0 7h14M7 0v14" stroke="#FFFFFF" stroke-opacity="0.05" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <rect width="1600" height="900" fill="url(#linen)"/>
+  <circle cx="1250" cy="450" r="420" fill="none" stroke="#C9A24D" stroke-opacity="0.35" stroke-width="2"/>
+  <circle cx="1250" cy="450" r="330" fill="none" stroke="#C9A24D" stroke-opacity="0.5" stroke-width="2"/>
+  <circle cx="1250" cy="450" r="250" fill="#C9A24D"/>
+  <text x="1250" y="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="30" letter-spacing="8" fill="#1F1B18">GIẢM ĐẾN</text>
+  <text x="1250" y="540" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="170" font-weight="700" fill="#1F1B18">30%</text>
+  <text x="1250" y="600" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="26" fill="#1F1B18">cho đồ lanh nữ &amp; trung niên</text>
+  <text x="120" y="330" font-family="Arial, Helvetica, sans-serif" font-size="30" letter-spacing="8" fill="#C9A24D">ƯU ĐÃI MÙA HÈ</text>
+  <text x="120" y="440" font-family="Georgia, 'Times New Roman', serif" font-size="96" font-weight="700" fill="#FAF7F2">Sale lớn</text>
+  <text x="120" y="548" font-family="Georgia, 'Times New Roman', serif" font-size="96" font-weight="700" font-style="italic" fill="#F6E9DF">cuối mùa</text>
+  <text x="120" y="630" font-family="Arial, Helvetica, sans-serif" font-size="32" fill="#F6E9DF" fill-opacity="0.9">Nhập mã VT10 để giảm thêm 10% cho đơn đầu tiên</text>
+  <rect x="120" y="680" width="260" height="64" rx="32" fill="#FAF7F2"/>
+  <text x="250" y="722" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#A3412F">Mua ngay →</text>
 </svg>

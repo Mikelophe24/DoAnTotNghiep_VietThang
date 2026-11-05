@@ -9,8 +9,8 @@ import { AuthService } from '../../core/auth.service';
   imports: [RouterLink, ReactiveFormsModule],
   template: `
     <div class="container"><div class="row justify-content-center my-5"><div class="col-md-5 col-lg-4">
-      <div class="card shadow-sm"><div class="card-body p-4">
-        <h1 class="h4 mb-3 text-center">Đăng nhập</h1>
+      <div class="card auth-card"><div class="card-body">
+        <h1 class="h3 mb-4 text-center">Đăng nhập</h1>
         @if (expired) { <div class="alert alert-warning py-2 small">Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.</div> }
         @if (error()) { <div class="alert alert-danger py-2 small">{{ error() }}</div> }
         <form [formGroup]="form" (ngSubmit)="submit()" novalidate>

@@ -10,7 +10,7 @@ import { Profile } from '../../core/models';
   standalone: true,
   imports: [ReactiveFormsModule],
   template: `
-    <h1 class="h4 mb-3">Hồ sơ của tôi</h1>
+    <h1 class="page-title">Hồ sơ của tôi</h1>
     <form [formGroup]="form" (ngSubmit)="save()" class="bg-white border rounded p-4 mb-4" style="max-width:640px" novalidate>
       <div class="mb-3"><label class="form-label required">Họ và tên</label><input class="form-control" formControlName="fullName" [class.is-invalid]="invalid(form, 'fullName')" /><div class="invalid-feedback">Nhập họ tên</div></div>
       <div class="mb-3"><label class="form-label">Email</label><input class="form-control" formControlName="email" readonly /></div>

@@ -9,6 +9,8 @@
 | `04b-migration-script.sql` | Script sinh tự động từ EF Core Migration (bản đang chạy thực tế, 34 bảng gồm 7 bảng Identity) | Phụ lục |
 | `05-kien-truc-he-thong.md` | Kiến trúc, cấu trúc solution, phân quyền, máy trạng thái đơn, sitemap, báo cáo, bảo mật | Chương 4 |
 | `06-huong-dan-cai-dat.md` | Cài đặt trên máy mới: phần mềm cần có, `setup.ps1`, chạy, những gì không theo git, backup/restore, lỗi thường gặp | Phụ lục, bàn giao |
+| `diagrams/usecase/*.svg, *.png` | 20 biểu đồ use case kiểu StarUML (tổng quát + 19 chức năng), sinh bằng `node tools/gen-usecase.mjs` | Chương 3 |
+| `diagrams/sequence/*.svg, *.png` | 20 biểu đồ tuần tự kiểu StarUML theo từng chức năng, sinh bằng `node tools/gen-sequence.mjs` | Chương 3 |
 
 ## Giao diện khách hàng bằng Angular (từ 15/09/2026)
 
@@ -20,7 +22,7 @@ Quyết định: **Angular 18 cho storefront (khách hàng), Admin giữ Razor**
 | JWT | `Services/IJwtTokenService.cs`, cấu hình `Jwt` trong `appsettings.json` | Scheme `Bearer` chỉ dùng cho API; Admin Razor vẫn dùng cookie Identity |
 | CORS | `Cors:Origins` trong `appsettings.json` | Mặc định `http://localhost:4200` |
 | Angular app | `src/vietthang-web/` | Standalone components, signals, lazy routes, Reactive Forms, HttpClient + interceptor JWT, guard `/tai-khoan` |
-| Proxy dev | `src/vietthang-web/proxy.conf.json` | Chuyển `/api`, `/images`, `/uploads` sang `http://localhost:5292` |
+| Proxy dev | `src/vietthang-web/proxy.conf.json` | Chuyển `/api`, `/images`, `/uploads` và `/Admin`, `/lib`, `/css`, `/js` sang `http://localhost:5292`; nhờ vậy trang quản trị mở được tại `http://localhost:4200/Admin` (từ 05/11/2026, `changeOrigin: false` cho `/Admin` để redirect đăng nhập giữ cổng 4200) |
 
 Giỏ hàng khách vãng lai lưu `localStorage`, tính giá qua `POST /api/cart/quote`; khi đăng nhập, giỏ được gộp lên CSDL qua `POST /api/cart/merge`. Đặt hàng: `POST /api/checkout` (khách vãng lai gửi `items`, khách đăng nhập dùng giỏ CSDL).
 
@@ -133,6 +135,7 @@ Sơ đồ viết bằng Mermaid: xem trực tiếp trên GitHub/VS Code (extensi
 | GĐ1 | Gỡ storefront Razor, quên mật khẩu + SMTP, tìm kiếm không dấu, giá vốn snapshot, chống trùng mã đơn, khóa JWT ngoài mã nguồn, chọn tỉnh/quận/phường | ✅ Xong (03/10/2026) |
 | 13a | Dữ liệu demo (`--seed-demo`), 93 unit test xUnit | ✅ Xong (03/10/2026) |
 | GĐ3 | Lưu ảnh tải lên trên Cloudinary (`CloudinaryFileStorageService`, bật qua user-secrets, tự quay về lưu đĩa khi chưa cấu hình); `setup.ps1` + `06-huong-dan-cai-dat.md` để chuyển dự án sang máy khác; 104 unit test | ✅ Xong (17/10/2026) |
+| UI | Thiết kế lại giao diện Angular: bảng màu đất nung + kem + vàng đồng (`src/vietthang-web/src/styles.scss`), font Be Vietnam Pro + Playfair Display, header sticky, hero 2 cột, khối giới thiệu thương hiệu, thẻ sản phẩm/danh mục có hiệu ứng hover, banner SVG và ảnh minh họa sinh lại theo tone mới, Admin đồng bộ màu | ✅ Xong (05/11/2026) |
 | 13b | Bảng test case chức năng, rà responsive Angular, ảnh sản phẩm thật | ⏳ Tiếp theo |
 | 14–15 | Viết báo cáo, slide, bảo vệ | |
 
@@ -149,6 +152,7 @@ Dịch vụ nghiệp vụ (`Services/`): `PricingService` (giá khuyến mãi), 
 
 ## Quyết định đã chốt
 - ASP.NET Core MVC (.NET 8 LTS) + EF Core + Identity + SQL Server.
+- **Bảng màu storefront (05/11/2026)**: đất nung `#A3412F` (chính), kem `#FAF7F2` (nền), vàng đồng `#C9A24D` (nhấn), đỏ `#C62839` (sale), chữ `#1F1B18`. Khai báo một lần trong `:root` ở `styles.scss` kèm ghi đè biến Bootstrap (`--bs-primary`, `--bs-link-color`…); component chỉ dùng class, không hard-code màu. Font tải từ Google Fonts trong `index.html`.
 - Một ứng dụng, Storefront + Area Admin.
 - Thanh toán COD / chuyển khoản (không tích hợp cổng online).
 - Có quản lý kho, nhập hàng, báo cáo biểu đồ (Chart.js).

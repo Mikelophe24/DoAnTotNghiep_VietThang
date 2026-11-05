@@ -7,7 +7,7 @@ import { RouterLink } from '@angular/router';
   imports: [RouterLink],
   template: `
     <div class="container text-center my-5">
-      <h1 class="display-6">404</h1>
+      <h1 class="display-3 text-brand">404</h1>
       <p class="lead">Trang bạn tìm không tồn tại.</p>
       <a class="btn btn-brand" routerLink="/">Về trang chủ</a>
     </div>
