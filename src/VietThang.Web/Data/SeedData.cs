@@ -44,7 +44,7 @@ public static class SeedData
 
     /// <summary>
     /// Chạy mỗi lần khởi động: sản phẩm chỉ có ảnh placeholder sẽ được gắn ảnh theo từng màu (nếu file tồn tại);
-    /// danh mục gốc chưa có ảnh sẽ dùng ảnh /images/categories/{slug}.svg.
+    /// danh mục gốc dùng ảnh /images/categories/{slug}.jpg (ưu tiên) hoặc {slug}.svg.
     /// </summary>
     private static async Task UpgradeImagesAsync(ApplicationDbContext db, IWebHostEnvironment env)
     {
@@ -70,10 +70,17 @@ public static class SeedData
         foreach (var b in await db.Banners.Where(b => b.LinkUrl != null && b.LinkUrl.StartsWith("/danh-muc/")).ToListAsync())
             b.LinkUrl = "/category/" + b.LinkUrl!.Substring("/danh-muc/".Length);
 
-        foreach (var c in await db.Categories.Where(c => c.ParentId == null && c.ImageUrl == null).ToListAsync())
+        // Danh mục gốc: ưu tiên ảnh thật /images/categories/{slug}.jpg, không có thì dùng SVG sinh tự động.
+        // Danh mục đang dùng SVG mặc định cũng được nâng cấp lên ảnh .jpg khi file xuất hiện (ảnh do Admin tải lên giữ nguyên).
+        foreach (var c in await db.Categories.Where(c => c.ParentId == null).ToListAsync())
         {
-            var url = $"/images/categories/{c.Slug}.svg";
-            if (Exists(url)) c.ImageUrl = url;
+            var jpg = $"/images/categories/{c.Slug}.jpg";
+            var svg = $"/images/categories/{c.Slug}.svg";
+            if (c.ImageUrl == null || c.ImageUrl == svg)
+            {
+                if (Exists(jpg)) c.ImageUrl = jpg;
+                else if (c.ImageUrl == null && Exists(svg)) c.ImageUrl = svg;
+            }
         }
         await db.SaveChangesAsync();
     }

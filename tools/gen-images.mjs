@@ -115,11 +115,70 @@ ${lines[1] ? `<text x="300" y="756" text-anchor="middle" font-family="Segoe UI, 
 </svg>`;
 }
 
+// Ảnh đại diện danh mục: vẽ hình người minh họa (cô gái, phụ nữ trung niên, em bé, chàng trai) mặc đồ màu chủ đạo của nhóm.
+const PERSONS = {
+  'nu':         { skin: '#F3C9A8', hair: '#4A2E22', style: 'long',  build: 'slim',  bottom: 'capri',  blush: true },
+  'trung-nien': { skin: '#EBC3A2', hair: '#6E5B52', style: 'bun',   build: 'full',  bottom: 'long',   glasses: true },
+  'tre-em':     { skin: '#F6D2B5', hair: '#3B2A20', style: 'kid',   build: 'kid',   bottom: 'shorts', blush: true },
+  'nam':        { skin: '#E8B48C', hair: '#2B2B2B', style: 'short', build: 'broad', bottom: 'shorts' }
+};
+const BUILDS = { slim: { sw: 88, hw: 76, hr: 56, hry: 62 }, full: { sw: 100, hw: 96, hr: 58, hry: 62 }, broad: { sw: 118, hw: 90, hr: 58, hry: 62 }, kid: { sw: 82, hw: 74, hr: 68, hry: 70 } };
+
+function person(p, fill) {
+  const { sw, hw, hr, hry } = BUILDS[p.build];
+  const X = 320, HY = 185;
+  const stroke = isLight(fill) ? '#D9CFC5' : shade(fill, 0.7);
+  const detail = isLight(fill) ? '#E3DAD0' : shade(fill, 0.8);
+  const pantsFill = isLight(fill) ? shade(fill, 0.96) : shade(fill, 0.9);
+  const hairDark = shade(p.hair, 0.8);
+  const bottomY = { shorts: 625, capri: 700, long: 760 }[p.bottom];
+  const legW = Math.round(hw * 0.7), legX = Math.round(hw * 0.5);
+  const g = [];
+  // Tóc phía sau (tóc dài) và búi tóc
+  if (p.style === 'long') g.push(`<path d="M${X - hr - 24},${HY - 20} Q${X - hr - 34},330 ${X - hr + 4},345 L${X + hr - 4},345 Q${X + hr + 34},330 ${X + hr + 24},${HY - 20} Q${X},${HY - 120} ${X - hr - 24},${HY - 20} Z" fill="${p.hair}"/>`);
+  if (p.style === 'bun') g.push(`<circle cx="${X}" cy="${HY - hry - 14}" r="30" fill="${p.hair}"/><path d="M${X - 18},${HY - hry - 24} Q${X},${HY - hry - 40} ${X + 18},${HY - hry - 24}" stroke="#B8AAA2" stroke-width="4" fill="none" opacity="0.8"/>`);
+  // Tay (da) – vẽ trước áo để tay áo đè lên
+  g.push(`<path d="M${X - sw + 8},300 L${X - sw - 24},548" stroke="${p.skin}" stroke-width="32" stroke-linecap="round"/>`,
+    `<path d="M${X + sw - 8},300 L${X + sw + 24},548" stroke="${p.skin}" stroke-width="32" stroke-linecap="round"/>`);
+  // Chân (da) và giày – vẽ trước quần
+  g.push(`<path d="M${X - legX},520 L${X - legX - 6},768" stroke="${p.skin}" stroke-width="${legW - 10}" stroke-linecap="round"/>`,
+    `<path d="M${X + legX},520 L${X + legX + 6},768" stroke="${p.skin}" stroke-width="${legW - 10}" stroke-linecap="round"/>`,
+    `<ellipse cx="${X - legX - 12}" cy="782" rx="36" ry="14" fill="#3A2F2A"/><ellipse cx="${X + legX + 12}" cy="782" rx="36" ry="14" fill="#3A2F2A"/>`);
+  // Quần
+  g.push(`<path d="M${X - legX},510 L${X - legX - 6},${bottomY}" stroke="${pantsFill}" stroke-width="${legW}" stroke-linecap="round"/>`,
+    `<path d="M${X + legX},510 L${X + legX + 6},${bottomY}" stroke="${pantsFill}" stroke-width="${legW}" stroke-linecap="round"/>`,
+    `<rect x="${X - hw}" y="490" width="${hw * 2}" height="${legW * 0.9}" fill="${pantsFill}"/>`);
+  // Cổ + áo
+  g.push(`<rect x="${X - 22}" y="${HY + hry - 16}" width="44" height="52" rx="10" fill="${p.skin}"/>`);
+  const shirt = `M${X - sw},276 Q${X},256 ${X + sw},276 L${X + sw + 38},392 L${X + sw - 2},412 L${X + hw + 6},500 L${X - hw - 6},500 L${X - sw + 2},412 L${X - sw - 38},392 Z`;
+  g.push(`<path d="${shirt}" fill="${fill}" stroke="${stroke}" stroke-width="4" stroke-linejoin="round"/>`,
+    `<path d="M${X - 28},274 Q${X},302 ${X + 28},274" fill="none" stroke="${detail}" stroke-width="7"/>`,
+    `<path d="M${X},300 L${X},494" stroke="${detail}" stroke-width="2" opacity="0.5"/>`,
+    `<path d="M${X - hw - 2},500 L${X + hw + 2},500" stroke="${detail}" stroke-width="5"/>`);
+  // Đầu, tóc trước, mặt
+  g.push(`<ellipse cx="${X}" cy="${HY}" rx="${hr}" ry="${hry}" fill="${p.skin}"/>`);
+  const fringeY = p.style === 'short' ? HY - 34 : HY - 22;
+  g.push(`<path d="M${X - hr - 3},${HY} A${hr + 3},${hry + 3} 0 0 1 ${X + hr + 3},${HY} L${X + hr - 8},${fringeY} Q${X + hr - 30},${fringeY - 22} ${X},${fringeY - 10} Q${X - hr + 20},${fringeY - 6} ${X - hr + 8},${fringeY + 8} Z" fill="${p.hair}"/>`);
+  if (p.style === 'kid') g.push(`<path d="M${X - 10},${HY - hry - 2} Q${X - 4},${HY - hry - 34} ${X + 14},${HY - hry - 28} Q${X + 6},${HY - hry - 18} ${X + 12},${HY - hry - 2} Z" fill="${p.hair}"/>`);
+  if (p.style === 'long') g.push(`<path d="M${X - hr - 3},${HY} Q${X - hr - 6},${HY + 60} ${X - hr + 14},${HY + 90}" stroke="${hairDark}" stroke-width="3" fill="none" opacity="0.5"/>`);
+  const ey = HY + 6, ex = p.build === 'kid' ? 26 : 22;
+  g.push(`<ellipse cx="${X - ex}" cy="${ey}" rx="5" ry="7" fill="#2B2B2B"/><ellipse cx="${X + ex}" cy="${ey}" rx="5" ry="7" fill="#2B2B2B"/>`);
+  const browW = p.build === 'broad' ? 4 : 2.5;
+  g.push(`<path d="M${X - ex - 10},${ey - 18} Q${X - ex},${ey - 24} ${X - ex + 10},${ey - 18}" stroke="${hairDark}" stroke-width="${browW}" fill="none"/><path d="M${X + ex - 10},${ey - 18} Q${X + ex},${ey - 24} ${X + ex + 10},${ey - 18}" stroke="${hairDark}" stroke-width="${browW}" fill="none"/>`);
+  g.push(`<path d="M${X - 16},${HY + 30} Q${X},${HY + 46} ${X + 16},${HY + 30}" stroke="#B05C5C" stroke-width="3.5" fill="none" stroke-linecap="round"/>`);
+  if (p.blush) g.push(`<circle cx="${X - hr + 18}" cy="${HY + 24}" r="9" fill="#F09A9A" opacity="0.45"/><circle cx="${X + hr - 18}" cy="${HY + 24}" r="9" fill="#F09A9A" opacity="0.45"/>`);
+  if (p.glasses) g.push(`<circle cx="${X - ex}" cy="${ey}" r="17" fill="none" stroke="#4A3F3A" stroke-width="3"/><circle cx="${X + ex}" cy="${ey}" r="17" fill="none" stroke="#4A3F3A" stroke-width="3"/><path d="M${X - ex + 17},${ey} L${X + ex - 17},${ey}" stroke="#4A3F3A" stroke-width="3"/>`);
+  const scale = p.build === 'kid' ? 0.8 : 1;
+  return `<g transform="translate(${X},792) scale(${scale}) translate(${-X},-792)">${g.join('')}</g>`;
+}
+
 function categorySvg(c) {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  const p = PERSONS[c.slug];
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="800" viewBox="0 0 640 800">
 <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${shade(c.color, 1.15)}" stop-opacity="0.35"/><stop offset="1" stop-color="${c.color}" stop-opacity="0.75"/></linearGradient></defs>
-<rect width="800" height="600" fill="#FAF7F2"/><rect width="800" height="600" fill="url(#bg)"/>
-<g transform="translate(400,0) scale(0.72) translate(-300,20)">${garment(c.type, c.color, 'none', c.kid)}</g>
+<rect width="640" height="800" fill="#FAF7F2"/><rect width="640" height="800" fill="url(#bg)"/>
+<circle cx="320" cy="330" r="250" fill="#FFFFFF" opacity="0.28"/>
+${p ? person(p, c.color) : `<g transform="translate(320,0) scale(0.72) translate(-300,20)">${garment(c.type, c.color, 'none', c.kid)}</g>`}
 </svg>`;
 }
 
